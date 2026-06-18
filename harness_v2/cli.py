@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .core import initialize_project, read_current_status
 from .doctor import inspect_project
+from .gate import evaluate_gate
 from .preflight import evaluate_preflight
 from .verify import verify_task
 
@@ -29,6 +30,13 @@ def build_parser() -> argparse.ArgumentParser:
     preflight.add_argument("--side-effect", help="Proposed command or side-effect label to check.")
     preflight.add_argument("--path", help="Proposed path to check.")
     preflight.add_argument("--mode", choices=("command", "read", "write"), default="command", help="Preflight mode. Write mode checks approval.approved_paths.")
+
+    gate = subparsers.add_parser("gate", help="Run hook-equivalent status, verify, and optional preflight checks.")
+    gate.add_argument("task", help="Path to a task JSON file.")
+    gate.add_argument("--root", default=".", help="HARNESS V2 product root. Defaults to current directory.")
+    gate.add_argument("--side-effect", dest="side_effects", action="append", default=[], help="Proposed command or side-effect label to check. May be repeated.")
+    gate.add_argument("--path", dest="paths", action="append", default=[], help="Proposed path to check. May be repeated.")
+    gate.add_argument("--mode", choices=("command", "read", "write"), default="command", help="Preflight mode for proposed paths. Write mode checks approval.approved_paths.")
 
     doctor = subparsers.add_parser("doctor", help="Report read-only next action and local project shape.")
     doctor.add_argument("--root", default=".", help="HARNESS V2 product root. Defaults to current directory.")
@@ -68,6 +76,17 @@ def main(argv: list[str] | None = None) -> int:
             Path(args.task),
             side_effect=args.side_effect,
             path=args.path,
+            mode=args.mode,
+        )
+        print(json.dumps(result.to_json(), ensure_ascii=False, sort_keys=True))
+        return 0 if result.ok else 1
+
+    if args.command == "gate":
+        result = evaluate_gate(
+            Path(args.task),
+            root=Path(args.root),
+            side_effects=args.side_effects,
+            paths=args.paths,
             mode=args.mode,
         )
         print(json.dumps(result.to_json(), ensure_ascii=False, sort_keys=True))

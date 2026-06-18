@@ -170,6 +170,7 @@ class InitResult:
             "next": [
                 "harness-v2 status --root .",
                 f"harness-v2 verify {self.initial_task}",
+                f"harness-v2 gate {self.initial_task} --root .",
             ],
         }
 
@@ -620,6 +621,8 @@ This project has HARNESS V2 applied at the project root. This file is the AI age
 
 The applied surface is a scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, or lifecycle transition engine.
 
+HARNESS V2 provides a hook-equivalent gate command for Codex-app-focused work. `harness-v2 gate <task.json> --root .` combines `status`, `verify`, and optional `preflight` checks into one executable boundary check. It does not automatically block shell or editor actions.
+
 `README.md` and `README.ko.md` are user documentation. They explain the tool, but they do not grant source authority, approval, permission, proof, lifecycle state, or release authority.
 
 ## Evidence-Scaled Read Order
@@ -639,6 +642,7 @@ Run these checks before changing files or side-effectful commands:
 ```powershell
 harness-v2 status --root .
 harness-v2 verify contracts\\harness-task.json
+harness-v2 gate contracts\\harness-task.json --root .
 ```
 
 ## Working Boundary
@@ -656,6 +660,8 @@ def _rules_md() -> str:
 
 HARNESS V2 records the current task boundary for AI-assisted work. It is a scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, lifecycle transition engine, editor, shell, network, or release sandbox.
 
+The local hook-equivalent gate is an explicit command: `harness-v2 gate <task.json> --root .`. It checks the active task boundary through status, verify, and optional preflight. It does not install a real Codex app hook and does not automatically block shell or editor actions.
+
 README files are user-facing documentation only. They never grant approval, permission, proof, lifecycle state, route authority, release readiness, or package publish authority.
 
 ## Required Flow
@@ -663,9 +669,10 @@ README files are user-facing documentation only. They never grant approval, perm
 1. Read `CURRENT.md`.
 2. Read the active task contract.
 3. Verify the task contract with `harness-v2 verify <task.json>`.
-4. Modify only paths named in `approval.approved_paths`.
-5. Do not execute side effects named in `approval.excluded_side_effects` or `permission.denied_side_effects`.
-6. Before completion, run or report every item in `proof.obligations`.
+4. Run `harness-v2 gate <task.json> --root .` before file changes or side-effectful commands.
+5. Modify only paths named in `approval.approved_paths`.
+6. Do not execute side effects named in `approval.excluded_side_effects` or `permission.denied_side_effects`.
+7. Before completion, run or report every item in `proof.obligations`.
 
 ## Evidence-Scaled Readback
 
@@ -695,6 +702,8 @@ status: applied_project_surface / init / current_pointer
 This project root has HARNESS V2 applied. AI agents should use `AGENTS.md`, `RULES.md`, this file, `control\\`, and the active task contract as the operating boundary.
 
 The applied surface is a scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, or lifecycle transition engine, and it does not approve future work by installation, `init`, `apply`, or CLI availability.
+
+Use `harness-v2 gate contracts\\harness-task.json --root .` as the local hook-equivalent gate before work. The gate is explicit and checkable, but it does not automatically block shell or editor actions.
 
 workflow: `default`
 
@@ -836,7 +845,8 @@ def _initial_task_json() -> str:
       "local file writes to initial HARNESS V2 scaffold files",
       "local readback of generated HARNESS V2 scaffold files",
       "harness-v2 status --root .",
-      "harness-v2 verify contracts\\\\harness-task.json"
+      "harness-v2 verify contracts\\\\harness-task.json",
+      "harness-v2 gate contracts\\\\harness-task.json --root ."
     ],
     "denied_side_effects": [
       "dependency install from network",
@@ -851,7 +861,8 @@ def _initial_task_json() -> str:
     "obligations": [
       "generated AGENTS/RULES/CURRENT bind AI agents without relying on README authority",
       "harness-v2 status --root .",
-      "harness-v2 verify contracts\\\\harness-task.json"
+      "harness-v2 verify contracts\\\\harness-task.json",
+      "harness-v2 gate contracts\\\\harness-task.json --root ."
     ]
   },
   "lifecycle": {

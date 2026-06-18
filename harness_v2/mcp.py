@@ -7,6 +7,7 @@ from typing import Any, TextIO
 
 from . import __version__
 from .core import initialize_project, read_current_status
+from .gate import evaluate_gate
 from .preflight import evaluate_preflight
 from .verify import verify_task
 
@@ -133,6 +134,35 @@ def _tools() -> list[dict[str, Any]]:
             },
         },
         {
+            "name": "harness_gate",
+            "title": "HARNESS V2 Hook-Equivalent Gate",
+            "description": "Run status, verify, and optional preflight checks as a hook-equivalent gate. This does not automatically block shell or editor actions.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "task": {"type": "string", "description": "Path to the task JSON file."},
+                    "root": {"type": "string", "description": "HARNESS V2 root. Defaults to current directory."},
+                    "side_effects": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Proposed commands or side-effect labels to check.",
+                    },
+                    "paths": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Proposed paths to check.",
+                    },
+                    "mode": {
+                        "type": "string",
+                        "enum": ["command", "read", "write"],
+                        "description": "Preflight mode for proposed paths. Write mode checks approval.approved_paths.",
+                    },
+                },
+                "required": ["task"],
+                "additionalProperties": False,
+            },
+        },
+        {
             "name": "harness_init",
             "title": "HARNESS V2 Init",
             "description": "Apply HARNESS V2 scaffold files to a project root.",
@@ -183,6 +213,15 @@ def _call_tool(params: Any) -> dict[str, Any]:
             mode=_string_arg(arguments, "mode", "command"),
         )
         payload = result.to_json()
+    elif name == "harness_gate":
+        result = evaluate_gate(
+            Path(_required_string_arg(arguments, "task")),
+            root=Path(_string_arg(arguments, "root", ".")),
+            side_effects=_optional_string_list_arg(arguments, "side_effects"),
+            paths=_optional_string_list_arg(arguments, "paths"),
+            mode=_string_arg(arguments, "mode", "command"),
+        )
+        payload = result.to_json()
     elif name == "harness_init":
         payload = initialize_project(Path(_string_arg(arguments, "root", ".")), force=_bool_arg(arguments, "force", False)).to_json()
     elif name == "harness_apply":
@@ -213,6 +252,15 @@ def _optional_string_arg(arguments: dict[str, Any], name: str) -> str | None:
         return None
     if not isinstance(value, str):
         raise ValueError(f"argument {name} must be a string")
+    return value
+
+
+def _optional_string_list_arg(arguments: dict[str, Any], name: str) -> list[str]:
+    value = arguments.get(name)
+    if value is None:
+        return []
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise ValueError(f"argument {name} must be an array of strings")
     return value
 
 

@@ -24,6 +24,7 @@ Do not use this file as a transcript, scratchpad, or complete audit database.
 | side-effect preflight adapter | `harness_v2\preflight.py`, `harness_v2\cli.py`, tests, README usage, and control surfaces | completed remaining completion program slice |
 | MCP feasibility/design and final audit | README, README.ko, routing, control, artifact, safety, improvement, release, tests, and verification output | completed remaining completion program closeout slice |
 | MCP stdio adapter implementation | `harness_v2\mcp.py`, CLI `mcp` command, tests, README usage, routing, control, artifact, and safety surfaces | completed Goal G slice |
+| hook-equivalent gate hardening | `harness_v2\gate.py`, CLI `gate` command, MCP `harness_gate`, generated scaffold, tests, README usage, routing, control, artifact, and safety surfaces | completed Goal H slice |
 
 ## Freshness
 

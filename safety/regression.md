@@ -25,6 +25,7 @@ This file maps HARNESS V2 boundary risks to regression guard candidates. It does
 | preflight adapter mistaken for shell-level blocking | require README/control wording that preflight checks proposed actions but does not execute or automatically block external tools |
 | MCP stdio adapter mistaken for source of truth | require README/routing/control wording that MCP wraps existing HARNESS V2 core behavior and does not replace source, approval, permission, proof, lifecycle, or release boundaries |
 | MCP stdio adapter mistaken for remote MCP hosting or shell-level blocking | require README/routing/control wording that this is local stdio only and not a hook, HTTP server, editor blocker, or shell blocker |
+| hook-equivalent gate mistaken for a real shell/editor blocker | require CLI/MCP tests plus README/routing/control wording that `gate` is explicit and does not automatically block external tools |
 
 ## Guard Evidence
 

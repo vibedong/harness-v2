@@ -31,12 +31,15 @@ The executable surface currently covers:
 - current pointer readback with `status`;
 - task contract validation with `verify`;
 - stage-specific workflow checks through `workflow_stage`;
-- side-effect and write-path preflight checks with `preflight`.
+- side-effect and write-path preflight checks with `preflight`;
+- hook-equivalent gate checks with `gate`;
 - local MCP stdio tool access with `mcp`.
 
-HARNESS V2 ships a local stdio MCP adapter that exposes `status`, `verify`, `preflight`, `init`, and `apply` as MCP tools. The MCP adapter is a thin wrapper over the existing HARNESS V2 core and does not replace `CURRENT.md`, task contracts, approval, permission, proof, lifecycle, or release boundaries.
+HARNESS V2 ships a hook-equivalent gate command: `harness-v2 gate <task.json> --root .`. It combines `status`, `verify`, and optional `preflight` checks into one explicit boundary check. From local evidence for this repo, no direct Codex app hook surface was found, so the gate does not install a real Codex app hook and does not automatically block your shell or editor.
 
-HARNESS V2 does not currently ship an HTTP MCP server, editor hook, shell-level blocker, or Codex app configuration installer.
+HARNESS V2 ships a local stdio MCP adapter that exposes `status`, `verify`, `preflight`, `gate`, `init`, and `apply` as MCP tools. The MCP adapter is a thin wrapper over the existing HARNESS V2 core and does not replace `CURRENT.md`, task contracts, approval, permission, proof, lifecycle, or release boundaries.
+
+HARNESS V2 does not currently ship an HTTP MCP server, real editor hook, shell-level blocker, or Codex app configuration installer.
 
 ## When To Use It
 
@@ -86,6 +89,7 @@ The npm command delegates to the Python CLI. HARNESS V2 is not rewritten in Java
 - Generated `AGENTS.md` says README files are user documentation, not AI operating authority.
 - Generated `RULES.md`, `CURRENT.md`, and `control\` make source, approval, permission, proof, and lifecycle separation more explicit.
 - Installed project files should appear directly in the target project root, not inside a nested `harness-v2` folder.
+- Current GitHub source adds a hook-equivalent gate command for Codex-app-focused use without claiming real shell/editor blocking.
 
 ## Updating HARNESS V2
 
@@ -102,7 +106,7 @@ The agent should treat that request as:
 3. Create a temporary fresh scaffold with the latest CLI and compare it with the project.
 4. Update only HARNESS-managed surfaces that are safe to refresh, preserving project-specific `CURRENT.md`, approval, permission, proof, lifecycle, and active task state unless the user explicitly asks to reset them.
 5. Do not create or leave a nested `harness-v2` folder inside the project.
-6. Run `harness-v2 status --root .` and `harness-v2 verify contracts\harness-task.json`.
+6. Run `harness-v2 status --root .`, `harness-v2 verify contracts\harness-task.json`, and `harness-v2 gate contracts\harness-task.json --root .`.
 
 Manual CLI update:
 
@@ -110,6 +114,7 @@ Manual CLI update:
 npm install -g harness-v2@latest
 harness-v2 status --root .
 harness-v2 verify contracts\harness-task.json
+harness-v2 gate contracts\harness-task.json --root .
 ```
 
 This updates the global CLI only. It does not refresh project-local scaffold files or overwrite `CURRENT.md` / control state.
@@ -135,6 +140,7 @@ npm install -g harness-v2
 harness-v2 init --root .
 harness-v2 status --root .
 harness-v2 verify contracts\harness-task.json
+harness-v2 gate contracts\harness-task.json --root .
 ```
 
 Expected behavior:
@@ -142,6 +148,7 @@ Expected behavior:
 - `init` creates `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `contracts\harness-task.json`, and `templates\task.json`.
 - `status` prints JSON from `CURRENT.md`.
 - `verify` accepts the initial task contract and prints `{"ok": true, ...}`.
+- `gate` accepts the initial task contract and prints a combined status/verify result.
 
 The target folder itself receives the harness files. If a `harness-v2` child folder appears in your project, that folder is not the applied harness surface; run `harness-v2 init --root <project>` against the parent folder you actually want to use.
 
@@ -192,8 +199,9 @@ The task `workflow` and `lifecycle.current_state` must match the current pointer
 5. Put required checks in `proof.obligations`.
 6. Keep lifecycle movement separate from progress notes.
 7. Run `harness-v2 verify <task.json>`.
-8. Give the verified contract to your AI coding agent.
-9. Before completion, check that the proof obligations were actually run and reported.
+8. Run `harness-v2 gate <task.json> --root .` before file changes or side-effectful commands.
+9. Give the verified contract to your AI coding agent.
+10. Before completion, check that the proof obligations were actually run and reported.
 
 ## Core Concepts
 
@@ -234,6 +242,15 @@ Verify a task contract:
 harness-v2 verify contracts\harness-task.json
 ```
 
+Run the hook-equivalent gate before work:
+
+```powershell
+harness-v2 gate contracts\harness-task.json --root .
+harness-v2 gate contracts\harness-task.json --root . --side-effect "python -m unittest discover tests"
+```
+
+`gate` does not execute the proposed command. It reads `CURRENT.md`, verifies the task contract, and runs optional `preflight` checks for proposed side effects or write paths. It is a hook-equivalent gate, not a real Codex app hook, shell blocker, or editor blocker.
+
 Check a proposed side effect or write path before running it:
 
 ```powershell
@@ -249,7 +266,7 @@ Run the local MCP stdio adapter:
 harness-v2 mcp
 ```
 
-The MCP adapter speaks newline-delimited JSON-RPC over stdio. It is meant to be launched by an MCP-capable client, not used as an interactive shell command. Exposed tools are `harness_status`, `harness_verify`, `harness_preflight`, `harness_init`, and `harness_apply`.
+The MCP adapter speaks newline-delimited JSON-RPC over stdio. It is meant to be launched by an MCP-capable client, not used as an interactive shell command. Exposed tools are `harness_status`, `harness_verify`, `harness_preflight`, `harness_gate`, `harness_init`, and `harness_apply`.
 
 Inspect project shape without mutating files:
 

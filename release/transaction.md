@@ -51,6 +51,7 @@ Reason:
 - npm package `harness-v2@0.1.5` is already published.
 - The current remaining completion program may verify package shape with `npm pack --dry-run`, but does not authorize repeat npm publish.
 - Generated scaffold hardening improves the files created by `harness-v2 init --root .` and `harness-v2 apply --root .` for future package updates.
+- Hook-equivalent gate hardening adds local `gate` checks to the source surface, but it does not execute a release, create a tag, or republish the package.
 - Git tag creation and GitHub release execution are not permitted by the current transaction.
 - Python package registry publish is not permitted by the current transaction.
 

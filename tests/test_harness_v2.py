@@ -54,6 +54,7 @@ APPROVED_SOURCE_FILES = {
     "harness_v2/verify.py",
     "harness_v2/doctor.py",
     "harness_v2/preflight.py",
+    "harness_v2/gate.py",
     "harness_v2/mcp.py",
     "tests/test_harness_v2.py",
     "tests/fixtures/valid-task.json",
@@ -65,11 +66,13 @@ ALLOWED_COMMANDS = {
     "node bin\\harness-v2.js status --root .",
     "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
     "node bin\\harness-v2.js preflight tests\\fixtures\\valid-task.json --side-effect \"python -m compileall harness_v2\"",
+    "node bin\\harness-v2.js gate tests\\fixtures\\valid-task.json --root . --side-effect \"python -m compileall harness_v2\"",
     "node bin\\harness-v2.js mcp < JSON-RPC smoke input",
     "node bin\\harness-v2.js init --root <temporary project>",
     "python -m harness_v2 status --root <repo root>",
     "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
     "python -m harness_v2 preflight tests\\fixtures\\valid-task.json --side-effect \"python -m unittest discover tests\"",
+    "python -m harness_v2 gate tests\\fixtures\\valid-task.json --root . --side-effect \"python -m unittest discover tests\"",
     "python -m harness_v2 mcp < JSON-RPC smoke input",
     "python -m harness_v2 init --root <temporary project>",
     "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
@@ -81,11 +84,13 @@ PERMISSION_COMMANDS = {
     "node bin\\harness-v2.js status --root .",
     "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
     "node bin\\harness-v2.js preflight tests\\fixtures\\valid-task.json --side-effect \"python -m compileall harness_v2\"",
+    "node bin\\harness-v2.js gate tests\\fixtures\\valid-task.json --root . --side-effect \"python -m compileall harness_v2\"",
     "node bin\\harness-v2.js mcp < JSON-RPC smoke input",
     "node bin\\harness-v2.js init --root <temporary project>",
     "python -m harness_v2 status --root <repo root>",
     "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
     "python -m harness_v2 preflight tests\\fixtures\\valid-task.json --side-effect \"python -m unittest discover tests\"",
+    "python -m harness_v2 gate tests\\fixtures\\valid-task.json --root . --side-effect \"python -m unittest discover tests\"",
     "python -m harness_v2 mcp < JSON-RPC smoke input",
     "python -m harness_v2 init --root <temporary project>",
     "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
@@ -126,6 +131,7 @@ INITIAL_ALLOWED_SIDE_EFFECTS = {
     "local readback of generated HARNESS V2 scaffold files",
     "harness-v2 status --root .",
     "harness-v2 verify contracts\\harness-task.json",
+    "harness-v2 gate contracts\\harness-task.json --root .",
 }
 INITIAL_DENIED_SIDE_EFFECTS = {
     "dependency install from network",
@@ -139,6 +145,7 @@ INITIAL_PROOF_OBLIGATIONS = {
     "generated AGENTS/RULES/CURRENT bind AI agents without relying on README authority",
     "harness-v2 status --root .",
     "harness-v2 verify contracts\\harness-task.json",
+    "harness-v2 gate contracts\\harness-task.json --root .",
 }
 WORKFLOW_STAGES = {
     "planning",
@@ -389,6 +396,9 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("Do not create or leave a nested `harness-v2` folder", readme)
         self.assertIn("ships a local stdio MCP adapter", readme)
         self.assertIn("harness-v2 mcp", readme)
+        self.assertIn("harness-v2 gate", readme)
+        self.assertIn("hook-equivalent gate", readme)
+        self.assertIn("does not automatically block your shell or editor", readme)
         self.assertIn("README.ko.md", readme)
         self.assertIn("# HARNESS V2 사용설명서", korean_readme)
         self.assertIn("npm install -g harness-v2", korean_readme)
@@ -399,6 +409,9 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("프로젝트 안에 `harness-v2` 하위 폴더를 만들거나 남기지 않습니다", korean_readme)
         self.assertIn("local stdio MCP adapter", korean_readme)
         self.assertIn("harness-v2 mcp", korean_readme)
+        self.assertIn("harness-v2 gate", korean_readme)
+        self.assertIn("hook-equivalent gate", korean_readme)
+        self.assertIn("shell이나 editor를 자동으로 차단하지 않습니다", korean_readme)
         self.assertIn("Python 3.11", readme)
         self.assertIn("Python 3.11", release_notes)
         self.assertIn("NPM_PUBLISHED", release_notes)
@@ -550,6 +563,94 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertTrue(json.loads(completed.stdout)["ok"])
 
+    def test_cli_gate_accepts_valid_task_status_and_preflight_checks(self):
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "harness_v2",
+                "gate",
+                str(VALID_TASK),
+                "--root",
+                ".",
+                "--side-effect",
+                "python -m unittest discover tests",
+                "--path",
+                "harness_v2\\gate.py",
+                "--mode",
+                "write",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertTrue(payload["ok"])
+        self.assertTrue(payload["hook_equivalent"])
+        self.assertFalse(payload["automatic_enforcement"])
+        self.assertEqual(payload["task_id"], "harness-v2-valid-task")
+        self.assertEqual(payload["status"]["workflow"], "remaining_completion_program")
+        self.assertTrue(payload["verify"]["ok"])
+        self.assertEqual(len(payload["preflight"]), 1)
+        self.assertTrue(payload["preflight"][0]["ok"])
+
+    def test_cli_gate_rejects_denied_side_effect_and_unapproved_write_path(self):
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "harness_v2",
+                "gate",
+                str(VALID_TASK),
+                "--root",
+                ".",
+                "--side-effect",
+                "npm publish",
+                "--path",
+                "outside.md",
+                "--mode",
+                "write",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 1)
+        payload = json.loads(completed.stdout)
+        self.assertFalse(payload["ok"])
+        errors = "\n".join(payload["errors"])
+        self.assertIn("permission.denied_side_effects", errors)
+        self.assertIn("write path is not approved: outside.md", errors)
+
+    def test_node_wrapper_delegates_gate_to_python_cli(self):
+        completed = subprocess.run(
+            [
+                "node",
+                "bin/harness-v2.js",
+                "gate",
+                "tests/fixtures/valid-task.json",
+                "--root",
+                ".",
+                "--side-effect",
+                "python -m compileall harness_v2",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertTrue(payload["ok"])
+        self.assertTrue(payload["hook_equivalent"])
+        self.assertFalse(payload["automatic_enforcement"])
+
     def test_python_mcp_adapter_lists_and_calls_core_tools(self):
         with tempfile.TemporaryDirectory() as temp_root:
             root = Path(temp_root)
@@ -563,7 +664,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                     {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "harness_status", "arguments": {"root": "."}}},
                     {"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "harness_verify", "arguments": {"task": "tests\\fixtures\\valid-task.json"}}},
                     {"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "harness_preflight", "arguments": {"task": "tests\\fixtures\\valid-task.json", "side_effect": "python -m unittest discover tests"}}},
-                    {"jsonrpc": "2.0", "id": 6, "method": "tools/call", "params": {"name": "harness_init", "arguments": {"root": str(root)}}},
+                    {"jsonrpc": "2.0", "id": 6, "method": "tools/call", "params": {"name": "harness_gate", "arguments": {"task": "tests\\fixtures\\valid-task.json", "root": ".", "side_effects": ["python -m unittest discover tests"]}}},
+                    {"jsonrpc": "2.0", "id": 7, "method": "tools/call", "params": {"name": "harness_init", "arguments": {"root": str(root)}}},
                 ),
                 text=True,
                 capture_output=True,
@@ -573,20 +675,23 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertEqual(completed.returncode, 0, completed.stderr)
             self.assertEqual(completed.stderr, "")
             responses = [json.loads(line) for line in completed.stdout.splitlines()]
-            self.assertEqual([response["id"] for response in responses], [1, 2, 3, 4, 5, 6])
+            self.assertEqual([response["id"] for response in responses], [1, 2, 3, 4, 5, 6, 7])
             self.assertEqual(responses[0]["result"]["capabilities"], {"tools": {"listChanged": False}})
 
             tool_names = {tool["name"] for tool in responses[1]["result"]["tools"]}
-            self.assertEqual(tool_names, {"harness_status", "harness_verify", "harness_preflight", "harness_init", "harness_apply"})
+            self.assertEqual(tool_names, {"harness_status", "harness_verify", "harness_preflight", "harness_gate", "harness_init", "harness_apply"})
 
             status_payload = responses[2]["result"]["structuredContent"]
             verify_payload = responses[3]["result"]["structuredContent"]
             preflight_payload = responses[4]["result"]["structuredContent"]
-            init_payload = responses[5]["result"]["structuredContent"]
+            gate_payload = responses[5]["result"]["structuredContent"]
+            init_payload = responses[6]["result"]["structuredContent"]
 
             self.assertEqual(status_payload["status"]["workflow"], "remaining_completion_program")
             self.assertTrue(verify_payload["ok"])
             self.assertTrue(preflight_payload["ok"])
+            self.assertTrue(gate_payload["ok"])
+            self.assertTrue(gate_payload["hook_equivalent"])
             assert_fresh_scaffold_shape(self, root, init_payload, root)
 
     def test_node_wrapper_delegates_mcp_to_python_cli(self):
@@ -606,6 +711,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         responses = [json.loads(line) for line in completed.stdout.splitlines()]
         self.assertEqual(responses[0]["result"]["serverInfo"]["name"], "harness-v2")
         self.assertIn("harness_preflight", {tool["name"] for tool in responses[1]["result"]["tools"]})
+        self.assertIn("harness_gate", {tool["name"] for tool in responses[1]["result"]["tools"]})
 
     def test_mcp_adapter_reports_protocol_errors_as_json_rpc(self):
         from harness_v2.mcp import handle_message
@@ -766,8 +872,11 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("package.json", valid["approval"]["approved_paths"])
         self.assertIn("bin\\harness-v2.js", valid["approval"]["approved_paths"])
         self.assertIn("harness_v2\\mcp.py", valid["approval"]["approved_paths"])
+        self.assertIn("harness_v2\\gate.py", valid["approval"]["approved_paths"])
         self.assertIn("node bin\\harness-v2.js status --root .", valid["permission"]["allowed_side_effects"])
+        self.assertIn("node bin\\harness-v2.js gate tests\\fixtures\\valid-task.json --root . --side-effect \"python -m compileall harness_v2\"", valid["permission"]["allowed_side_effects"])
         self.assertIn("node bin\\harness-v2.js mcp < JSON-RPC smoke input", valid["permission"]["allowed_side_effects"])
+        self.assertIn("python -m harness_v2 gate tests\\fixtures\\valid-task.json --root . --side-effect \"python -m unittest discover tests\"", valid["permission"]["allowed_side_effects"])
         self.assertIn("python -m harness_v2 mcp < JSON-RPC smoke input", valid["permission"]["allowed_side_effects"])
         self.assertIn("npm pack --dry-run", valid["permission"]["allowed_side_effects"])
         self.assertNotIn("npm publish", valid["permission"]["allowed_side_effects"])
@@ -786,9 +895,11 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("fourth-slice package and GitHub MVP", log)
         self.assertIn("docs/control sync", log)
         self.assertIn("MCP stdio adapter implementation", log)
+        self.assertIn("hook-equivalent gate hardening", log)
         self.assertIn("author-local paths copied into GitHub-facing commands", regression)
         self.assertIn("npm wrapper MVP mistaken for npm release", regression)
         self.assertIn("MCP stdio adapter mistaken for source of truth", regression)
+        self.assertIn("hook-equivalent gate mistaken for a real shell/editor blocker", regression)
 
 
     def test_mcp_adapter_is_stdio_wrapper_not_source_of_truth(self):
@@ -803,6 +914,22 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("local stdio only", routing)
         self.assertIn("local stdio JSON-RPC adapter", proof)
         self.assertIn("MCP adapter around `status`, `verify`, `preflight`, and `init/apply`", improvement)
+
+    def test_hook_equivalent_gate_is_not_claimed_as_real_shell_or_editor_hook(self):
+        readme = (ROOT / "README.md").read_text()
+        korean_readme = (ROOT / "README.ko.md").read_text(encoding="utf-8")
+        routing = (ROOT / "routing" / "manifest.md").read_text()
+        proof = (ROOT / "control" / "proof.md").read_text()
+        lifecycle = (ROOT / "control" / "lifecycle.md").read_text()
+        improvement = (ROOT / "safety" / "improvement.md").read_text()
+
+        for content in (readme, routing, proof, lifecycle, improvement):
+            self.assertIn("hook-equivalent gate", content)
+        self.assertIn("harness_gate", routing)
+        self.assertIn("no direct Codex app hook surface was found", readme)
+        self.assertIn("does not automatically block your shell or editor", readme)
+        self.assertIn("직접 Codex app hook surface는 확인되지 않았습니다", korean_readme)
+        self.assertIn("shell이나 editor를 자동으로 차단하지 않습니다", korean_readme)
 
 
     def test_valid_task_fixture_is_accepted_by_verifier(self):
@@ -1137,8 +1264,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(status["workflow"], "remaining_completion_program")
         self.assertEqual(status["state"], "package_publish_review")
-        self.assertIn("mcp_stdio_adapter_implementation", status["substate"])
-        self.assertIn("goal_g_complete", status["substate"])
+        self.assertIn("hook_equivalent_gate_hardening", status["substate"])
+        self.assertIn("goal_h_complete", status["substate"])
 
     def test_doctor_reports_next_action_without_mutation(self):
         from harness_v2.doctor import inspect_project

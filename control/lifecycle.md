@@ -36,7 +36,7 @@ package_publish_review -> package_publish_review
 Active slice:
 
 ```text
-mcp_stdio_adapter_implementation / goal_g_complete
+hook_equivalent_gate_hardening / goal_h_complete
 ```
 
 Scope:
@@ -47,14 +47,15 @@ Scope:
 - side-effect preflight adapter work is complete;
 - MCP feasibility/design and final quality audit/docs-control sync is complete;
 - local MCP stdio adapter implementation, final quality audit, documentation sync, and GitHub push are complete for Goal G;
-- no implementation slice is currently active until Goal H hook or hook-equivalent hardening begins;
+- hook-equivalent gate hardening is complete for Goal H;
+- the gate is an explicit executable check over status, verify, and optional preflight, not a real Codex app hook, shell blocker, or editor blocker;
 - no remote MCP hosting, MCP client configuration mutation, package registry publish, GitHub release, release tag, dependency install, secret access, or destructive operation is part of this lifecycle entry;
 - local verification commands named in `control\permission.md`;
 - read-only subagent review with `vowline`;
 - git add, commit, and push after completed slices pass verification and review;
 - no npm publish, Python package registry publish, GitHub release, release tag, dependency install from network, secret access, external network mutation outside allowed git push, or destructive operation outside generated temporary verification artifacts.
 
-This entry preserves `package_publish_review` while adding a local MCP stdio adapter for Codex-app-focused use. It is not repeat npm publish, Python package registry publish, public stable release readiness, release execution, shell-level automatic enforcement, remote MCP hosting, MCP client installation, or MCP client configuration.
+This entry preserves `package_publish_review` while adding a local MCP stdio adapter and hook-equivalent gate for Codex-app-focused use. It is not repeat npm publish, Python package registry publish, public stable release readiness, release execution, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, or MCP client configuration.
 
 ## Transition Requirements
 

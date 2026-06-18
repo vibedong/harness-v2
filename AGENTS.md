@@ -6,6 +6,8 @@ This file is the product-local entry router for HARNESS V2. Keep it short and us
 
 Current HARNESS V2 is a project scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, or lifecycle transition engine.
 
+Goal H adds an explicit hook-equivalent gate command. Use `harness-v2 gate <task.json> --root .` to combine status, verify, and optional preflight checks before work, but do not treat it as a real shell/editor blocker or Codex app hook installation.
+
 ## Read Order
 
 1. `RULES.md`

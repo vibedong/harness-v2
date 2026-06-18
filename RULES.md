@@ -6,6 +6,8 @@ These are the product-local root rules for the HARNESS V2 package, GitHub, and n
 
 Current HARNESS V2 is a scaffold, task-contract validator, and CLI helper. It makes boundaries visible and checkable, but it is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, lifecycle transition engine, editor, shell, network, or release sandbox.
 
+The hook-equivalent gate is an explicit local command, `harness-v2 gate <task.json> --root .`, that checks status, verify, and optional preflight together. It does not install a real Codex app hook, block the shell or editor, grant approval, widen permission, produce proof, or move lifecycle state.
+
 ## Authority Separation
 
 - `control\source.md` decides what can be trusted as source.

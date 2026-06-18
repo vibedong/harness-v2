@@ -23,6 +23,7 @@ This file maps operation modes to suggested local routes. Routing is guidance, n
 | development review | source, approval, permission, proof, lifecycle, route, artifact, safety surfaces | findings are not proof |
 | proof check | `control\proof.md` plus readback/search/listing | artifact checks must match obligation |
 | side-effect preflight | `harness_v2` CLI with `preflight <task> --side-effect ...` or `--path ... --mode write` | preflight checks a proposed action; it does not execute or automatically block shell/editor actions |
+| hook-equivalent gate | `harness_v2` CLI with `gate <task> --root .`, or MCP tool `harness_gate` | combines status, verify, and optional preflight; no direct Codex app hook surface was found and this does not automatically block shell/editor actions |
 | executable local MVP | `harness_v2` CLI with `status`, `verify`, and `doctor` | only approved local commands and no external dependency |
 | MCP stdio adapter | `python -m harness_v2 mcp` or `node bin\harness-v2.js mcp` with JSON-RPC over stdio | local stdio only; tools wrap existing core behavior and do not replace source, approval, permission, proof, lifecycle, or release boundaries |
 | remaining completion program | generated scaffold, workflow engine, preflight adapter, tests, docs/control, and audit surfaces named by current approval | no npm publish, Python package registry publish, release tag, GitHub release, dependency install, secrets, or destructive action outside generated verification artifacts |

@@ -10,7 +10,7 @@ workflow: `remaining_completion_program`
 
 state: `package_publish_review`
 
-substate: `mcp_stdio_adapter_implementation / goal_g_complete`
+substate: `hook_equivalent_gate_hardening / goal_h_complete`
 
 source basis:
 
@@ -22,6 +22,8 @@ source basis:
 - Exact remaining completion program approval for generated scaffold hardening, executable workflow enforcement, side-effect preflight adapter work if locally feasible, MCP feasibility/design only unless separately approved, final audit, documentation sync, and GitHub push.
 - User approval to proceed with Goal G after the three-step MCP, hook, and integration hardening plan.
 - Goal G approval supersedes the prior MCP design-only boundary only for local stdio MCP adapter implementation; hook work, integration hardening, package registry publish, release, dependency, secret, external mutation, and destructive work remain outside this slice.
+- User approval to proceed with Goal H hook / hook-equivalent hardening under the remaining completion program.
+- Local evidence did not expose a direct Codex app pre-command or pre-write hook surface for this repo, so Goal H implements an executable hook-equivalent gate instead of mutating Codex app configuration.
 
 ## Current Program
 
@@ -34,14 +36,14 @@ Completed slices:
 - side-effect preflight adapter
 - MCP feasibility/design and final quality audit/docs-control sync
 - MCP stdio adapter implementation
+- hook-equivalent gate hardening
 
 Current active slice:
 
-- no active implementation slice; waiting for Goal H hook or hook-equivalent hardening
+- no active implementation slice; Goal H hook-equivalent gate hardening is complete
 
 Future slices in this program:
 
-- Hook or hook-equivalent hardening
 - integration hardening and release preparation
 - package registry publish, GitHub release, release tag, dependency installation, secret access, or destructive work require a later exact approval packet
 
@@ -91,11 +93,13 @@ New files are allowed only when directly required for workflow engine enforcemen
 - `node bin\harness-v2.js status --root .`
 - `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
 - `node bin\harness-v2.js preflight tests\fixtures\valid-task.json --side-effect "python -m compileall harness_v2"`
+- `node bin\harness-v2.js gate tests\fixtures\valid-task.json --root . --side-effect "python -m compileall harness_v2"`
 - `node bin\harness-v2.js mcp < JSON-RPC smoke input`
 - `node bin\harness-v2.js init --root <temporary project>`
 - `python -m harness_v2 status --root <repo root>`
 - `python -m harness_v2 verify tests\fixtures\valid-task.json`
 - `python -m harness_v2 preflight tests\fixtures\valid-task.json --side-effect "python -m unittest discover tests"`
+- `python -m harness_v2 gate tests\fixtures\valid-task.json --root . --side-effect "python -m unittest discover tests"`
 - `python -m harness_v2 mcp < JSON-RPC smoke input`
 - `python -m harness_v2 init --root <temporary project>`
 - `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
@@ -117,4 +121,4 @@ Stop if a pointer, source, approval, permission, proof obligation, lifecycle req
 
 Stop before npm publish, Python package registry publish, GitHub release creation, release tag creation, dependency installation from network, secret access, external network mutation outside allowed git push, or destructive operation outside generated temporary verification artifacts.
 
-This file is a current pointer. It does not claim shell-level automatic enforcement, public stable release readiness, Python package registry publish state, release execution, release tag state, GitHub release state, remote MCP hosting, MCP client installation, or MCP client configuration state.
+This file is a current pointer. It does not claim shell-level automatic enforcement, public stable release readiness, Python package registry publish state, release execution, release tag state, GitHub release state, real Codex app hook installation, remote MCP hosting, MCP client installation, or MCP client configuration state.

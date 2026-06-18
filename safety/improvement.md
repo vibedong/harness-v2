@@ -31,6 +31,7 @@ An improvement candidate must name:
 | candidate | class | current handling |
 | --- | --- | --- |
 | MCP adapter around `status`, `verify`, `preflight`, and `init/apply` | observation | implemented as a local stdio adapter; future work may add Codex app configuration guidance or hook-equivalent integration under a separate scope |
+| hook-equivalent gate over `status`, `verify`, and optional `preflight` | observation | implemented as an explicit local CLI/MCP gate after no direct Codex app hook surface was found; future work may integrate with a real hook only under a separate scope |
 
 ## Direct-Change Guard
 

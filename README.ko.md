@@ -32,11 +32,14 @@ CLI는 `harness-v2 init --root .`로 초기 scaffold를 적용하고, task contr
 - `verify`로 task contract 검증
 - `workflow_stage`를 통한 stage-specific workflow 검사
 - `preflight`로 side effect와 write path 사전 확인
+- `gate`로 hook-equivalent boundary 확인
 - `mcp`로 local MCP stdio tool 접근
 
-HARNESS V2는 local stdio MCP adapter를 포함합니다. 이 adapter는 `status`, `verify`, `preflight`, `init`, `apply`를 MCP tool로 노출합니다. MCP adapter는 기존 HARNESS V2 core를 감싸는 얇은 wrapper이며, `CURRENT.md`, task contract, approval, permission, proof, lifecycle, release boundary를 대체하지 않습니다.
+HARNESS V2는 hook-equivalent gate 명령을 포함합니다. `harness-v2 gate <task.json> --root .`는 `status`, `verify`, 선택적 `preflight`를 한 번에 확인합니다. 이 repo의 local evidence에서는 직접 Codex app hook surface는 확인되지 않았습니다. 그래서 gate는 실제 Codex app hook을 설치하지 않고, shell이나 editor를 자동으로 차단하지 않습니다.
 
-HARNESS V2는 현재 HTTP MCP server, editor hook, shell-level blocker, Codex 앱 설정 installer를 포함하지 않습니다.
+HARNESS V2는 local stdio MCP adapter를 포함합니다. 이 adapter는 `status`, `verify`, `preflight`, `gate`, `init`, `apply`를 MCP tool로 노출합니다. MCP adapter는 기존 HARNESS V2 core를 감싸는 얇은 wrapper이며, `CURRENT.md`, task contract, approval, permission, proof, lifecycle, release boundary를 대체하지 않습니다.
+
+HARNESS V2는 현재 HTTP MCP server, 실제 editor hook, shell-level blocker, Codex 앱 설정 installer를 포함하지 않습니다.
 
 ## 언제 사용하나요?
 
@@ -86,6 +89,7 @@ npm 명령은 내부적으로 Python CLI에 위임합니다. HARNESS V2를 JavaS
 - 생성되는 `AGENTS.md`는 README가 사용자 문서이지 AI 작업 권한 표면이 아니라고 명시합니다.
 - 생성되는 `RULES.md`, `CURRENT.md`, `control\`은 source, approval, permission, proof, lifecycle 분리를 더 명확히 합니다.
 - 적용된 project file은 대상 프로젝트 루트에 바로 있어야 하며, 프로젝트 안에 `harness-v2` 하위 폴더가 남는 구조가 정상 흐름이 아닙니다.
+- 현재 GitHub source는 Codex-app-focused 사용을 위한 hook-equivalent gate 명령을 추가합니다. 이것은 실제 shell/editor 자동 차단을 주장하지 않습니다.
 
 ## HARNESS V2 업데이트 방법
 
@@ -102,7 +106,7 @@ AI는 이 요청을 다음 작업으로 처리해야 합니다.
 3. 최신 CLI로 임시 fresh scaffold를 만든 뒤 현재 프로젝트와 비교합니다.
 4. 안전하게 갱신 가능한 HARNESS-managed surface만 업데이트하고, 사용자가 reset을 명시하지 않았다면 프로젝트별 `CURRENT.md`, approval, permission, proof, lifecycle, active task 상태를 보존합니다.
 5. 프로젝트 안에 `harness-v2` 하위 폴더를 만들거나 남기지 않습니다.
-6. `harness-v2 status --root .`와 `harness-v2 verify contracts\harness-task.json`를 실행합니다.
+6. `harness-v2 status --root .`, `harness-v2 verify contracts\harness-task.json`, `harness-v2 gate contracts\harness-task.json --root .`를 실행합니다.
 
 직접 명령으로 CLI만 업데이트할 때는 아래처럼 실행합니다.
 
@@ -110,6 +114,7 @@ AI는 이 요청을 다음 작업으로 처리해야 합니다.
 npm install -g harness-v2@latest
 harness-v2 status --root .
 harness-v2 verify contracts\harness-task.json
+harness-v2 gate contracts\harness-task.json --root .
 ```
 
 이 명령은 전역 CLI만 업데이트합니다. project-local scaffold 파일을 갱신하거나 `CURRENT.md` / control 상태를 덮어쓰지 않습니다.
@@ -135,6 +140,7 @@ npm install -g harness-v2
 harness-v2 init --root .
 harness-v2 status --root .
 harness-v2 verify contracts\harness-task.json
+harness-v2 gate contracts\harness-task.json --root .
 ```
 
 정상 동작:
@@ -142,6 +148,7 @@ harness-v2 verify contracts\harness-task.json
 - `init`은 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `contracts\harness-task.json`, `templates\task.json`을 만듭니다.
 - `status`는 `CURRENT.md`에서 읽은 JSON을 출력합니다.
 - `verify`는 초기 task contract를 통과시키고 `{"ok": true, ...}`를 출력합니다.
+- `gate`는 초기 task contract를 통과시키고 status/verify 결합 결과를 출력합니다.
 
 대상 폴더 자체가 하네스 파일을 받아야 합니다. 프로젝트 안에 `harness-v2` 하위 폴더가 보인다면 그 폴더는 적용된 하네스 표면이 아닙니다. 실제로 쓰려는 상위 프로젝트 폴더를 대상으로 `harness-v2 init --root <project>`를 실행하세요.
 
@@ -192,8 +199,9 @@ harness-v2 verify <task.json>
 5. 완료 전 검증을 `proof.obligations`에 둡니다.
 6. 진행 메모와 lifecycle 이동을 분리합니다.
 7. `harness-v2 verify <task.json>`를 실행합니다.
-8. 검증된 contract를 AI 코딩 도구에 줍니다.
-9. 완료 전 proof obligation이 실제로 실행되고 보고됐는지 확인합니다.
+8. 파일 변경이나 side-effect 명령 전 `harness-v2 gate <task.json> --root .`를 실행합니다.
+9. 검증된 contract를 AI 코딩 도구에 줍니다.
+10. 완료 전 proof obligation이 실제로 실행되고 보고됐는지 확인합니다.
 
 ## 핵심 개념
 
@@ -234,6 +242,15 @@ task contract를 검증합니다.
 harness-v2 verify contracts\harness-task.json
 ```
 
+작업 전 hook-equivalent gate를 실행합니다.
+
+```powershell
+harness-v2 gate contracts\harness-task.json --root .
+harness-v2 gate contracts\harness-task.json --root . --side-effect "python -m unittest discover tests"
+```
+
+`gate`는 제안된 명령을 실행하지 않습니다. `CURRENT.md`를 읽고, task contract를 검증하고, 필요한 경우 side effect나 write path에 대해 `preflight`를 실행합니다. 이것은 hook-equivalent gate이지 실제 Codex app hook, shell blocker, editor blocker가 아닙니다.
+
 실행하려는 side effect나 write path가 contract 안에 있는지 먼저 확인합니다.
 
 ```powershell
@@ -249,7 +266,7 @@ local MCP stdio adapter를 실행합니다.
 harness-v2 mcp
 ```
 
-MCP adapter는 stdio 위에서 newline-delimited JSON-RPC를 사용합니다. 사람이 대화형 shell 명령처럼 쓰는 것이 아니라, MCP-capable client가 실행하는 용도입니다. 노출되는 tool은 `harness_status`, `harness_verify`, `harness_preflight`, `harness_init`, `harness_apply`입니다.
+MCP adapter는 stdio 위에서 newline-delimited JSON-RPC를 사용합니다. 사람이 대화형 shell 명령처럼 쓰는 것이 아니라, MCP-capable client가 실행하는 용도입니다. 노출되는 tool은 `harness_status`, `harness_verify`, `harness_preflight`, `harness_gate`, `harness_init`, `harness_apply`입니다.
 
 파일을 바꾸지 않고 project shape를 점검합니다.
 
