@@ -22,7 +22,8 @@ Do not use this file as a transcript, scratchpad, or complete audit database.
 | generated scaffold hardening | `harness_v2\core.py`, generated project-root scaffold, fixtures, tests, and current control surfaces | completed remaining completion program slice |
 | executable 8-stage workflow enforcement | `workflow_stage`, verifier stage predicates, schema/template updates, fixtures, tests, and workflow rules | completed remaining completion program slice |
 | side-effect preflight adapter | `harness_v2\preflight.py`, `harness_v2\cli.py`, tests, README usage, and control surfaces | completed remaining completion program slice |
-| MCP feasibility/design and final audit | README, README.ko, routing, control, artifact, safety, improvement, release, tests, and verification output | active remaining completion program closeout slice |
+| MCP feasibility/design and final audit | README, README.ko, routing, control, artifact, safety, improvement, release, tests, and verification output | completed remaining completion program closeout slice |
+| MCP stdio adapter implementation | `harness_v2\mcp.py`, CLI `mcp` command, tests, README usage, routing, control, artifact, and safety surfaces | active Goal G slice |
 
 ## Freshness
 

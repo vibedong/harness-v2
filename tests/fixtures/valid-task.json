@@ -59,6 +59,7 @@
       "harness_v2\\verify.py",
       "harness_v2\\doctor.py",
       "harness_v2\\preflight.py",
+      "harness_v2\\mcp.py",
       "tests\\test_harness_v2.py",
       "tests\\fixtures\\valid-task.json",
       "tests\\fixtures\\invalid-missing-approval.json"
@@ -71,6 +72,8 @@
       "dependency install from network",
       "secret access",
       "external network mutation outside allowed git push",
+      "remote MCP hosting",
+      "MCP client configuration mutation",
       "destructive operation outside generated verification artifacts"
     ]
   },
@@ -82,9 +85,11 @@
       "python -m unittest discover tests",
       "node bin\\harness-v2.js status --root .",
       "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
+      "node bin\\harness-v2.js mcp < JSON-RPC smoke input",
       "node bin\\harness-v2.js init --root <temporary project>",
       "python -m harness_v2 status --root <repo root>",
       "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
+      "python -m harness_v2 mcp < JSON-RPC smoke input",
       "python -m harness_v2 init --root <temporary project>",
       "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
       "npm pack --dry-run",
@@ -100,6 +105,8 @@
       "dependency install from network",
       "secret access",
       "external network mutation outside allowed git push",
+      "remote MCP hosting",
+      "MCP client configuration mutation",
       "destructive operation outside generated verification artifacts"
     ]
   },
@@ -109,8 +116,10 @@
       "unittest exits 0",
       "node wrapper status exits 0",
       "node wrapper verify exits 0",
+      "node wrapper mcp smoke exits 0",
       "python status exits 0",
       "python verify exits 0",
+      "python mcp smoke exits 0",
       "python init creates a valid temporary project harness",
       "node wrapper init creates a valid temporary project harness",
       "npm pack dry-run exits 0 without publishing or generated pycache files",
@@ -118,7 +127,7 @@
       "generated scaffold is not described as automatic enforcement completion",
       "valid fixture accepted",
       "invalid fixture rejected",
-      "no npm publish, Python package registry publish, dependency install, secret access, external mutation outside allowed git push, release tag creation, GitHub release creation, or destructive operation outside generated verification artifacts"
+      "no npm publish, Python package registry publish, dependency install, secret access, external mutation outside allowed git push, remote MCP hosting, MCP client configuration mutation, release tag creation, GitHub release creation, or destructive operation outside generated verification artifacts"
     ]
   },
   "lifecycle": {

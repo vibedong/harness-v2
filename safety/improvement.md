@@ -30,7 +30,7 @@ An improvement candidate must name:
 
 | candidate | class | current handling |
 | --- | --- | --- |
-| MCP adapter around `status`, `verify`, `preflight`, and `init/apply` | deferred | feasible future integration, but this slice only documents design boundaries and does not implement MCP runtime surfaces |
+| MCP adapter around `status`, `verify`, `preflight`, and `init/apply` | observation | implemented as a local stdio adapter; future work may add Codex app configuration guidance or hook-equivalent integration under a separate scope |
 
 ## Direct-Change Guard
 

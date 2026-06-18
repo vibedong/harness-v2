@@ -32,8 +32,11 @@ CLI는 `harness-v2 init --root .`로 초기 scaffold를 적용하고, task contr
 - `verify`로 task contract 검증
 - `workflow_stage`를 통한 stage-specific workflow 검사
 - `preflight`로 side effect와 write path 사전 확인
+- `mcp`로 local MCP stdio tool 접근
 
-HARNESS V2는 현재 MCP server, MCP tool manifest, editor hook, shell-level blocker를 포함하지 않습니다. MCP adapter는 기존 CLI의 `status`, `verify`, `preflight`, `init/apply`를 감싸는 future wrapper로는 가능하지만, 현재 릴리스 라인에서는 별도 구현 scope가 승인되기 전까지 design-only 상태입니다.
+HARNESS V2는 local stdio MCP adapter를 포함합니다. 이 adapter는 `status`, `verify`, `preflight`, `init`, `apply`를 MCP tool로 노출합니다. MCP adapter는 기존 HARNESS V2 core를 감싸는 얇은 wrapper이며, `CURRENT.md`, task contract, approval, permission, proof, lifecycle, release boundary를 대체하지 않습니다.
+
+HARNESS V2는 현재 HTTP MCP server, editor hook, shell-level blocker, Codex 앱 설정 installer를 포함하지 않습니다.
 
 ## 언제 사용하나요?
 
@@ -239,6 +242,14 @@ harness-v2 preflight contracts\harness-task.json --path README.md --mode write
 ```
 
 `preflight`는 명령을 실행하지 않고, shell이나 editor를 자동으로 차단하지도 않습니다. 행동하기 전에 task contract와 충돌하는지 확인하는 사전 검사입니다.
+
+local MCP stdio adapter를 실행합니다.
+
+```powershell
+harness-v2 mcp
+```
+
+MCP adapter는 stdio 위에서 newline-delimited JSON-RPC를 사용합니다. 사람이 대화형 shell 명령처럼 쓰는 것이 아니라, MCP-capable client가 실행하는 용도입니다. 노출되는 tool은 `harness_status`, `harness_verify`, `harness_preflight`, `harness_init`, `harness_apply`입니다.
 
 파일을 바꾸지 않고 project shape를 점검합니다.
 

@@ -32,8 +32,11 @@ The executable surface currently covers:
 - task contract validation with `verify`;
 - stage-specific workflow checks through `workflow_stage`;
 - side-effect and write-path preflight checks with `preflight`.
+- local MCP stdio tool access with `mcp`.
 
-HARNESS V2 does not currently ship an MCP server, MCP tool manifest, editor hook, or shell-level blocker. An MCP adapter is feasible as a future wrapper around the existing CLI operations, but it is design-only in the current release line until a separate implementation scope approves it.
+HARNESS V2 ships a local stdio MCP adapter that exposes `status`, `verify`, `preflight`, `init`, and `apply` as MCP tools. The MCP adapter is a thin wrapper over the existing HARNESS V2 core and does not replace `CURRENT.md`, task contracts, approval, permission, proof, lifecycle, or release boundaries.
+
+HARNESS V2 does not currently ship an HTTP MCP server, editor hook, shell-level blocker, or Codex app configuration installer.
 
 ## When To Use It
 
@@ -239,6 +242,14 @@ harness-v2 preflight contracts\harness-task.json --path README.md --mode write
 ```
 
 `preflight` does not execute the command and does not automatically block your shell or editor. It checks the proposal against the task contract before you act.
+
+Run the local MCP stdio adapter:
+
+```powershell
+harness-v2 mcp
+```
+
+The MCP adapter speaks newline-delimited JSON-RPC over stdio. It is meant to be launched by an MCP-capable client, not used as an interactive shell command. Exposed tools are `harness_status`, `harness_verify`, `harness_preflight`, `harness_init`, and `harness_apply`.
 
 Inspect project shape without mutating files:
 

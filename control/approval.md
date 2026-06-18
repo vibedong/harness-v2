@@ -21,7 +21,7 @@ remaining_completion_program
 Current active slice:
 
 ```text
-mcp_feasibility_design_and_final_audit
+mcp_stdio_adapter_implementation
 ```
 
 Current bound user packet:
@@ -77,6 +77,14 @@ Do not mutate files outside F:\Folder\harness-v2.
 Do not claim final HARNESS completion until final audit, tests, readback, and fresh-project scaffold verification pass.
 ```
 
+Current Goal G continuation approval:
+
+```text
+User approved proceeding with the MCP, hook, and integration-hardening plan, starting with Goal G.
+Goal G may evaluate and implement a local MCP adapter when feasible, as a thin wrapper over existing HARNESS V2 CLI/core surfaces.
+This supersedes the prior MCP design-only boundary only for local stdio MCP adapter implementation. Hook work, integration hardening, package registry publish, release, dependency, secret, external mutation, and destructive work remain outside this slice.
+```
+
 ## Bound Local Verification Commands
 
 These commands are bound for the current remaining completion program. The direct preflight smoke commands are included because the current program explicitly includes the side-effect preflight adapter and the latest user response approved DEF continuation under the existing denied-operation ceiling.
@@ -86,10 +94,12 @@ These commands are bound for the current remaining completion program. The direc
 - `node bin\harness-v2.js status --root .`
 - `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
 - `node bin\harness-v2.js preflight tests\fixtures\valid-task.json --side-effect "python -m compileall harness_v2"`
+- `node bin\harness-v2.js mcp < JSON-RPC smoke input`
 - `node bin\harness-v2.js init --root <temporary project>`
 - `python -m harness_v2 status --root <repo root>`
 - `python -m harness_v2 verify tests\fixtures\valid-task.json`
 - `python -m harness_v2 preflight tests\fixtures\valid-task.json --side-effect "python -m unittest discover tests"`
+- `python -m harness_v2 mcp < JSON-RPC smoke input`
 - `python -m harness_v2 init --root <temporary project>`
 - `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
 - `npm pack --dry-run`
@@ -98,7 +108,7 @@ Operation type:
 
 - local product implementation, documentation, control-plane, test, scaffold, and verification work under `F:\Folder\harness-v2`;
 - completed targets are generated scaffold hardening, executable 8-stage workflow engine enforcement, and side-effect preflight adapter work;
-- current target is MCP feasibility/design only, final quality audit, documentation sync, and GitHub push;
+- current target is local MCP stdio adapter implementation, documentation sync, final quality audit, and GitHub push;
 - no npm publish, Python package registry publish, GitHub release, release tag, dependency install, secret access, or destructive operation outside generated temporary verification artifacts.
 
 Freshness anchors:
@@ -120,6 +130,8 @@ Denied by the current approval scope:
 - dependency install from network;
 - secret access;
 - external network mutation outside allowed git push;
+- remote MCP hosting;
+- MCP client configuration mutation;
 - destructive operation outside generated temporary verification artifacts.
 
 ## Scope Fit

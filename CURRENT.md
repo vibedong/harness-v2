@@ -10,7 +10,7 @@ workflow: `remaining_completion_program`
 
 state: `package_publish_review`
 
-substate: `mcp_feasibility_design_and_final_audit / closeout_review`
+substate: `mcp_stdio_adapter_implementation / active_goal_g`
 
 source basis:
 
@@ -20,6 +20,8 @@ source basis:
 - User correction that `F:\Folder\harness-v2` is the completed product repository, not the user's downstream working project.
 - User requirement that Codex-app users should install/apply HARNESS V2 into their project root, with README as user documentation and AI-facing rules in generated project-root files.
 - Exact remaining completion program approval for generated scaffold hardening, executable workflow enforcement, side-effect preflight adapter work if locally feasible, MCP feasibility/design only unless separately approved, final audit, documentation sync, and GitHub push.
+- User approval to proceed with Goal G after the three-step MCP, hook, and integration hardening plan.
+- Goal G approval supersedes the prior MCP design-only boundary only for local stdio MCP adapter implementation; hook work, integration hardening, package registry publish, release, dependency, secret, external mutation, and destructive work remain outside this slice.
 
 ## Current Program
 
@@ -30,19 +32,21 @@ Completed slices:
 - generated scaffold hardening
 - executable 8-stage workflow engine enforcement
 - side-effect preflight adapter
+- MCP feasibility/design and final quality audit/docs-control sync
 
 Current active slice:
 
-- MCP feasibility/design and final quality audit/docs-control sync
+- MCP stdio adapter implementation
 
 Future slices in this program:
 
-- no further implementation slice is approved by this program after final audit closeout
-- MCP implementation, package registry publish, GitHub release, release tag, dependency installation, secret access, or destructive work require a later exact approval packet
+- Hook or hook-equivalent hardening
+- integration hardening and release preparation
+- package registry publish, GitHub release, release tag, dependency installation, secret access, or destructive work require a later exact approval packet
 
 ## Current Surface
 
-Active package, GitHub, npm wrapper, scaffold, workflow, preflight, MCP design-only, and audit files may include:
+Active package, GitHub, npm wrapper, scaffold, workflow, preflight, local MCP stdio adapter, and audit files may include:
 
 - `.gitattributes`
 - `.gitignore`
@@ -77,7 +81,7 @@ Active package, GitHub, npm wrapper, scaffold, workflow, preflight, MCP design-o
 - `tests\*.py`
 - `tests\fixtures\*.json`
 
-New files are allowed only when directly required for workflow engine enforcement, lifecycle ledger/read-set/preflight implementation, generated scaffold templates, tests/fixtures, hook or equivalent local preflight adapter, or documentation needed to explain implemented or design-only surfaces.
+New files are allowed only when directly required for workflow engine enforcement, lifecycle ledger/read-set/preflight implementation, generated scaffold templates, tests/fixtures, hook or equivalent local preflight adapter, local MCP stdio adapter implementation, or documentation needed to explain implemented surfaces.
 
 ## Current Allowed Local Verification Commands
 
@@ -86,10 +90,12 @@ New files are allowed only when directly required for workflow engine enforcemen
 - `node bin\harness-v2.js status --root .`
 - `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
 - `node bin\harness-v2.js preflight tests\fixtures\valid-task.json --side-effect "python -m compileall harness_v2"`
+- `node bin\harness-v2.js mcp < JSON-RPC smoke input`
 - `node bin\harness-v2.js init --root <temporary project>`
 - `python -m harness_v2 status --root <repo root>`
 - `python -m harness_v2 verify tests\fixtures\valid-task.json`
 - `python -m harness_v2 preflight tests\fixtures\valid-task.json --side-effect "python -m unittest discover tests"`
+- `python -m harness_v2 mcp < JSON-RPC smoke input`
 - `python -m harness_v2 init --root <temporary project>`
 - `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
 - `npm pack --dry-run`
@@ -110,4 +116,4 @@ Stop if a pointer, source, approval, permission, proof obligation, lifecycle req
 
 Stop before npm publish, Python package registry publish, GitHub release creation, release tag creation, dependency installation from network, secret access, external network mutation outside allowed git push, or destructive operation outside generated temporary verification artifacts.
 
-This file is a current pointer. It does not claim shell-level automatic enforcement, public stable release readiness, Python package registry publish state, release execution, release tag state, GitHub release state, or MCP implementation state.
+This file is a current pointer. It does not claim shell-level automatic enforcement, public stable release readiness, Python package registry publish state, release execution, release tag state, GitHub release state, remote MCP hosting, MCP client installation, or MCP client configuration state.

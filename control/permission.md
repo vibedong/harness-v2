@@ -10,8 +10,9 @@ This file separates approved intent from allowed side effects.
 | --- | --- |
 | local read | allowed under `F:\Folder\harness-v2` and generated TEMP verification folders |
 | local file write | allowed under `F:\Folder\harness-v2` only when directly required by the active remaining completion program |
-| new files | allowed only for workflow engine enforcement, lifecycle ledger/read-set/preflight implementation, generated scaffold templates, tests/fixtures, hook or equivalent local preflight adapter, or documentation needed to explain implemented surfaces |
+| new files | allowed only for workflow engine enforcement, lifecycle ledger/read-set/preflight implementation, generated scaffold templates, tests/fixtures, hook or equivalent local preflight adapter, local MCP stdio adapter implementation, or documentation needed to explain implemented surfaces |
 | local command execution | allowed only for the commands listed below |
+| local MCP stdio adapter | allowed only as a dependency-free stdio JSON-RPC adapter over existing HARNESS V2 core functions |
 | temporary verification folders | allowed under TEMP |
 | cleanup | allowed only for generated TEMP folders, `__pycache__`, `*.egg-info`, and npm pack dry-run output |
 | read-only subagent review | allowed with `vowline`; subagents may not edit, mutate git/network, grant approval, produce proof, or declare lifecycle transition |
@@ -65,10 +66,12 @@ Any mutation outside `F:\Folder\harness-v2` fails closed except generated TEMP v
 - `node bin\harness-v2.js status --root .`
 - `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
 - `node bin\harness-v2.js preflight tests\fixtures\valid-task.json --side-effect "python -m compileall harness_v2"`
+- `node bin\harness-v2.js mcp < JSON-RPC smoke input`
 - `node bin\harness-v2.js init --root <temporary project>`
 - `python -m harness_v2 status --root <repo root>`
 - `python -m harness_v2 verify tests\fixtures\valid-task.json`
 - `python -m harness_v2 preflight tests\fixtures\valid-task.json --side-effect "python -m unittest discover tests"`
+- `python -m harness_v2 mcp < JSON-RPC smoke input`
 - `python -m harness_v2 init --root <temporary project>`
 - `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
 - `npm pack --dry-run`
@@ -83,4 +86,4 @@ Any mutation outside `F:\Folder\harness-v2` fails closed except generated TEMP v
 
 Permission cannot widen approval scope and cannot produce proof, lifecycle state, route permission, regression pass, improvement execution, package registry publish readiness, release readiness, or automatic enforcement completion.
 
-This permission surface denies npm publish, Python package registry publish, GitHub release creation, release tag creation, dependency installation from network, secret access, external network mutation outside allowed git push, and destructive action outside generated verification artifacts.
+This permission surface denies npm publish, Python package registry publish, GitHub release creation, release tag creation, dependency installation from network, secret access, external network mutation outside allowed git push, remote MCP hosting, MCP client configuration mutation, and destructive action outside generated verification artifacts.

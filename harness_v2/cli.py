@@ -33,6 +33,8 @@ def build_parser() -> argparse.ArgumentParser:
     doctor = subparsers.add_parser("doctor", help="Report read-only next action and local project shape.")
     doctor.add_argument("--root", default=".", help="HARNESS V2 product root. Defaults to current directory.")
 
+    subparsers.add_parser("mcp", help="Run the HARNESS V2 MCP stdio adapter.")
+
     init = subparsers.add_parser("init", help="Apply HARNESS V2 scaffold files to a project root.")
     init.add_argument("--root", default=".", help="Project root to initialize. Defaults to current directory.")
     init.add_argument("--force", action="store_true", help="Overwrite existing HARNESS V2 scaffold files.")
@@ -75,6 +77,11 @@ def main(argv: list[str] | None = None) -> int:
         payload = inspect_project(Path(args.root))
         print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
         return 0
+
+    if args.command == "mcp":
+        from .mcp import run_stdio_server
+
+        return run_stdio_server()
 
     if args.command in {"init", "apply"}:
         payload = initialize_project(Path(args.root), force=args.force)

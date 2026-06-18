@@ -38,7 +38,7 @@ Do not build a full transcript registry or register every temporary note.
 | executable-cli | `harness_v2\*.py` | stdlib local CLI, verifier, and doctor packaged for local editable install | not proof by file existence |
 | executable-tests | `tests\*` | unittest and fixture proof material | not ProofReceipt by file existence |
 | side-effect-preflight | `harness_v2\preflight.py` | local pre-execution side-effect and path check against a task contract | not shell-level blocking |
-| mcp-feasibility-design | `routing\manifest.md`, `README.md`, `README.ko.md`, `control\proof.md` | design-only future adapter boundary | not MCP implementation |
+| mcp-stdio-adapter | `harness_v2\mcp.py`, `harness_v2\cli.py`, `tests\test_harness_v2.py` | local stdio JSON-RPC adapter exposing status, verify, preflight, init, and apply | not source authority, shell-level blocking, or remote MCP hosting |
 
 ## Stale Triggers
 

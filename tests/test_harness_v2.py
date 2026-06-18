@@ -54,6 +54,7 @@ APPROVED_SOURCE_FILES = {
     "harness_v2/verify.py",
     "harness_v2/doctor.py",
     "harness_v2/preflight.py",
+    "harness_v2/mcp.py",
     "tests/test_harness_v2.py",
     "tests/fixtures/valid-task.json",
     "tests/fixtures/invalid-missing-approval.json",
@@ -64,10 +65,12 @@ ALLOWED_COMMANDS = {
     "node bin\\harness-v2.js status --root .",
     "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
     "node bin\\harness-v2.js preflight tests\\fixtures\\valid-task.json --side-effect \"python -m compileall harness_v2\"",
+    "node bin\\harness-v2.js mcp < JSON-RPC smoke input",
     "node bin\\harness-v2.js init --root <temporary project>",
     "python -m harness_v2 status --root <repo root>",
     "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
     "python -m harness_v2 preflight tests\\fixtures\\valid-task.json --side-effect \"python -m unittest discover tests\"",
+    "python -m harness_v2 mcp < JSON-RPC smoke input",
     "python -m harness_v2 init --root <temporary project>",
     "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
     "npm pack --dry-run",
@@ -78,10 +81,12 @@ PERMISSION_COMMANDS = {
     "node bin\\harness-v2.js status --root .",
     "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
     "node bin\\harness-v2.js preflight tests\\fixtures\\valid-task.json --side-effect \"python -m compileall harness_v2\"",
+    "node bin\\harness-v2.js mcp < JSON-RPC smoke input",
     "node bin\\harness-v2.js init --root <temporary project>",
     "python -m harness_v2 status --root <repo root>",
     "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
     "python -m harness_v2 preflight tests\\fixtures\\valid-task.json --side-effect \"python -m unittest discover tests\"",
+    "python -m harness_v2 mcp < JSON-RPC smoke input",
     "python -m harness_v2 init --root <temporary project>",
     "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
     "npm pack --dry-run",
@@ -153,6 +158,8 @@ COMMON_DENIED_SIDE_EFFECTS = [
     "dependency install from network",
     "secret access",
     "external network mutation outside allowed git push",
+    "remote MCP hosting",
+    "MCP client configuration mutation",
     "destructive operation outside generated verification artifacts",
 ]
 FORBIDDEN_SOURCE_FRAGMENT = "source" + ".fragment.json"
@@ -380,8 +387,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("What's New In 0.1.5", readme)
         self.assertIn("하네스 업데이트해줘.", readme)
         self.assertIn("Do not create or leave a nested `harness-v2` folder", readme)
-        self.assertIn("does not currently ship an MCP server", readme)
-        self.assertIn("design-only", readme)
+        self.assertIn("ships a local stdio MCP adapter", readme)
+        self.assertIn("harness-v2 mcp", readme)
         self.assertIn("README.ko.md", readme)
         self.assertIn("# HARNESS V2 사용설명서", korean_readme)
         self.assertIn("npm install -g harness-v2", korean_readme)
@@ -390,8 +397,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("0.1.5 업데이트 내용", korean_readme)
         self.assertIn("하네스 업데이트해줘.", korean_readme)
         self.assertIn("프로젝트 안에 `harness-v2` 하위 폴더를 만들거나 남기지 않습니다", korean_readme)
-        self.assertIn("현재 MCP server", korean_readme)
-        self.assertIn("design-only", korean_readme)
+        self.assertIn("local stdio MCP adapter", korean_readme)
+        self.assertIn("harness-v2 mcp", korean_readme)
         self.assertIn("Python 3.11", readme)
         self.assertIn("Python 3.11", release_notes)
         self.assertIn("NPM_PUBLISHED", release_notes)
@@ -543,6 +550,82 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertTrue(json.loads(completed.stdout)["ok"])
 
+    def test_python_mcp_adapter_lists_and_calls_core_tools(self):
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            completed = subprocess.run(
+                [sys.executable, "-m", "harness_v2", "mcp"],
+                cwd=ROOT,
+                input=mcp_input(
+                    {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "test", "version": "0"}}},
+                    {"jsonrpc": "2.0", "method": "notifications/initialized"},
+                    {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+                    {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "harness_status", "arguments": {"root": "."}}},
+                    {"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "harness_verify", "arguments": {"task": "tests\\fixtures\\valid-task.json"}}},
+                    {"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "harness_preflight", "arguments": {"task": "tests\\fixtures\\valid-task.json", "side_effect": "python -m unittest discover tests"}}},
+                    {"jsonrpc": "2.0", "id": 6, "method": "tools/call", "params": {"name": "harness_init", "arguments": {"root": str(root)}}},
+                ),
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertEqual(completed.stderr, "")
+            responses = [json.loads(line) for line in completed.stdout.splitlines()]
+            self.assertEqual([response["id"] for response in responses], [1, 2, 3, 4, 5, 6])
+            self.assertEqual(responses[0]["result"]["capabilities"], {"tools": {"listChanged": False}})
+
+            tool_names = {tool["name"] for tool in responses[1]["result"]["tools"]}
+            self.assertEqual(tool_names, {"harness_status", "harness_verify", "harness_preflight", "harness_init", "harness_apply"})
+
+            status_payload = responses[2]["result"]["structuredContent"]
+            verify_payload = responses[3]["result"]["structuredContent"]
+            preflight_payload = responses[4]["result"]["structuredContent"]
+            init_payload = responses[5]["result"]["structuredContent"]
+
+            self.assertEqual(status_payload["status"]["workflow"], "remaining_completion_program")
+            self.assertTrue(verify_payload["ok"])
+            self.assertTrue(preflight_payload["ok"])
+            assert_fresh_scaffold_shape(self, root, init_payload, root)
+
+    def test_node_wrapper_delegates_mcp_to_python_cli(self):
+        completed = subprocess.run(
+            ["node", "bin/harness-v2.js", "mcp"],
+            cwd=ROOT,
+            input=mcp_input(
+                {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "test", "version": "0"}}},
+                {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+            ),
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        responses = [json.loads(line) for line in completed.stdout.splitlines()]
+        self.assertEqual(responses[0]["result"]["serverInfo"]["name"], "harness-v2")
+        self.assertIn("harness_preflight", {tool["name"] for tool in responses[1]["result"]["tools"]})
+
+    def test_mcp_adapter_reports_protocol_errors_as_json_rpc(self):
+        from harness_v2.mcp import handle_message
+
+        parse_error = handle_message("{")
+        unknown_tool = handle_message(
+            json.dumps(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "tools/call",
+                    "params": {"name": "missing_tool", "arguments": {}},
+                }
+            )
+        )
+
+        self.assertEqual(parse_error["error"]["code"], -32700)
+        self.assertEqual(unknown_tool["error"]["code"], -32602)
+        self.assertIn("Unknown tool", unknown_tool["error"]["message"])
+
     def test_preflight_rejects_invalid_task_contract_before_side_effect(self):
         from harness_v2.preflight import evaluate_preflight
 
@@ -682,11 +765,16 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("_build_backend\\harness_backend.py", valid["approval"]["approved_paths"])
         self.assertIn("package.json", valid["approval"]["approved_paths"])
         self.assertIn("bin\\harness-v2.js", valid["approval"]["approved_paths"])
+        self.assertIn("harness_v2\\mcp.py", valid["approval"]["approved_paths"])
         self.assertIn("node bin\\harness-v2.js status --root .", valid["permission"]["allowed_side_effects"])
+        self.assertIn("node bin\\harness-v2.js mcp < JSON-RPC smoke input", valid["permission"]["allowed_side_effects"])
+        self.assertIn("python -m harness_v2 mcp < JSON-RPC smoke input", valid["permission"]["allowed_side_effects"])
         self.assertIn("npm pack --dry-run", valid["permission"]["allowed_side_effects"])
         self.assertNotIn("npm publish", valid["permission"]["allowed_side_effects"])
         self.assertIn("npm publish", valid["permission"]["denied_side_effects"])
         self.assertIn("Python package registry publish", valid["permission"]["denied_side_effects"])
+        self.assertIn("remote MCP hosting", valid["permission"]["denied_side_effects"])
+        self.assertIn("MCP client configuration mutation", valid["permission"]["denied_side_effects"])
 
     def test_artifact_surfaces_include_package_github_scope(self):
         registry = (ROOT / "artifacts" / "registry.md").read_text()
@@ -697,22 +785,23 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("package-backend", registry)
         self.assertIn("fourth-slice package and GitHub MVP", log)
         self.assertIn("docs/control sync", log)
-        self.assertIn("MCP feasibility/design and final audit", log)
+        self.assertIn("MCP stdio adapter implementation", log)
         self.assertIn("author-local paths copied into GitHub-facing commands", regression)
         self.assertIn("npm wrapper MVP mistaken for npm release", regression)
-        self.assertIn("MCP feasibility mistaken for MCP implementation", regression)
+        self.assertIn("MCP stdio adapter mistaken for source of truth", regression)
 
 
-    def test_mcp_feasibility_is_design_only_not_implementation(self):
+    def test_mcp_adapter_is_stdio_wrapper_not_source_of_truth(self):
         readme = (ROOT / "README.md").read_text()
         routing = (ROOT / "routing" / "manifest.md").read_text()
         proof = (ROOT / "control" / "proof.md").read_text()
         improvement = (ROOT / "safety" / "improvement.md").read_text()
 
-        self.assertIn("does not currently ship an MCP server", readme)
-        self.assertIn("MCP feasibility/design", routing)
-        self.assertIn("design-only in this slice", routing)
-        self.assertIn("no MCP server, tool manifest, or runtime implementation", proof)
+        self.assertIn("local stdio MCP adapter", readme)
+        self.assertIn("does not replace `CURRENT.md`", readme)
+        self.assertIn("MCP stdio adapter", routing)
+        self.assertIn("local stdio only", routing)
+        self.assertIn("local stdio JSON-RPC adapter", proof)
         self.assertIn("MCP adapter around `status`, `verify`, `preflight`, and `init/apply`", improvement)
 
 
@@ -1048,7 +1137,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(status["workflow"], "remaining_completion_program")
         self.assertEqual(status["state"], "package_publish_review")
-        self.assertIn("mcp_feasibility_design_and_final_audit", status["substate"])
+        self.assertIn("mcp_stdio_adapter_implementation", status["substate"])
 
     def test_doctor_reports_next_action_without_mutation(self):
         from harness_v2.doctor import inspect_project
@@ -1278,6 +1367,10 @@ def commands_under_heading(path: Path, heading: str) -> set[str]:
         if inside and line.strip().startswith("- `") and line.strip().endswith("`"):
             commands.add(line.strip()[3:-1])
     return commands
+
+
+def mcp_input(*messages: dict) -> str:
+    return "\n".join(json.dumps(message, separators=(",", ":")) for message in messages) + "\n"
 
 
 def valid_task_payload() -> dict:
