@@ -12,7 +12,7 @@ This file separates approved intent from allowed side effects.
 | local file write | allowed only under `F:\Folder\harness-v2` |
 | local command execution | allowed for verification, editable package smoke, Node wrapper smoke, npm dry-run pack, npm publish, and git/GitHub release commands below |
 | package metadata, package build, local editable smoke install | allowed only for this product |
-| npm wrapper metadata, dry-run pack, and npm publish | allowed only for `harness-v2@0.1.2` release execution |
+| npm wrapper metadata, dry-run pack, and npm publish | allowed only for `harness-v2@0.1.3` release execution |
 | GitHub repository creation and push | allowed only for this product folder |
 | Python package registry publish, dependency install | denied |
 | secret access, unrelated external network mutation, destructive action | denied |
@@ -31,8 +31,11 @@ Any write outside that folder fails closed, except generated package smoke artif
 - `<temporary venv>\Scripts\python -m pip install --no-deps -e .`
 - `<temporary venv>\Scripts\python -m harness_v2 status --root <repo root>`
 - `<temporary venv>\Scripts\python -m harness_v2 verify tests\fixtures\valid-task.json`
+- `python -m harness_v2 init --root <temporary project>`
+- `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
 - `node bin\harness-v2.js status --root .`
 - `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
+- `node bin\harness-v2.js init --root <temporary project>`
 - `npm pack --dry-run`
 - `npm publish --dry-run`
 - `npm publish`
@@ -46,9 +49,9 @@ The temporary smoke-test venv, generated `harness_v2.egg-info`, generated `__pyc
 - `git commit`
 - `gh repo create vibedong/harness-v2 --public --source . --remote origin`
 - `git push -u origin <branch>`
-- `git tag v0.1.2`
-- `git push origin v0.1.2`
-- `gh release create v0.1.2 --title "HARNESS V2 0.1.2" --notes-file RELEASE_NOTES.md`
+- `git tag v0.1.3`
+- `git push origin v0.1.3`
+- `gh release create v0.1.3 --title "HARNESS V2 0.1.3" --notes-file RELEASE_NOTES.md`
 
 ## Permission Boundaries
 

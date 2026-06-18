@@ -1,6 +1,6 @@
 # HARNESS V2
 
-HARNESS V2 is a local control tool for AI-assisted development work. It records the task scope, approval, permissions, proof obligations, and lifecycle state before an AI coding agent starts changing files.
+HARNESS V2 is a local control tool for AI-assisted development work. It applies a project-local harness scaffold, then records the task scope, approval, permissions, proof obligations, and lifecycle state before an AI coding agent starts changing files.
 
 Use it with tools such as Codex, Claude Code, Cursor, or Copilot when you want the agent to stay inside an explicit task contract and report verifiable evidence before claiming completion.
 
@@ -19,7 +19,7 @@ Before a task starts, you describe:
 - the proof obligations required before completion;
 - the lifecycle state the task is allowed to occupy.
 
-The CLI then checks whether a task contract is structurally valid and whether it conflicts with the current local HARNESS V2 state.
+The CLI can apply the initial scaffold with `harness-v2 init --root .`, then check whether a task contract is structurally valid and whether it conflicts with the current local HARNESS V2 state.
 
 ## When To Use It
 
@@ -63,24 +63,32 @@ Runtime prerequisites:
 
 The npm command delegates to the Python CLI. HARNESS V2 is not rewritten in JavaScript.
 
-## 5-Minute Quick Start
-
-The fastest first success is to run the CLI against this repository, which already contains HARNESS V2 control files and fixtures.
+Apply HARNESS V2 to a project:
 
 ```powershell
-git clone https://github.com/vibedong/harness-v2.git
-cd harness-v2
+harness-v2 init --root .
+```
+
+`harness-v2 apply --root .` is an alias for the same operation. Existing files are not overwritten unless you pass `--force`.
+
+## 5-Minute Quick Start
+
+The fastest first success is to apply HARNESS V2 to the current project and verify the initial task contract.
+
+```powershell
 npm install -g harness-v2
+harness-v2 init --root .
 harness-v2 status --root .
-harness-v2 verify tests\fixtures\valid-task.json
+harness-v2 verify contracts\harness-task.json
 ```
 
 Expected behavior:
 
+- `init` creates `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `contracts\harness-task.json`, and `templates\task.json`.
 - `status` prints JSON from `CURRENT.md`.
-- `verify` accepts the valid fixture and prints `{"ok": true, ...}`.
+- `verify` accepts the initial task contract and prints `{"ok": true, ...}`.
 
-To start a new task contract, use `templates\task.json` as the shape reference and fill in values that match your current `CURRENT.md`.
+To start a new task contract, copy or adapt `templates\task.json` and fill in values that match your current `CURRENT.md`.
 
 ```json
 {
@@ -156,10 +164,17 @@ Show the current workflow pointer:
 harness-v2 status --root .
 ```
 
+Apply HARNESS V2 to a project:
+
+```powershell
+harness-v2 init --root .
+harness-v2 apply --root .
+```
+
 Verify a task contract:
 
 ```powershell
-harness-v2 verify tests\fixtures\valid-task.json
+harness-v2 verify contracts\harness-task.json
 ```
 
 Inspect project shape without mutating files:
@@ -205,6 +220,12 @@ This prompt is guidance for the agent. The current task contract and local contr
 
 Check that the root contains `CURRENT.md`. The `status` command reads the current pointer from that file.
 
+If the project has not been initialized yet, run:
+
+```powershell
+harness-v2 init --root .
+```
+
 ### `harness-v2 verify <task.json>` fails
 
 Common causes:
@@ -237,14 +258,14 @@ Report the failing command and separate existing failures from failures introduc
 | `package.json` | npm wrapper package manifest |
 | `bin\harness-v2.js` | Windows/macOS Node CLI wrapper for the Python CLI |
 | `control\` | source, approval, permission, proof, and lifecycle boundaries |
-| `contracts\` | JSON schema contract files |
-| `templates\` | task, gate, approval, and proof templates |
+| `contracts\harness-task.json` | initial project task contract created by `init` |
+| `templates\task.json` | reusable task contract template created by `init` |
 | `harness_v2\` | standard-library Python CLI and helpers |
 | `_build_backend\` | dependency-free local PEP 517 build backend |
 | `tests\` | unittest coverage and fixtures |
 | `records\`, `routing\`, `artifacts\`, `safety\`, `release\` | local boundary and observability surfaces |
 
-This repository ships schemas and templates. It does not currently reserve a `contracts\tasks\` folder for user task files.
+The npm package also ships its own schema and test fixtures for development, but a newly initialized user project starts with the smaller scaffold above.
 
 ## What HARNESS V2 Does Not Do
 
@@ -255,6 +276,7 @@ HARNESS V2 does not:
 - automatically block every external tool;
 - run proof commands automatically;
 - fix failing tests automatically;
+- silently modify an arbitrary directory during `npm install -g`;
 - publish packages or create releases without an exact, separate transaction scope;
 - make README text into approval, permission, proof, lifecycle state, or release readiness.
 
@@ -293,7 +315,7 @@ Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 
 ## Status
 
-The current public release is `harness-v2@0.1.2` on npm.
+The current public release is `harness-v2@0.1.3` on npm.
 
 ## Boundary Rule
 

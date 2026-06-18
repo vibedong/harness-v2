@@ -1,6 +1,6 @@
 {
   "name": "harness-v2",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "HARNESS V2 workflow boundary harness with a Windows/macOS npm CLI wrapper.",
   "license": "MIT",
   "author": "vibedong",

@@ -1,13 +1,14 @@
-# HARNESS V2 0.1.2 Release Notes
+# HARNESS V2 0.1.3 Release Notes
 
-Documentation patch release for the public npm package README.
+Project application release for HARNESS V2.
 
 ## Changed
 
-- Expanded `README.md` into a user-first onboarding guide with install, quick start, AI-agent prompt, troubleshooting, and actual task-contract vocabulary.
-- Expanded `README.ko.md` into a Korean user manual with the same practical flow.
-- Kept examples aligned with the shipped schema fields: `approval.approved_paths`, `permission.allowed_side_effects`, `permission.denied_side_effects`, and `proof.obligations`.
-- Kept the npm package as a Windows/macOS wrapper that delegates to the Python CLI.
+- Added `harness-v2 init --root .` to apply HARNESS V2 scaffold files to a project.
+- Added `harness-v2 apply --root .` as an alias for `init`.
+- Added an initial valid task contract at `contracts\harness-task.json` in initialized projects.
+- Added idempotent scaffold behavior: existing files are skipped unless `--force` is passed.
+- Updated English and Korean README quick starts to use install, init, status, and verify.
 
 ## Runtime Requirements
 
@@ -24,6 +25,8 @@ python -m compileall harness_v2
 python -m unittest discover tests
 node bin\harness-v2.js status --root .
 node bin\harness-v2.js verify tests\fixtures\valid-task.json
+python -m harness_v2 init --root <temporary project>
+python -m harness_v2 verify <temporary project>\contracts\harness-task.json
 npm pack --dry-run
 npm publish --dry-run
 npm publish
@@ -34,11 +37,11 @@ npm publish
 Published npm package:
 
 ```text
-harness-v2@0.1.2
+harness-v2@0.1.3
 ```
 
 GitHub release:
 
 ```text
-https://github.com/vibedong/harness-v2/releases/tag/v0.1.2
+https://github.com/vibedong/harness-v2/releases/tag/v0.1.3
 ```

@@ -18,19 +18,22 @@ For the fourth-slice package, GitHub publish, and npm wrapper surface, verify af
 8. installed package smoke can verify `tests\fixtures\valid-task.json`;
 9. `node bin\harness-v2.js status --root .` exits 0;
 10. `node bin\harness-v2.js verify tests\fixtures\valid-task.json` exits 0;
-11. `npm pack --dry-run` exits 0 without publishing;
-12. `npm publish --dry-run` exits 0;
-13. `LICENSE`, `RELEASE_NOTES.md`, and public npm metadata are present;
-14. `npm publish` exits 0 for `harness-v2@0.1.2`;
-15. `git tag v0.1.2` and `git push origin v0.1.2` succeed;
-16. `gh release create v0.1.2 --title "HARNESS V2 0.1.2" --notes-file RELEASE_NOTES.md` succeeds;
-17. post-publish fresh install verification succeeds from npm;
-18. the unittest suite proves CLI status can run without external dependency;
-19. the unittest suite proves the verifier rejects `tests\fixtures\invalid-missing-approval.json`;
-20. the unittest suite proves the verifier accepts `tests\fixtures\valid-task.json`;
-21. the unittest suite proves doctor reports next action without mutating files;
-22. GitHub publish proof names repository URL, branch, and pushed commit;
-23. product-local markdown boundaries still deny Python package registry publish, dependency install, secret access, unrelated external network mutation, and destructive operation outside generated verification artifacts.
+11. `python -m harness_v2 init --root <temporary project>` exits 0;
+12. `python -m harness_v2 verify <temporary project>\contracts\harness-task.json` exits 0;
+13. `node bin\harness-v2.js init --root <temporary project>` exits 0;
+14. `npm pack --dry-run` exits 0 without publishing;
+15. `npm publish --dry-run` exits 0;
+16. `LICENSE`, `RELEASE_NOTES.md`, and public npm metadata are present;
+17. `npm publish` exits 0 for `harness-v2@0.1.3`;
+18. `git tag v0.1.3` and `git push origin v0.1.3` succeed;
+19. `gh release create v0.1.3 --title "HARNESS V2 0.1.3" --notes-file RELEASE_NOTES.md` succeeds;
+20. post-publish fresh install verification succeeds from npm;
+21. the unittest suite proves CLI status can run without external dependency;
+22. the unittest suite proves the verifier rejects `tests\fixtures\invalid-missing-approval.json`;
+23. the unittest suite proves the verifier accepts `tests\fixtures\valid-task.json`;
+24. the unittest suite proves doctor reports next action without mutating files;
+25. GitHub publish proof names repository URL, branch, and pushed commit;
+26. product-local markdown boundaries still deny Python package registry publish, dependency install, secret access, unrelated external network mutation, and destructive operation outside generated verification artifacts.
 
 ## Artifact Checks
 

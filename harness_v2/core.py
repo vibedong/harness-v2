@@ -45,6 +45,22 @@ REQUIRED_TASK_OBJECTS = (
     "proof",
     "lifecycle",
 )
+INITIAL_TASK_PATH = "contracts\\harness-task.json"
+
+
+def _scaffold_files() -> tuple[tuple[tuple[str, ...], str], ...]:
+    return (
+        (("AGENTS.md",), _agents_md()),
+        (("RULES.md",), _rules_md()),
+        (("CURRENT.md",), _current_md()),
+        (("control", "source.md"), _source_md()),
+        (("control", "approval.md"), _approval_md()),
+        (("control", "permission.md"), _permission_md()),
+        (("control", "proof.md"), _proof_md()),
+        (("control", "lifecycle.md"), _lifecycle_md()),
+        (("contracts", "harness-task.json"), _initial_task_json()),
+        (("templates", "task.json"), _task_template_json()),
+    )
 
 
 @dataclass(frozen=True)
@@ -52,6 +68,30 @@ class ValidationResult:
     ok: bool
     task_id: str | None
     errors: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class InitResult:
+    ok: bool
+    root: str
+    initial_task: str
+    created: tuple[str, ...]
+    skipped: tuple[str, ...]
+    overwritten: tuple[str, ...]
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "ok": self.ok,
+            "root": self.root,
+            "initial_task": self.initial_task,
+            "created": list(self.created),
+            "skipped": list(self.skipped),
+            "overwritten": list(self.overwritten),
+            "next": [
+                "harness-v2 status --root .",
+                f"harness-v2 verify {self.initial_task}",
+            ],
+        }
 
 
 def load_json(path: str | Path) -> dict[str, Any]:
@@ -70,6 +110,38 @@ def validate_task_file(path: str | Path) -> ValidationResult:
     except Exception as exc:  # pragma: no cover - exact parser messages vary.
         return ValidationResult(False, None, (f"json: {exc}",))
     return validate_task(data, root=_find_project_root(payload_path))
+
+
+def initialize_project(root: str | Path, force: bool = False) -> InitResult:
+    root_path = Path(root)
+    root_path.mkdir(parents=True, exist_ok=True)
+
+    created: list[str] = []
+    skipped: list[str] = []
+    overwritten: list[str] = []
+
+    for parts, content in _scaffold_files():
+        target = root_path.joinpath(*parts)
+        relative_path = _display_path(parts)
+        if target.exists() and not force:
+            skipped.append(relative_path)
+            continue
+
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if target.exists():
+            overwritten.append(relative_path)
+        else:
+            created.append(relative_path)
+        target.write_text(content, encoding="utf-8")
+
+    return InitResult(
+        ok=True,
+        root=str(root_path.resolve()),
+        initial_task=INITIAL_TASK_PATH,
+        created=tuple(created),
+        skipped=tuple(skipped),
+        overwritten=tuple(overwritten),
+    )
 
 
 def validate_task(data: dict[str, Any], root: str | Path | None = None) -> ValidationResult:
@@ -287,3 +359,226 @@ def _string_list(value: Any) -> list[str]:
 
 def _normalize_side_effect(value: str) -> str:
     return " ".join(value.casefold().split())
+
+
+def _display_path(parts: tuple[str, ...]) -> str:
+    return "\\".join(parts)
+
+
+def _agents_md() -> str:
+    return """# HARNESS V2 Agent Entry
+
+Before doing project work, read:
+
+1. `RULES.md`
+2. `CURRENT.md`
+3. The active task contract, initially `contracts\\harness-task.json`
+
+Run these checks before changing files:
+
+```powershell
+harness-v2 status --root .
+harness-v2 verify contracts\\harness-task.json
+```
+
+Stay inside `approval.approved_paths`. Do not execute `approval.excluded_side_effects` or `permission.denied_side_effects`. If the requested work needs a wider scope, stop and ask for a new task contract.
+"""
+
+
+def _rules_md() -> str:
+    return """# HARNESS V2 Project Rules
+
+HARNESS V2 records the current task boundary for AI-assisted work. It is not a sandbox and does not replace human approval.
+
+## Required Flow
+
+1. Read `CURRENT.md`.
+2. Read the active task contract.
+3. Verify the task contract with `harness-v2 verify <task.json>`.
+4. Modify only paths named in `approval.approved_paths`.
+5. Do not execute side effects named in `approval.excluded_side_effects` or `permission.denied_side_effects`.
+6. Before completion, run or report every item in `proof.obligations`.
+
+If source, approval, permission, proof, lifecycle, or requested paths conflict, fail closed and ask for a new contract.
+"""
+
+
+def _current_md() -> str:
+    return """# HARNESS V2 Current State
+
+status: applied_project_surface / init / current_pointer
+
+workflow: `default`
+
+state: `ready`
+
+substate: `initialized`
+
+source basis:
+
+- `AGENTS.md`
+- `RULES.md`
+- `contracts\\harness-task.json`
+
+## Current Task
+
+The initial task contract is `contracts\\harness-task.json`.
+
+## Stop Conditions
+
+Stop if the requested work needs paths, commands, side effects, secrets, external mutation, dependency changes, package publish, release execution, or destructive operations outside the active task contract.
+"""
+
+
+def _source_md() -> str:
+    return """# HARNESS V2 Source Control
+
+status: applied_project_surface / init / source_control
+
+Source basis is declared by each task contract in `source.basis`.
+
+This file is guidance only. The active task contract and `CURRENT.md` decide the current source pointer.
+"""
+
+
+def _approval_md() -> str:
+    return """# HARNESS V2 Approval Control
+
+status: applied_project_surface / init / approval_control
+
+Approval is declared by each task contract in `approval.packet` and `approval.approved_paths`.
+
+No file path is approved unless the active task contract names it.
+"""
+
+
+def _permission_md() -> str:
+    return """# HARNESS V2 Permission Control
+
+status: applied_project_surface / init / permission_control
+
+Permission is declared by each task contract in `permission.allowed_side_effects` and `permission.denied_side_effects`.
+
+Denied side effects win over broad requests. Secrets, dependency installation, package publish, release execution, external mutation, and destructive operations require a separate explicit task contract.
+"""
+
+
+def _proof_md() -> str:
+    return """# HARNESS V2 Proof Control
+
+status: applied_project_surface / init / proof_control
+
+Proof obligations are declared by each task contract in `proof.obligations`.
+
+Do not claim completion until the active proof obligations are run or their blocked status is reported.
+"""
+
+
+def _lifecycle_md() -> str:
+    return """# HARNESS V2 Lifecycle Control
+
+status: applied_project_surface / init / lifecycle_control
+
+Known local states:
+
+- `ready`
+- `active`
+- `blocked`
+- `done`
+
+Lifecycle movement must be named in the active task contract. Progress notes are not lifecycle transitions.
+"""
+
+
+def _initial_task_json() -> str:
+    return """{
+  "task_id": "harness-v2-initial-task",
+  "title": "Initial HARNESS V2 project binding",
+  "workflow": "default",
+  "source": {
+    "basis": [
+      "AGENTS.md",
+      "RULES.md",
+      "CURRENT.md"
+    ],
+    "current_pointer": "CURRENT.md"
+  },
+  "approval": {
+    "packet": "Initial local HARNESS V2 project application",
+    "approved_paths": [
+      "AGENTS.md",
+      "RULES.md",
+      "CURRENT.md",
+      "control\\\\source.md",
+      "control\\\\approval.md",
+      "control\\\\permission.md",
+      "control\\\\proof.md",
+      "control\\\\lifecycle.md",
+      "contracts\\\\harness-task.json",
+      "templates\\\\task.json"
+    ],
+    "excluded_side_effects": [
+      "dependency install from network",
+      "package publish",
+      "release execution",
+      "secret access",
+      "external network mutation",
+      "destructive operation"
+    ]
+  },
+  "permission": {
+    "allowed_side_effects": [
+      "local file writes to initial HARNESS V2 scaffold files",
+      "harness-v2 status --root .",
+      "harness-v2 verify contracts\\\\harness-task.json"
+    ],
+    "denied_side_effects": [
+      "dependency install from network",
+      "package publish",
+      "release execution",
+      "secret access",
+      "external network mutation",
+      "destructive operation"
+    ]
+  },
+  "proof": {
+    "obligations": [
+      "harness-v2 status --root .",
+      "harness-v2 verify contracts\\\\harness-task.json"
+    ]
+  },
+  "lifecycle": {
+    "current_state": "ready",
+    "target_state": "ready"
+  }
+}
+"""
+
+
+def _task_template_json() -> str:
+    return """{
+  "task_id": "<task-id>",
+  "title": "<task title>",
+  "workflow": "default",
+  "source": {
+    "basis": ["CURRENT.md"],
+    "current_pointer": "CURRENT.md"
+  },
+  "approval": {
+    "packet": "<exact approval packet>",
+    "approved_paths": ["<approved path>"],
+    "excluded_side_effects": ["<excluded side effect>"]
+  },
+  "permission": {
+    "allowed_side_effects": ["<allowed side effect>"],
+    "denied_side_effects": ["<denied side effect>"]
+  },
+  "proof": {
+    "obligations": ["<proof obligation>"]
+  },
+  "lifecycle": {
+    "current_state": "ready",
+    "target_state": "ready"
+  }
+}
+"""
