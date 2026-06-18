@@ -53,6 +53,7 @@ APPROVED_SOURCE_FILES = {
     "harness_v2/core.py",
     "harness_v2/verify.py",
     "harness_v2/doctor.py",
+    "harness_v2/preflight.py",
     "tests/test_harness_v2.py",
     "tests/fixtures/valid-task.json",
     "tests/fixtures/invalid-missing-approval.json",
@@ -62,9 +63,11 @@ ALLOWED_COMMANDS = {
     "python -m unittest discover tests",
     "node bin\\harness-v2.js status --root .",
     "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
+    "node bin\\harness-v2.js preflight tests\\fixtures\\valid-task.json --side-effect \"python -m compileall harness_v2\"",
     "node bin\\harness-v2.js init --root <temporary project>",
     "python -m harness_v2 status --root <repo root>",
     "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
+    "python -m harness_v2 preflight tests\\fixtures\\valid-task.json --side-effect \"python -m unittest discover tests\"",
     "python -m harness_v2 init --root <temporary project>",
     "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
     "npm pack --dry-run",
@@ -74,9 +77,11 @@ PERMISSION_COMMANDS = {
     "python -m unittest discover tests",
     "node bin\\harness-v2.js status --root .",
     "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
+    "node bin\\harness-v2.js preflight tests\\fixtures\\valid-task.json --side-effect \"python -m compileall harness_v2\"",
     "node bin\\harness-v2.js init --root <temporary project>",
     "python -m harness_v2 status --root <repo root>",
     "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
+    "python -m harness_v2 preflight tests\\fixtures\\valid-task.json --side-effect \"python -m unittest discover tests\"",
     "python -m harness_v2 init --root <temporary project>",
     "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
     "npm pack --dry-run",
@@ -419,6 +424,128 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertEqual(json.loads(status.stdout)["workflow"], "remaining_completion_program")
         self.assertEqual(verify.returncode, 0, verify.stderr)
         self.assertEqual(json.loads(verify.stdout)["task_id"], "harness-v2-valid-task")
+
+    def test_cli_preflight_allows_explicit_side_effect_and_write_path(self):
+        side_effect = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "harness_v2",
+                "preflight",
+                str(VALID_TASK),
+                "--side-effect",
+                "python -m unittest discover tests",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        write_path = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "harness_v2",
+                "preflight",
+                str(VALID_TASK),
+                "--path",
+                "harness_v2\\preflight.py",
+                "--mode",
+                "write",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(side_effect.returncode, 0, side_effect.stderr)
+        self.assertTrue(json.loads(side_effect.stdout)["ok"])
+        self.assertEqual(write_path.returncode, 0, write_path.stderr)
+        self.assertTrue(json.loads(write_path.stdout)["ok"])
+
+    def test_cli_preflight_rejects_denied_or_unlisted_side_effects_and_unapproved_path(self):
+        denied = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "harness_v2",
+                "preflight",
+                str(VALID_TASK),
+                "--side-effect",
+                "npm publish",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        unlisted = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "harness_v2",
+                "preflight",
+                str(VALID_TASK),
+                "--side-effect",
+                "python -m pip install requests",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        unapproved_path = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "harness_v2",
+                "preflight",
+                str(VALID_TASK),
+                "--path",
+                "outside.md",
+                "--mode",
+                "write",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(denied.returncode, 1)
+        self.assertIn("permission.denied_side_effects", "\n".join(json.loads(denied.stdout)["errors"]))
+        self.assertEqual(unlisted.returncode, 1)
+        self.assertIn("side effect is not explicitly allowed", "\n".join(json.loads(unlisted.stdout)["errors"]))
+        self.assertEqual(unapproved_path.returncode, 1)
+        self.assertIn("write path is not approved: outside.md", "\n".join(json.loads(unapproved_path.stdout)["errors"]))
+
+    def test_node_wrapper_delegates_preflight_to_python_cli(self):
+        completed = subprocess.run(
+            [
+                "node",
+                "bin/harness-v2.js",
+                "preflight",
+                "tests/fixtures/valid-task.json",
+                "--side-effect",
+                "python -m compileall harness_v2",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertTrue(json.loads(completed.stdout)["ok"])
+
+    def test_preflight_rejects_invalid_task_contract_before_side_effect(self):
+        from harness_v2.preflight import evaluate_preflight
+
+        result = evaluate_preflight(INVALID_TASK, side_effect="local read")
+
+        self.assertFalse(result.ok)
+        self.assertIn("task: approval must be an object", "\n".join(result.errors))
 
     def test_node_wrapper_delegates_init_to_python_cli(self):
         with tempfile.TemporaryDirectory() as temp_root:
@@ -893,7 +1020,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(status["workflow"], "remaining_completion_program")
         self.assertEqual(status["state"], "package_publish_review")
-        self.assertIn("executable_8_stage_workflow_engine_enforcement", status["substate"])
+        self.assertIn("side_effect_preflight_adapter", status["substate"])
 
     def test_doctor_reports_next_action_without_mutation(self):
         from harness_v2.doctor import inspect_project

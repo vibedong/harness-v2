@@ -10,7 +10,7 @@ workflow: `remaining_completion_program`
 
 state: `package_publish_review`
 
-substate: `executable_8_stage_workflow_engine_enforcement / not_final_completion`
+substate: `side_effect_preflight_adapter / not_final_completion`
 
 source basis:
 
@@ -28,14 +28,14 @@ The remaining completion program is active but not complete.
 Completed slices:
 
 - generated scaffold hardening
+- executable 8-stage workflow engine enforcement
 
 Current active slice:
 
-- executable 8-stage workflow engine enforcement
+- side-effect preflight adapter
 
 Future slices in this program:
 
-- side-effect preflight adapter design and implementation if locally feasible
 - MCP feasibility/design only unless separately approved for implementation
 - final quality audit, documentation sync, and GitHub push
 
@@ -84,9 +84,11 @@ New files are allowed only when directly required for workflow engine enforcemen
 - `python -m unittest discover tests`
 - `node bin\harness-v2.js status --root .`
 - `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
+- `node bin\harness-v2.js preflight tests\fixtures\valid-task.json --side-effect "python -m compileall harness_v2"`
 - `node bin\harness-v2.js init --root <temporary project>`
 - `python -m harness_v2 status --root <repo root>`
 - `python -m harness_v2 verify tests\fixtures\valid-task.json`
+- `python -m harness_v2 preflight tests\fixtures\valid-task.json --side-effect "python -m unittest discover tests"`
 - `python -m harness_v2 init --root <temporary project>`
 - `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
 - `npm pack --dry-run`

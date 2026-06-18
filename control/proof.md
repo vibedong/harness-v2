@@ -6,15 +6,15 @@ This file separates proof obligation, artifact check, and proof result.
 
 ## Current Proof Obligation
 
-For the executable 8-stage workflow engine enforcement slice, verify after authoring:
+For the side-effect preflight adapter slice, verify after authoring:
 
-1. task contracts require `workflow_stage`;
-2. `workflow_stage` is limited to the eight executable stages in `rules\workflows.md`;
-3. verifier rejects missing or unknown stages;
-4. verifier accepts one coherent minimal contract for each stage;
-5. verifier rejects representative stage rule violations for planning, approval, development, development review, artifact observation, routing, safety/improvement, and release boundary work;
-6. generated initial task contracts declare a valid `workflow_stage` and still verify in a fresh temporary project;
-7. current fixtures match the active remaining completion program workflow, stage, and denial boundaries;
+1. the CLI exposes `preflight`;
+2. preflight validates the task contract before evaluating the proposed side effect or path;
+3. explicitly allowed side effects pass;
+4. denied, excluded, or unlisted side effects fail;
+5. write-mode path checks require an exact `approval.approved_paths` match;
+6. Node wrapper delegates `preflight` to the Python CLI;
+7. README and README.ko explain preflight as a pre-execution contract check, not automatic shell-level blocking;
 8. read-only subagent review findings are reflected or explicitly rejected before git push;
 9. the approved local verification commands pass or blocked commands are reported as blocked.
 
@@ -24,9 +24,11 @@ For the executable 8-stage workflow engine enforcement slice, verify after autho
 - `python -m unittest discover tests`
 - `node bin\harness-v2.js status --root .`
 - `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
+- `node bin\harness-v2.js preflight tests\fixtures\valid-task.json --side-effect "python -m compileall harness_v2"`
 - `node bin\harness-v2.js init --root <temporary project>`
 - `python -m harness_v2 status --root <repo root>`
 - `python -m harness_v2 verify tests\fixtures\valid-task.json`
+- `python -m harness_v2 preflight tests\fixtures\valid-task.json --side-effect "python -m unittest discover tests"`
 - `python -m harness_v2 init --root <temporary project>`
 - `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
 - `npm pack --dry-run`

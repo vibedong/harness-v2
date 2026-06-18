@@ -219,6 +219,15 @@ task contract를 검증합니다.
 harness-v2 verify contracts\harness-task.json
 ```
 
+실행하려는 side effect나 write path가 contract 안에 있는지 먼저 확인합니다.
+
+```powershell
+harness-v2 preflight contracts\harness-task.json --side-effect "python -m unittest discover tests"
+harness-v2 preflight contracts\harness-task.json --path README.md --mode write
+```
+
+`preflight`는 명령을 실행하지 않고, shell이나 editor를 자동으로 차단하지도 않습니다. 행동하기 전에 task contract와 충돌하는지 확인하는 사전 검사입니다.
+
 파일을 바꾸지 않고 project shape를 점검합니다.
 
 ```powershell

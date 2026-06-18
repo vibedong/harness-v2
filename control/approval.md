@@ -21,7 +21,7 @@ remaining_completion_program
 Current active slice:
 
 ```text
-executable_8_stage_workflow_engine_enforcement
+side_effect_preflight_adapter
 ```
 
 Current bound user packet:

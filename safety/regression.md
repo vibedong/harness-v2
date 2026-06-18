@@ -22,6 +22,7 @@ This file maps HARNESS V2 boundary risks to regression guard candidates. It does
 | author-local paths copied into GitHub-facing commands | require `<repo root>` or current-directory examples for portable docs |
 | generated scaffold mistaken for automatic enforcement completion | require generated AGENTS/RULES/CURRENT to say scaffold + task-contract validator + CLI helper, not automatic enforcement sandbox or completion layer |
 | workflow area documented but not executable | require `workflow_stage` enum, verifier stage predicates, valid examples for all stages, and representative rejection tests |
+| preflight adapter mistaken for shell-level blocking | require README/control wording that preflight checks proposed actions but does not execute or automatically block external tools |
 
 ## Guard Evidence
 

@@ -219,6 +219,15 @@ Verify a task contract:
 harness-v2 verify contracts\harness-task.json
 ```
 
+Check a proposed side effect or write path before running it:
+
+```powershell
+harness-v2 preflight contracts\harness-task.json --side-effect "python -m unittest discover tests"
+harness-v2 preflight contracts\harness-task.json --path README.md --mode write
+```
+
+`preflight` does not execute the command and does not automatically block your shell or editor. It checks the proposal against the task contract before you act.
+
 Inspect project shape without mutating files:
 
 ```powershell

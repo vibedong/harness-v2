@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .core import initialize_project, read_current_status
 from .doctor import inspect_project
+from .preflight import evaluate_preflight
 from .verify import verify_task
 
 
@@ -22,6 +23,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     verify = subparsers.add_parser("verify", help="Validate a task JSON file against the local MVP contract.")
     verify.add_argument("task", help="Path to a task JSON file.")
+
+    preflight = subparsers.add_parser("preflight", help="Check a proposed side effect or write path against a task contract.")
+    preflight.add_argument("task", help="Path to a task JSON file.")
+    preflight.add_argument("--side-effect", help="Proposed command or side-effect label to check.")
+    preflight.add_argument("--path", help="Proposed path to check.")
+    preflight.add_argument("--mode", choices=("command", "read", "write"), default="command", help="Preflight mode. Write mode checks approval.approved_paths.")
 
     doctor = subparsers.add_parser("doctor", help="Report read-only next action and local project shape.")
     doctor.add_argument("--root", default=".", help="HARNESS V2 product root. Defaults to current directory.")
@@ -53,6 +60,16 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         print("\n".join(result.errors), file=sys.stderr)
         return 1
+
+    if args.command == "preflight":
+        result = evaluate_preflight(
+            Path(args.task),
+            side_effect=args.side_effect,
+            path=args.path,
+            mode=args.mode,
+        )
+        print(json.dumps(result.to_json(), ensure_ascii=False, sort_keys=True))
+        return 0 if result.ok else 1
 
     if args.command == "doctor":
         payload = inspect_project(Path(args.root))

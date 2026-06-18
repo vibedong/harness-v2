@@ -36,15 +36,16 @@ package_publish_review -> package_publish_review
 Active slice:
 
 ```text
-executable_8_stage_workflow_engine_enforcement
+side_effect_preflight_adapter
 ```
 
 Scope:
 
 - product writes only under `F:\Folder\harness-v2`;
 - generated scaffold hardening is complete;
-- current work covers executable 8-stage workflow enforcement;
-- later slices may cover side-effect preflight adapter work if locally feasible, MCP feasibility/design only unless separately approved, final quality audit, documentation sync, and GitHub push;
+- executable 8-stage workflow enforcement is complete;
+- current work covers the locally feasible side-effect preflight adapter;
+- later slices may cover MCP feasibility/design only unless separately approved, final quality audit, documentation sync, and GitHub push;
 - local verification commands named in `control\permission.md`;
 - read-only subagent review with `vowline`;
 - git add, commit, and push after completed slices pass verification and review;

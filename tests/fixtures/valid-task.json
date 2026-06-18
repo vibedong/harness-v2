@@ -58,6 +58,7 @@
       "harness_v2\\core.py",
       "harness_v2\\verify.py",
       "harness_v2\\doctor.py",
+      "harness_v2\\preflight.py",
       "tests\\test_harness_v2.py",
       "tests\\fixtures\\valid-task.json",
       "tests\\fixtures\\invalid-missing-approval.json"
