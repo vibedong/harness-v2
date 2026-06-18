@@ -1,6 +1,6 @@
 # HARNESS V2 Regression Safety
 
-status: package_github_surface / fourth_slice / regression_safety
+status: package_github_surface / remaining_completion_program / regression_safety
 
 This file maps HARNESS V2 boundary risks to regression guard candidates. It does not define executable tests or passing evidence.
 
@@ -23,6 +23,7 @@ This file maps HARNESS V2 boundary risks to regression guard candidates. It does
 | generated scaffold mistaken for automatic enforcement completion | require generated AGENTS/RULES/CURRENT to say scaffold + task-contract validator + CLI helper, not automatic enforcement sandbox or completion layer |
 | workflow area documented but not executable | require `workflow_stage` enum, verifier stage predicates, valid examples for all stages, and representative rejection tests |
 | preflight adapter mistaken for shell-level blocking | require README/control wording that preflight checks proposed actions but does not execute or automatically block external tools |
+| MCP feasibility mistaken for MCP implementation | require README/routing/control wording that no MCP server, manifest, or runtime implementation is shipped in this slice |
 
 ## Guard Evidence
 
@@ -30,7 +31,7 @@ Valid evidence for this package, GitHub, npm wrapper, generated scaffold, and re
 
 Executable tests and fixtures inside `tests\` are part of the current proof material. Package metadata, Windows/macOS npm wrapper metadata, local Node wrapper smoke, npm dry-run pack verification, fresh scaffold verification, and git push are allowed only inside the current remaining completion approval and permission scope.
 
-Npm publish, Python package registry publish, dependency installation from the network, secret access, unrelated external mutation, destructive operations outside generated verification artifacts, GitHub release creation, release tag creation, and release execution remain outside the current permission ceiling.
+Npm publish, Python package registry publish, dependency installation from the network, secret access, unrelated external mutation, destructive operations outside generated verification artifacts, GitHub release creation, release tag creation, MCP implementation, and release execution remain outside the current permission ceiling.
 
 ## Non-Authority Boundary
 

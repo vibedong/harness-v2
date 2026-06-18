@@ -1,6 +1,6 @@
 # HARNESS V2 Workflow Records
 
-status: package_github_surface / fourth_slice / records_index
+status: package_github_surface / remaining_completion_program / records_index
 
 This file is the local lane index for future HARNESS V2 workflow records. It is an index and placement guide, not a decision ledger by itself.
 

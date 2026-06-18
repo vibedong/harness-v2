@@ -1,6 +1,6 @@
 # HARNESS V2 Artifact Registry
 
-status: package_github_surface / fourth_slice / artifact_registry
+status: package_github_surface / remaining_completion_program / artifact_registry
 
 This file is the lightweight artifact registry for gate-relevant local markdown surfaces. It is an index, not source authority or proof.
 
@@ -37,6 +37,8 @@ Do not build a full transcript registry or register every temporary note.
 | package-backend | `_build_backend\harness_backend.py` | dependency-free local PEP 517 and PEP 660 backend | not proof by file existence |
 | executable-cli | `harness_v2\*.py` | stdlib local CLI, verifier, and doctor packaged for local editable install | not proof by file existence |
 | executable-tests | `tests\*` | unittest and fixture proof material | not ProofReceipt by file existence |
+| side-effect-preflight | `harness_v2\preflight.py` | local pre-execution side-effect and path check against a task contract | not shell-level blocking |
+| mcp-feasibility-design | `routing\manifest.md`, `README.md`, `README.ko.md`, `control\proof.md` | design-only future adapter boundary | not MCP implementation |
 
 ## Stale Triggers
 

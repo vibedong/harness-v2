@@ -6,17 +6,17 @@ This file separates proof obligation, artifact check, and proof result.
 
 ## Current Proof Obligation
 
-For the side-effect preflight adapter slice, verify after authoring:
+For the MCP feasibility/design and final quality audit slice, verify after authoring:
 
-1. the CLI exposes `preflight`;
-2. preflight validates the task contract before evaluating the proposed side effect or path;
-3. explicitly allowed side effects pass;
-4. denied, excluded, or unlisted side effects fail;
-5. write-mode path checks require an exact `approval.approved_paths` match;
-6. Node wrapper delegates `preflight` to the Python CLI;
-7. README and README.ko explain preflight as a pre-execution contract check, not automatic shell-level blocking;
-8. read-only subagent review findings are reflected or explicitly rejected before git push;
-9. the approved local verification commands pass or blocked commands are reported as blocked.
+1. generated scaffold hardening remains documented and covered by tests;
+2. executable 8-stage workflow enforcement remains documented and covered by tests;
+3. side-effect preflight remains documented as a pre-execution contract check, not automatic shell-level blocking;
+4. MCP is documented as feasibility/design only, with no MCP server, tool manifest, or runtime implementation shipped in this slice;
+5. README and README.ko describe status, verify, init/apply, preflight, update behavior, and current non-automatic-enforcement limits;
+6. control, routing, artifact, safety, improvement, and release surfaces agree on current approval, permission, proof, lifecycle, MCP, and release boundaries;
+7. read-only subagent review findings are reflected or explicitly rejected before git push;
+8. the approved local verification commands pass or blocked commands are reported as blocked;
+9. git status and push output show the final intended product state is current on `vibedong/harness-v2`.
 
 ## Verification Commands
 

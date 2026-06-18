@@ -24,6 +24,7 @@ This file maps operation modes to suggested local routes. Routing is guidance, n
 | proof check | `control\proof.md` plus readback/search/listing | artifact checks must match obligation |
 | side-effect preflight | `harness_v2` CLI with `preflight <task> --side-effect ...` or `--path ... --mode write` | preflight checks a proposed action; it does not execute or automatically block shell/editor actions |
 | executable local MVP | `harness_v2` CLI with `status`, `verify`, and `doctor` | only approved local commands and no external dependency |
+| MCP feasibility/design | existing CLI surfaces `status`, `verify`, `preflight`, and `init/apply` as candidate MCP adapter operations | design-only in this slice; no MCP server, manifest, tool runtime, or external mutation is implemented |
 | remaining completion program | generated scaffold, workflow engine, preflight adapter, tests, docs/control, and audit surfaces named by current approval | no npm publish, Python package registry publish, release tag, GitHub release, dependency install, secrets, or destructive action outside generated verification artifacts |
 | package, GitHub, and npm wrapper MVP | package metadata and wrapper surfaces named by an explicit package slice | package, npm dry-run, registry readback, or release work require current approval, permission, and proof |
 | artifact observation | `artifacts\registry.md` and `artifacts\log.md` | registry/log are not source or proof |

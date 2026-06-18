@@ -1,6 +1,6 @@
 # HARNESS V2 Source Control
 
-status: package_github_surface / fourth_slice / source_control
+status: package_github_surface / remaining_completion_program / source_control
 
 This file defines source authority for local HARNESS V2 package and GitHub MVP operation.
 

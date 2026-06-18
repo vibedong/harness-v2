@@ -23,6 +23,18 @@ Before a task starts, you describe:
 
 The CLI can apply the initial scaffold with `harness-v2 init --root .`, then check whether a task contract is structurally valid and whether it conflicts with the current local HARNESS V2 state.
 
+## Current Enforcement Boundary
+
+The executable surface currently covers:
+
+- project-root scaffold generation with `init` / `apply`;
+- current pointer readback with `status`;
+- task contract validation with `verify`;
+- stage-specific workflow checks through `workflow_stage`;
+- side-effect and write-path preflight checks with `preflight`.
+
+HARNESS V2 does not currently ship an MCP server, MCP tool manifest, editor hook, or shell-level blocker. An MCP adapter is feasible as a future wrapper around the existing CLI operations, but it is design-only in the current release line until a separate implementation scope approves it.
+
 ## When To Use It
 
 HARNESS V2 is useful when:

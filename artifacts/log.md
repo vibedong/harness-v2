@@ -1,6 +1,6 @@
 # HARNESS V2 Artifact Log
 
-status: package_github_surface / fourth_slice / artifact_log
+status: package_github_surface / remaining_completion_program / artifact_log
 
 This file keeps concise provenance notes for gate-relevant local markdown events. It is not a full history and not proof.
 
@@ -19,9 +19,10 @@ Do not use this file as a transcript, scratchpad, or complete audit database.
 | third-slice executable local MVP | approved contracts, templates, `harness_v2`, tests, fixtures, README, and updated markdown controls | historical executable local MVP implementation scope |
 | fourth-slice package and GitHub MVP | `pyproject.toml`, `_build_backend`, editable install proof path, git repo, and GitHub `main` branch | current package and GitHub MVP publication scope |
 | docs/control sync | root rules, route, artifact, safety, README, CURRENT, and tests | current stale-surface reconciliation scope |
-| generated scaffold hardening | `harness_v2\core.py`, generated project-root scaffold, fixtures, tests, and current control surfaces | active remaining completion program slice |
-| executable 8-stage workflow enforcement | `workflow_stage`, verifier stage predicates, schema/template updates, fixtures, tests, and workflow rules | active remaining completion program slice |
-| side-effect preflight adapter | `harness_v2\preflight.py`, `harness_v2\cli.py`, tests, README usage, and control surfaces | active remaining completion program slice |
+| generated scaffold hardening | `harness_v2\core.py`, generated project-root scaffold, fixtures, tests, and current control surfaces | completed remaining completion program slice |
+| executable 8-stage workflow enforcement | `workflow_stage`, verifier stage predicates, schema/template updates, fixtures, tests, and workflow rules | completed remaining completion program slice |
+| side-effect preflight adapter | `harness_v2\preflight.py`, `harness_v2\cli.py`, tests, README usage, and control surfaces | completed remaining completion program slice |
+| MCP feasibility/design and final audit | README, README.ko, routing, control, artifact, safety, improvement, release, tests, and verification output | active remaining completion program closeout slice |
 
 ## Freshness
 

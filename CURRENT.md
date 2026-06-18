@@ -10,7 +10,7 @@ workflow: `remaining_completion_program`
 
 state: `package_publish_review`
 
-substate: `side_effect_preflight_adapter / not_final_completion`
+substate: `mcp_feasibility_design_and_final_audit / closeout_review`
 
 source basis:
 
@@ -29,19 +29,20 @@ Completed slices:
 
 - generated scaffold hardening
 - executable 8-stage workflow engine enforcement
+- side-effect preflight adapter
 
 Current active slice:
 
-- side-effect preflight adapter
+- MCP feasibility/design and final quality audit/docs-control sync
 
 Future slices in this program:
 
-- MCP feasibility/design only unless separately approved for implementation
-- final quality audit, documentation sync, and GitHub push
+- no further implementation slice is approved by this program after final audit closeout
+- MCP implementation, package registry publish, GitHub release, release tag, dependency installation, secret access, or destructive work require a later exact approval packet
 
 ## Current Surface
 
-Active package, GitHub, npm wrapper, scaffold, workflow, preflight, and audit files may include:
+Active package, GitHub, npm wrapper, scaffold, workflow, preflight, MCP design-only, and audit files may include:
 
 - `.gitattributes`
 - `.gitignore`
@@ -76,7 +77,7 @@ Active package, GitHub, npm wrapper, scaffold, workflow, preflight, and audit fi
 - `tests\*.py`
 - `tests\fixtures\*.json`
 
-New files are allowed only when directly required for workflow engine enforcement, lifecycle ledger/read-set/preflight implementation, generated scaffold templates, tests/fixtures, hook or equivalent local preflight adapter, or documentation needed to explain implemented surfaces.
+New files are allowed only when directly required for workflow engine enforcement, lifecycle ledger/read-set/preflight implementation, generated scaffold templates, tests/fixtures, hook or equivalent local preflight adapter, or documentation needed to explain implemented or design-only surfaces.
 
 ## Current Allowed Local Verification Commands
 
@@ -109,4 +110,4 @@ Stop if a pointer, source, approval, permission, proof obligation, lifecycle req
 
 Stop before npm publish, Python package registry publish, GitHub release creation, release tag creation, dependency installation from network, secret access, external network mutation outside allowed git push, or destructive operation outside generated temporary verification artifacts.
 
-This file is a current pointer. It does not claim automatic enforcement completion, final HARNESS completion, public stable release readiness, Python package registry publish state, release execution, release tag state, or GitHub release state.
+This file is a current pointer. It does not claim shell-level automatic enforcement, public stable release readiness, Python package registry publish state, release execution, release tag state, GitHub release state, or MCP implementation state.

@@ -380,6 +380,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("What's New In 0.1.5", readme)
         self.assertIn("하네스 업데이트해줘.", readme)
         self.assertIn("Do not create or leave a nested `harness-v2` folder", readme)
+        self.assertIn("does not currently ship an MCP server", readme)
+        self.assertIn("design-only", readme)
         self.assertIn("README.ko.md", readme)
         self.assertIn("# HARNESS V2 사용설명서", korean_readme)
         self.assertIn("npm install -g harness-v2", korean_readme)
@@ -388,6 +390,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("0.1.5 업데이트 내용", korean_readme)
         self.assertIn("하네스 업데이트해줘.", korean_readme)
         self.assertIn("프로젝트 안에 `harness-v2` 하위 폴더를 만들거나 남기지 않습니다", korean_readme)
+        self.assertIn("현재 MCP server", korean_readme)
+        self.assertIn("design-only", korean_readme)
         self.assertIn("Python 3.11", readme)
         self.assertIn("Python 3.11", release_notes)
         self.assertIn("NPM_PUBLISHED", release_notes)
@@ -591,6 +595,14 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             ALLOWED_COMMANDS,
         )
         self.assertEqual(
+            commands_under_heading(ROOT / "control" / "approval.md", "## Bound Local Verification Commands"),
+            ALLOWED_COMMANDS,
+        )
+        self.assertEqual(
+            commands_under_heading(ROOT / "control" / "proof.md", "## Verification Commands"),
+            ALLOWED_COMMANDS,
+        )
+        self.assertEqual(
             commands_under_heading(ROOT / "control" / "permission.md", "## Allowed Local Commands"),
             PERMISSION_COMMANDS,
         )
@@ -638,6 +650,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         for path in current_program_files:
             content = path.read_text()
             self.assertNotIn("status: executable_local_mvp_surface / third_slice", content)
+            self.assertNotIn("status: package_github_surface / fourth_slice", content)
         for path in (
             ROOT / "CURRENT.md",
             ROOT / "control" / "approval.md",
@@ -684,8 +697,23 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("package-backend", registry)
         self.assertIn("fourth-slice package and GitHub MVP", log)
         self.assertIn("docs/control sync", log)
+        self.assertIn("MCP feasibility/design and final audit", log)
         self.assertIn("author-local paths copied into GitHub-facing commands", regression)
         self.assertIn("npm wrapper MVP mistaken for npm release", regression)
+        self.assertIn("MCP feasibility mistaken for MCP implementation", regression)
+
+
+    def test_mcp_feasibility_is_design_only_not_implementation(self):
+        readme = (ROOT / "README.md").read_text()
+        routing = (ROOT / "routing" / "manifest.md").read_text()
+        proof = (ROOT / "control" / "proof.md").read_text()
+        improvement = (ROOT / "safety" / "improvement.md").read_text()
+
+        self.assertIn("does not currently ship an MCP server", readme)
+        self.assertIn("MCP feasibility/design", routing)
+        self.assertIn("design-only in this slice", routing)
+        self.assertIn("no MCP server, tool manifest, or runtime implementation", proof)
+        self.assertIn("MCP adapter around `status`, `verify`, `preflight`, and `init/apply`", improvement)
 
 
     def test_valid_task_fixture_is_accepted_by_verifier(self):
@@ -1020,7 +1048,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(status["workflow"], "remaining_completion_program")
         self.assertEqual(status["state"], "package_publish_review")
-        self.assertIn("side_effect_preflight_adapter", status["substate"])
+        self.assertIn("mcp_feasibility_design_and_final_audit", status["substate"])
 
     def test_doctor_reports_next_action_without_mutation(self):
         from harness_v2.doctor import inspect_project

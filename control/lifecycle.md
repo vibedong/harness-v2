@@ -36,7 +36,7 @@ package_publish_review -> package_publish_review
 Active slice:
 
 ```text
-side_effect_preflight_adapter
+mcp_feasibility_design_and_final_audit
 ```
 
 Scope:
@@ -44,14 +44,15 @@ Scope:
 - product writes only under `F:\Folder\harness-v2`;
 - generated scaffold hardening is complete;
 - executable 8-stage workflow enforcement is complete;
-- current work covers the locally feasible side-effect preflight adapter;
-- later slices may cover MCP feasibility/design only unless separately approved, final quality audit, documentation sync, and GitHub push;
+- side-effect preflight adapter work is complete;
+- current work covers MCP feasibility/design only, final quality audit, documentation sync, and GitHub push;
+- no MCP implementation, package registry publish, GitHub release, release tag, dependency install, secret access, or destructive operation is part of this lifecycle entry;
 - local verification commands named in `control\permission.md`;
 - read-only subagent review with `vowline`;
 - git add, commit, and push after completed slices pass verification and review;
 - no npm publish, Python package registry publish, GitHub release, release tag, dependency install from network, secret access, external network mutation outside allowed git push, or destructive operation outside generated temporary verification artifacts.
 
-This entry preserves `package_publish_review` while completing missing local behavior and documentation needed for Codex-app-focused use. It is not repeat npm publish, Python package registry publish, public stable release readiness, release execution, automatic enforcement completion, or final product completion.
+This entry preserves `package_publish_review` while closing out local behavior and documentation needed for Codex-app-focused use. It is not repeat npm publish, Python package registry publish, public stable release readiness, release execution, shell-level automatic enforcement, or MCP implementation.
 
 ## Transition Requirements
 

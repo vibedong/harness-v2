@@ -1,6 +1,6 @@
 # HARNESS V2 Improvement Safety
 
-status: package_github_surface / fourth_slice / improvement_safety
+status: package_github_surface / remaining_completion_program / improvement_safety
 
 This file classifies improvement observations without directly changing product rules.
 
@@ -25,6 +25,12 @@ An improvement candidate must name:
 - expected benefit;
 - stale or rollback trigger;
 - required approval and permission for any actual change.
+
+## Current Deferred Candidates
+
+| candidate | class | current handling |
+| --- | --- | --- |
+| MCP adapter around `status`, `verify`, `preflight`, and `init/apply` | deferred | feasible future integration, but this slice only documents design boundaries and does not implement MCP runtime surfaces |
 
 ## Direct-Change Guard
 
