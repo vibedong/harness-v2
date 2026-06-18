@@ -43,7 +43,7 @@ harness-v2@0.1.0
 Status:
 
 ```text
-RELEASE_READY_NPM_AUTH_PRESENT
+RELEASE_PUBLISHED
 ```
 
 Reason:
@@ -51,7 +51,10 @@ Reason:
 - npm package name `harness-v2` returned registry 404 during readiness check, so the name appears available.
 - GitHub CLI is authenticated for `vibedong/harness-v2`.
 - npm CLI now authenticates successfully with `npm.cmd whoami`.
-- Git tag `v0.1.0` and GitHub release `v0.1.0` must not be created until npm publish succeeds.
+- npm registry now reports `harness-v2@0.1.0` with tarball `https://registry.npmjs.org/harness-v2/-/harness-v2-0.1.0.tgz`.
+- Git tag `v0.1.0` was pushed to `vibedong/harness-v2`.
+- GitHub release `v0.1.0` was created at `https://github.com/vibedong/harness-v2/releases/tag/v0.1.0`.
+- Post-publish npm install verification succeeded from a temporary npm prefix.
 - Local verification, Node wrapper verification, and npm pack dry-run are the required pre-publish proof commands.
 - Exact release execution commands are permitted only for `harness-v2@0.1.0`, `v0.1.0`, and the GitHub repository `vibedong/harness-v2`.
 
