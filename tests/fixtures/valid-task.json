@@ -1,6 +1,6 @@
 {
   "task_id": "harness-v2-valid-task",
-  "title": "Validate HARNESS V2 package and GitHub task contract",
+  "title": "Validate HARNESS V2 package, GitHub, and npm wrapper task contract",
   "workflow": "package_publish_review",
   "source": {
     "basis": [
@@ -11,18 +11,21 @@
     "current_pointer": "CURRENT.md"
   },
   "approval": {
-    "packet": "Approve fourth HARNESS V2 package and GitHub publish slice",
+    "packet": "Approve HARNESS V2 npm wrapper package slice",
     "approved_paths": [
       "AGENTS.md",
       "RULES.md",
       "CURRENT.md",
       "README.md",
+      "package.json",
       "pyproject.toml",
       "_build_backend\\harness_backend.py",
+      "bin\\harness-v2.js",
       "harness_v2\\core.py",
       "tests\\test_harness_v2.py"
     ],
     "excluded_side_effects": [
+      "npm publish",
       "PyPI publish",
       "release execution",
       "dependency install from network",
@@ -40,11 +43,15 @@
       "<temporary venv>\\Scripts\\python -m pip install --no-deps -e .",
       "<temporary venv>\\Scripts\\python -m harness_v2 status --root <repo root>",
       "<temporary venv>\\Scripts\\python -m harness_v2 verify tests\\fixtures\\valid-task.json",
+      "node bin\\harness-v2.js status --root .",
+      "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
+      "npm pack --dry-run",
       "git add <intended HARNESS V2 product files>",
       "git commit",
       "git push -u origin <branch>"
     ],
     "denied_side_effects": [
+      "npm publish",
       "PyPI publish",
       "release execution",
       "dependency install from network",
@@ -58,11 +65,14 @@
       "compileall exits 0",
       "unittest exits 0",
       "editable install smoke exits 0",
+      "node wrapper status exits 0",
+      "node wrapper verify exits 0",
+      "npm pack dry-run exits 0 without publishing",
       "valid fixture accepted",
       "invalid fixture rejected",
       "doctor reports without mutation",
       "GitHub main contains pushed commit",
-      "no PyPI publish or release execution"
+      "no npm publish, PyPI publish, or release execution"
     ]
   },
   "lifecycle": {

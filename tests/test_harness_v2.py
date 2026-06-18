@@ -17,8 +17,10 @@ APPROVED_SOURCE_FILES = {
     "RULES.md",
     "CURRENT.md",
     "README.md",
+    "package.json",
     "pyproject.toml",
     "_build_backend/harness_backend.py",
+    "bin/harness-v2.js",
     "rules/workflows.md",
     "control/source.md",
     "control/approval.md",
@@ -59,6 +61,9 @@ ALLOWED_COMMANDS = {
     "<temporary venv>\\Scripts\\python -m pip install --no-deps -e .",
     "<temporary venv>\\Scripts\\python -m harness_v2 status --root <repo root>",
     "<temporary venv>\\Scripts\\python -m harness_v2 verify tests\\fixtures\\valid-task.json",
+    "node bin\\harness-v2.js status --root .",
+    "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
+    "npm pack --dry-run",
 }
 PERMISSION_COMMANDS = {
     "python -m compileall harness_v2",
@@ -67,6 +72,9 @@ PERMISSION_COMMANDS = {
     "<temporary venv>\\Scripts\\python -m pip install --no-deps -e .",
     "<temporary venv>\\Scripts\\python -m harness_v2 status --root <repo root>",
     "<temporary venv>\\Scripts\\python -m harness_v2 verify tests\\fixtures\\valid-task.json",
+    "node bin\\harness-v2.js status --root .",
+    "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
+    "npm pack --dry-run",
 }
 ALLOWED_GIT_COMMANDS = {
     "git init",
@@ -156,6 +164,58 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             content = (ROOT / source_file).read_text()
             self.assertNotIn(FORBIDDEN_SOURCE_FRAGMENT, content)
 
+    def test_npm_wrapper_package_metadata_is_dependency_free(self):
+        package_json = json.loads((ROOT / "package.json").read_text())
+
+        self.assertEqual(package_json["name"], "harness-v2")
+        self.assertEqual(package_json["version"], "0.1.0")
+        self.assertEqual(package_json["bin"], {"harness-v2": "bin/harness-v2.js"})
+        self.assertEqual(package_json["os"], ["win32", "darwin"])
+        self.assertEqual(package_json["engines"], {"node": ">=18"})
+        self.assertNotIn("dependencies", package_json)
+        self.assertNotIn("devDependencies", package_json)
+        self.assertNotIn("optionalDependencies", package_json)
+
+        files = set(package_json["files"])
+        self.assertIn("bin/", files)
+        self.assertIn("harness_v2/", files)
+        self.assertIn("control/", files)
+        self.assertIn("contracts/", files)
+        self.assertIn("templates/", files)
+
+    def test_node_wrapper_delegates_status_and_verify_to_python_cli(self):
+        status = subprocess.run(
+            ["node", "bin/harness-v2.js", "status", "--root", "."],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        verify = subprocess.run(
+            ["node", "bin/harness-v2.js", "verify", "tests/fixtures/valid-task.json"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(status.returncode, 0, status.stderr)
+        self.assertEqual(json.loads(status.stdout)["workflow"], "package_publish_review")
+        self.assertEqual(verify.returncode, 0, verify.stderr)
+        self.assertEqual(json.loads(verify.stdout)["task_id"], "harness-v2-valid-task")
+
+    def test_npm_pack_dry_run_succeeds_without_publish(self):
+        completed = subprocess.run(
+            [npm_executable(), "pack", "--dry-run"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("harness-v2-0.1.0.tgz", completed.stdout)
+
     def test_command_authority_lists_only_approved_verification_commands(self):
         self.assertEqual(
             commands_under_heading(ROOT / "CURRENT.md", "## Current Allowed Local Verification Commands"),
@@ -210,7 +270,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         root_rules = (ROOT / "RULES.md").read_text()
         self.assertNotIn("Do not create package metadata", root_rules)
-        self.assertIn("Package metadata, local editable install verification, and GitHub repository push", root_rules)
+        self.assertIn("Windows/macOS npm wrapper metadata", root_rules)
+        self.assertIn("Do not perform npm publish", root_rules)
 
     def test_task_fixtures_match_package_publish_review_state(self):
         valid = json.loads(VALID_TASK.read_text())
@@ -224,6 +285,11 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertEqual(invalid["lifecycle"]["target_state"], "package_publish_review")
         self.assertIn("pyproject.toml", valid["approval"]["approved_paths"])
         self.assertIn("_build_backend\\harness_backend.py", valid["approval"]["approved_paths"])
+        self.assertIn("package.json", valid["approval"]["approved_paths"])
+        self.assertIn("bin\\harness-v2.js", valid["approval"]["approved_paths"])
+        self.assertIn("node bin\\harness-v2.js status --root .", valid["permission"]["allowed_side_effects"])
+        self.assertIn("npm pack --dry-run", valid["permission"]["allowed_side_effects"])
+        self.assertIn("npm publish", valid["permission"]["denied_side_effects"])
         self.assertIn("PyPI publish", valid["permission"]["denied_side_effects"])
 
     def test_artifact_surfaces_include_package_github_scope(self):
@@ -236,6 +302,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("fourth-slice package and GitHub MVP", log)
         self.assertIn("docs/control sync", log)
         self.assertIn("author-local paths copied into GitHub-facing commands", regression)
+        self.assertIn("npm wrapper MVP mistaken for npm release", regression)
 
 
     def test_valid_task_fixture_is_accepted_by_verifier(self):
@@ -407,6 +474,10 @@ def commands_under_heading(path: Path, heading: str) -> set[str]:
 
 def valid_task_payload() -> dict:
     return json.loads(VALID_TASK.read_text())
+
+
+def npm_executable() -> str:
+    return "npm.cmd" if sys.platform == "win32" else "npm"
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 status: package_github_surface / fourth_slice / root_rules
 
-These are the product-local root rules for the HARNESS V2 package and GitHub MVP surface. Workflow rules in `rules\workflows.md` may specialize these rules but cannot weaken them.
+These are the product-local root rules for the HARNESS V2 package, GitHub, and npm wrapper MVP surface. Workflow rules in `rules\workflows.md` may specialize these rules but cannot weaken them.
 
 ## Authority Separation
 
@@ -23,17 +23,17 @@ No surface substitutes for another.
 
 Fail closed when any required source, current pointer, approval scope, permission scope, proof obligation, lifecycle state, route, artifact status, safety boundary, improvement classification, or release boundary is missing, stale, conflicting, or outside scope.
 
-Fail closed when a task asks for paths, commands, package metadata, release artifacts, dependency changes, git operations, secrets, external mutations, destructive actions, new files, or new folders outside the current exact approval and permission scope.
+Fail closed when a task asks for paths, commands, package metadata, npm wrapper metadata, release artifacts, dependency changes, git operations, secrets, external mutations, destructive actions, new files, or new folders outside the current exact approval and permission scope.
 
 ## Product Write Boundary
 
-The current package and GitHub MVP surface contains the files named in `CURRENT.md` and `control\permission.md`.
+The current package, GitHub, and npm wrapper MVP surface contains the files named in `CURRENT.md` and `control\permission.md`.
 
 Local writing is allowed only when the requested work unit is inside the bound approval scope, inside the permission side-effect ceiling, and tied to a current proof obligation and lifecycle entry.
 
-Package metadata, local editable install verification, and GitHub repository push are allowed only when the current approval and permission surfaces explicitly name them.
+Package metadata, local editable install verification, Windows/macOS npm wrapper metadata, npm dry-run pack verification, and GitHub repository push are allowed only when the current approval and permission surfaces explicitly name them.
 
-Do not perform PyPI publish, release execution, dependency installation from the network, secret access, unrelated external mutation, or destructive action outside generated verification artifacts.
+Do not perform npm publish, PyPI publish, release execution, dependency installation from the network, secret access, unrelated external mutation, or destructive action outside generated verification artifacts.
 
 ## Guard Catalog
 
@@ -48,7 +48,7 @@ Do not perform PyPI publish, release execution, dependency installation from the
 | artifact guard | registry rows and log entries are indexes, not source authority or proof |
 | regression guard | mappings and scenarios do not equal passing regression evidence |
 | improvement guard | improvement candidates do not directly change product rules |
-| release guard | install, package, publish, deploy, and release readiness require a separate transaction |
+| release guard | install, package, npm publish, PyPI publish, deploy, and release readiness require a separate transaction |
 
 ## Current State
 

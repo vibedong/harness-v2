@@ -1,0 +1,33 @@
+{
+  "name": "harness-v2",
+  "version": "0.1.0",
+  "description": "HARNESS V2 workflow boundary harness with a Windows/macOS npm CLI wrapper.",
+  "license": "UNLICENSED",
+  "bin": {
+    "harness-v2": "bin/harness-v2.js"
+  },
+  "files": [
+    "AGENTS.md",
+    "RULES.md",
+    "CURRENT.md",
+    "README.md",
+    "bin/",
+    "harness_v2/",
+    "contracts/",
+    "templates/",
+    "control/",
+    "rules/",
+    "records/",
+    "routing/",
+    "artifacts/",
+    "safety/",
+    "release/"
+  ],
+  "os": [
+    "win32",
+    "darwin"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

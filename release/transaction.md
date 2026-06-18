@@ -2,7 +2,7 @@
 
 status: package_github_surface / fourth_slice / release_transaction_boundary
 
-This file defines the local markdown boundary for future install and release transactions. It does not execute or prepare a PyPI or product release.
+This file defines the local markdown boundary for future install and release transactions. It does not execute or prepare an npm, PyPI, or product release.
 
 ## Release Separation
 
@@ -25,7 +25,7 @@ No one of these surfaces can create release readiness by itself.
 A future release transaction must name:
 
 - source release record;
-- package or install artifact target;
+- npm, Python package, or install artifact target;
 - permission scope for package, publish, deploy, install, or external mutation;
 - proof obligation and verifier;
 - installed project or rollback evidence when applicable;
@@ -34,9 +34,10 @@ A future release transaction must name:
 
 ## Current Denials
 
-The current package and GitHub publish scope allows local editable package smoke verification and GitHub repository push, but denies:
+The current package, GitHub publish, and npm wrapper scope allows local editable package smoke verification, local Node wrapper proof, npm dry-run pack proof, and GitHub repository push, but denies:
 
 - dependency changes;
+- npm publish or deploy work;
 - PyPI publish or deploy work;
 - release execution;
 - unrelated external network mutation;
@@ -46,4 +47,4 @@ The current package and GitHub publish scope allows local editable package smoke
 
 ## Non-Authority Boundary
 
-This file does not execute, approve, prepare, or validate PyPI publish, deploy, release, approval, permission, proof, lifecycle transition, implementation completion, or release readiness.
+This file does not execute, approve, prepare, or validate npm publish, PyPI publish, deploy, release, approval, permission, proof, lifecycle transition, implementation completion, or release readiness.

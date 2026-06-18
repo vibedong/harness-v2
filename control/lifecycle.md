@@ -16,6 +16,8 @@ Known local states:
 - `executable_mvp_review`
 - `package_publish_authoring`
 - `package_publish_review`
+- `npm_wrapper_authoring`
+- `npm_wrapper_review`
 - `blocked`
 - `deferred`
 
@@ -24,17 +26,17 @@ Known local states:
 The current fourth-slice entry is:
 
 ```text
-executable_mvp_review -> package_publish_review
+package_publish_review -> package_publish_review
 ```
 
 Scope:
 
 - `F:\Folder\harness-v2` folder only;
 - local verification commands named in `control\permission.md`;
-- package metadata, local editable package smoke verification, git initialization, GitHub repository creation, and push;
-- no PyPI publish, release execution, dependency install, secret access, unrelated external network mutation, or destructive operation outside generated verification artifacts.
+- package metadata, local editable package smoke verification, Windows/macOS npm wrapper metadata, local Node wrapper proof, npm dry-run pack proof, git initialization, GitHub repository creation, and push;
+- no npm publish, PyPI publish, release execution, dependency install, secret access, unrelated external network mutation, or destructive operation outside generated verification artifacts.
 
-This entry records that the local package and GitHub publication surface has moved into review after authoring. It is not PyPI publish, release execution, product completion, or future-slice transition.
+This entry records that the local package, GitHub publication, and npm wrapper surface remains in review after authoring. It is not npm publish, PyPI publish, release execution, product completion, or future-slice transition.
 
 ## Transition Requirements
 
@@ -51,6 +53,6 @@ A later state movement must name:
 
 ## Backtrack Rule
 
-Backtrack to `executable_mvp_review` or `package_publish_authoring` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, GitHub target, or target surface becomes stale or conflicting.
+Backtrack to `package_publish_review`, `package_publish_authoring`, or `npm_wrapper_authoring` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, npm wrapper surface, GitHub target, npm target, or target surface becomes stale or conflicting.
 
-This file does not produce proof, approval, PyPI publish state, release state, route permission, regression pass, improvement execution, or permission for future slices.
+This file does not produce proof, approval, npm publish state, PyPI publish state, release state, route permission, regression pass, improvement execution, or permission for future slices.

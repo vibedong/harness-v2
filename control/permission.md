@@ -10,10 +10,11 @@ This file separates approved intent from allowed side effects.
 | --- | --- |
 | local read | allowed for HARNESS V2 product files and planning context needed for this scope |
 | local file write | allowed only under `F:\Folder\harness-v2` |
-| local command execution | allowed for verification, editable package smoke, and git/GitHub publish commands below |
+| local command execution | allowed for verification, editable package smoke, Node wrapper smoke, npm dry-run pack, and git/GitHub publish commands below |
 | package metadata, package build, local editable smoke install | allowed only for this product |
+| npm wrapper metadata and dry-run pack | allowed only for Windows/macOS wrapper proof, with no npm publish |
 | GitHub repository creation and push | allowed only for this product folder |
-| PyPI publish, release execution, dependency install | denied |
+| npm publish, PyPI publish, release execution, dependency install | denied |
 | secret access, unrelated external network mutation, destructive action | denied |
 
 ## Exact Write Surface
@@ -30,8 +31,11 @@ Any write outside that folder fails closed, except generated package smoke artif
 - `<temporary venv>\Scripts\python -m pip install --no-deps -e .`
 - `<temporary venv>\Scripts\python -m harness_v2 status --root <repo root>`
 - `<temporary venv>\Scripts\python -m harness_v2 verify tests\fixtures\valid-task.json`
+- `node bin\harness-v2.js status --root .`
+- `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
+- `npm pack --dry-run`
 
-The temporary smoke-test venv, generated `harness_v2.egg-info`, and generated `__pycache__` directories under `F:\Folder\harness-v2` may be removed after verification because they are generated proof material, not product source.
+The temporary smoke-test venv, generated `harness_v2.egg-info`, generated `__pycache__` directories under `F:\Folder\harness-v2`, and npm dry-run generated output may be removed after verification because they are generated proof material, not product source.
 
 ## Allowed Git/GitHub Commands
 
@@ -45,4 +49,4 @@ The temporary smoke-test venv, generated `harness_v2.egg-info`, and generated `_
 
 Permission cannot widen approval scope and cannot produce proof, lifecycle state, route permission, regression pass, improvement execution, PyPI publish readiness, or release readiness.
 
-The release transaction file may describe release boundaries, but this permission surface still denies PyPI publish, release execution, dependency install, secret access, unrelated external network mutation, and destructive actions outside generated verification artifacts.
+The release transaction file may describe release boundaries, but this permission surface still denies npm publish, PyPI publish, release execution, dependency install, secret access, unrelated external network mutation, and destructive actions outside generated verification artifacts.

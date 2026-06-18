@@ -10,7 +10,7 @@ workflow: `package_publish_review`
 
 state: `package_publish_review`
 
-substate: `fourth_slice_package_github_surface_authored / local_package_smoke_required / not_pypi`
+substate: `fourth_slice_package_github_surface_authored / npm_wrapper_authored / local_package_smoke_required / not_npm_publish / not_pypi`
 
 source basis:
 
@@ -20,18 +20,21 @@ source basis:
 - Product Implementation Entry Gate section 25 blocked threshold record superseded by the user's exact third-slice packet.
 - Exact third-slice approval packet for the paths listed in `control\approval.md`.
 - User request to package and publish to GitHub, constrained to `F:\Folder\harness-v2` only.
+- Exact npm wrapper package slice approval for Windows/macOS Node wrapper packaging without npm publish.
 
 ## Current Surface
 
-Active executable local MVP files include:
+Active package, GitHub, and npm wrapper MVP files include:
 
 - `.gitignore`
 - `AGENTS.md`
 - `RULES.md`
 - `CURRENT.md`
 - `README.md`
+- `package.json`
 - `pyproject.toml`
 - `_build_backend\harness_backend.py`
+- `bin\harness-v2.js`
 - `rules\workflows.md`
 - `control\source.md`
 - `control\approval.md`
@@ -73,8 +76,11 @@ Active executable local MVP files include:
 - `<temporary venv>\Scripts\python -m pip install --no-deps -e .`
 - `<temporary venv>\Scripts\python -m harness_v2 status --root <repo root>`
 - `<temporary venv>\Scripts\python -m harness_v2 verify tests\fixtures\valid-task.json`
+- `node bin\harness-v2.js status --root .`
+- `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
+- `npm pack --dry-run`
 
-These commands are local proof material only. The temporary smoke-test venv is a generated verification artifact and is not part of the product source surface. These checks do not create PyPI publish readiness or release execution.
+These commands are local proof material only. The temporary smoke-test venv is a generated verification artifact and is not part of the product source surface. The npm pack command is dry-run only. These checks do not create npm publish readiness, PyPI publish readiness, or release execution.
 
 ## Stop Conditions
 
@@ -82,6 +88,6 @@ Stop if the requested action needs a file outside the active executable local MV
 
 Stop if a pointer, source, approval, permission, proof obligation, lifecycle requirement, route, registry/log row, safety boundary, improvement classification, or release boundary is missing, stale, or conflicting.
 
-Stop if the task asks for PyPI publish, release execution, dependency installation, secret access, external network mutation outside GitHub repository creation/push, or destructive operation outside generated local verification artifacts.
+Stop if the task asks for npm publish, PyPI publish, release execution, dependency installation, secret access, external network mutation outside GitHub repository creation/push, or destructive operation outside generated local verification artifacts.
 
-This file is a current pointer. The current pointer does not claim PyPI publish, release execution, dogfood proof, or final product completion.
+This file is a current pointer. The current pointer does not claim npm publish, PyPI publish, release execution, dogfood proof, or final product completion.

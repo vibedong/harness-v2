@@ -9,13 +9,13 @@ This file separates approval request, user response, and bound approval scope.
 Previous bound work unit:
 
 ```text
-executable_mvp_code_test_schema_runner_slice
+package_metadata_install_smoke_and_github_publish_slice
 ```
 
 Current bound work unit:
 
 ```text
-package_metadata_install_smoke_and_github_publish_slice
+npm_wrapper_package_slice
 ```
 
 Previous bound user packet:
@@ -96,29 +96,73 @@ No dependency install from network.
 No destructive operation outside the named generated verification artifacts.
 ```
 
+Current bound npm wrapper packet:
+
+```text
+Approve HARNESS V2 npm wrapper package slice:
+work only under F:\Folder\harness-v2.
+
+Allow creating/modifying only:
+package.json,
+bin\harness-v2.js,
+README.md,
+CURRENT.md,
+control\approval.md,
+control\permission.md,
+control\proof.md,
+control\lifecycle.md,
+release\transaction.md,
+tests\test_harness_v2.py.
+
+Purpose:
+add a Windows/macOS npm CLI wrapper package for HARNESS V2 that delegates to the existing Python CLI,
+without rewriting HARNESS V2 in JavaScript and without publishing to npm yet.
+
+Supported platforms:
+Windows and macOS only for this slice.
+Python 3 is an explicit runtime prerequisite.
+
+Allow local verification:
+python -m compileall harness_v2
+python -m unittest discover tests
+node bin\harness-v2.js status --root .
+node bin\harness-v2.js verify tests\fixtures\valid-task.json
+npm pack --dry-run
+
+No npm publish.
+No PyPI publish.
+No release execution.
+No dependency install from network.
+No secret read.
+No destructive operation outside generated verification artifacts.
+```
+
 Operation type:
 
 - local file creation or modification only under `F:\Folder\harness-v2`;
 - local package metadata and dependency-free build backend creation;
 - PEP 660 editable install support in `_build_backend\harness_backend.py`;
 - local editable package smoke verification with generated artifacts limited to temporary paths or ignored build metadata;
+- dependency-free npm wrapper metadata and Windows/macOS Node CLI wrapper creation;
+- local Node wrapper smoke verification and `npm pack --dry-run`;
 - git initialization, commit, GitHub repository creation, and push for the `F:\Folder\harness-v2` folder only;
-- no PyPI publish, release execution, dependency install, secret access, or destructive operation outside generated local verification artifacts.
+- no npm publish, PyPI publish, release execution, dependency install, secret access, or destructive operation outside generated local verification artifacts.
 
 Freshness anchors:
 
 - exact third-slice user packet;
-- `CURRENT.md` executable local MVP pointer;
+- `CURRENT.md` package, GitHub, and npm wrapper pointer;
 - `control\permission.md` exact write and command surface;
 - `control\proof.md` fourth-slice proof obligation;
-- `control\lifecycle.md` executable local MVP lifecycle entry.
+- `control\lifecycle.md` package, GitHub, and npm wrapper lifecycle entry.
 - fourth-slice user request constrained to the HARNESS folder only.
 - fourth-slice amendment for `.gitattributes`, `_build_backend\harness_backend.py`, editable install proof, generated artifact cleanup, and amendment git push.
+- npm wrapper package slice approval for `package.json`, `bin\harness-v2.js`, local Node wrapper proof, npm dry-run proof, and no npm publish.
 
 Denied by the current approval scope:
 
 - paths outside `F:\Folder\harness-v2`;
-- PyPI publish, release execution;
+- npm publish, PyPI publish, release execution;
 - dependency install outside already available local tooling;
 - secret access;
 - external network mutation outside GitHub repository creation and push;

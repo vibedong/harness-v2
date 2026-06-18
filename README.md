@@ -4,7 +4,7 @@ HARNESS V2 is a local workflow harness for AI-assisted software work. It keeps s
 
 ## Status
 
-Current build stage: package and GitHub publish MVP.
+Current build stage: package, GitHub, and npm wrapper MVP.
 
 This repository currently provides:
 
@@ -12,9 +12,10 @@ This repository currently provides:
 - minimal JSON contracts and templates;
 - a standard-library Python CLI;
 - dependency-free local package metadata and build backend;
+- a dependency-free Windows/macOS npm CLI wrapper that delegates to the Python CLI;
 - fixture-backed unit tests for local task verification.
 
-PyPI publish, release transaction execution, dependency installation, secret access, and destructive operations outside generated local verification artifacts are not part of this slice.
+Npm publish, PyPI publish, release transaction execution, dependency installation, secret access, and destructive operations outside generated local verification artifacts are not part of this slice.
 
 ## Quick Start
 
@@ -41,6 +42,16 @@ Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 
 The package smoke test proves that the local package metadata can be consumed by pip in editable mode without dependency installation.
 
+Local npm wrapper smoke test:
+
+```powershell
+node bin\harness-v2.js status --root .
+node bin\harness-v2.js verify tests\fixtures\valid-task.json
+npm pack --dry-run
+```
+
+The npm wrapper supports Windows and macOS for this slice. It requires Node.js and Python 3 on PATH, then delegates to the existing Python CLI without rewriting HARNESS V2 in JavaScript. The dry-run pack check does not publish to npm.
+
 ## Repository Layout
 
 | path | role |
@@ -48,6 +59,8 @@ The package smoke test proves that the local package metadata can be consumed by
 | `AGENTS.md` | product-local agent entry router |
 | `RULES.md` | product-local root rules |
 | `CURRENT.md` | visible current workflow pointer |
+| `package.json` | npm wrapper package manifest |
+| `bin\harness-v2.js` | Windows/macOS Node CLI wrapper for the Python CLI |
 | `control\` | source, approval, permission, proof, and lifecycle boundaries |
 | `contracts\` | minimal JSON contract files |
 | `templates\` | task, gate, approval, and proof templates |
