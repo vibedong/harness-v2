@@ -21,7 +21,8 @@ source basis:
 - Exact third-slice approval packet for the paths listed in `control\approval.md`.
 - User request to package and publish to GitHub, constrained to `F:\Folder\harness-v2` only.
 - Exact npm wrapper package slice approval for Windows/macOS Node wrapper packaging without npm publish.
-- User approval for the public npm release workflow, with Python package registry publish still outside scope and exact npm publish limited to `harness-v2@0.1.1` after npm authentication is present.
+- User approval for the public npm release workflow, with Python package registry publish still outside scope and exact npm publish limited to `harness-v2@0.1.2` after npm authentication is present.
+- User request to publish the updated README to the npm package page as a documentation patch release.
 
 ## Current Surface
 
@@ -86,7 +87,7 @@ Active package, GitHub, and npm wrapper MVP files include:
 - `npm publish --dry-run`
 - `npm publish`
 
-These commands are proof material and exact release execution material only. The temporary smoke-test venv is a generated verification artifact and is not part of the product source surface. The npm publish command is allowed only for `harness-v2@0.1.1` after npm authentication is present. These checks do not create Python package registry publish readiness.
+These commands are proof material and exact release execution material only. The temporary smoke-test venv is a generated verification artifact and is not part of the product source surface. The npm publish command is allowed only for `harness-v2@0.1.2` after npm authentication is present. These checks do not create Python package registry publish readiness.
 
 ## Stop Conditions
 

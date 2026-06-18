@@ -1,13 +1,13 @@
-# HARNESS V2 0.1.1 Release Notes
+# HARNESS V2 0.1.2 Release Notes
 
-Documentation patch release for HARNESS V2.
+Documentation patch release for the public npm package README.
 
 ## Changed
 
-- Reworked `README.md` into a practical user manual.
-- Added Korean documentation in `README.ko.md`.
-- Replaced the package-registry acronym in user-facing and control-plane documentation with the clearer phrase `Python package registry publish`.
-- Updated release notes and control surfaces to reflect that the public npm release is already published.
+- Expanded `README.md` into a user-first onboarding guide with install, quick start, AI-agent prompt, troubleshooting, and actual task-contract vocabulary.
+- Expanded `README.ko.md` into a Korean user manual with the same practical flow.
+- Kept examples aligned with the shipped schema fields: `approval.approved_paths`, `permission.allowed_side_effects`, `permission.denied_side_effects`, and `proof.obligations`.
+- Kept the npm package as a Windows/macOS wrapper that delegates to the Python CLI.
 
 ## Runtime Requirements
 
@@ -26,6 +26,7 @@ node bin\harness-v2.js status --root .
 node bin\harness-v2.js verify tests\fixtures\valid-task.json
 npm pack --dry-run
 npm publish --dry-run
+npm publish
 ```
 
 ## Publish Scope
@@ -33,11 +34,11 @@ npm publish --dry-run
 Published npm package:
 
 ```text
-harness-v2@0.1.1
+harness-v2@0.1.2
 ```
 
 GitHub release:
 
 ```text
-https://github.com/vibedong/harness-v2/releases/tag/v0.1.1
+https://github.com/vibedong/harness-v2/releases/tag/v0.1.2
 ```

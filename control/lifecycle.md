@@ -35,7 +35,7 @@ Scope:
 
 - `F:\Folder\harness-v2` folder only;
 - local verification commands named in `control\permission.md`;
-- package metadata, local editable package smoke verification, Windows/macOS npm wrapper metadata, local Node wrapper proof, npm dry-run pack proof, npm publish dry-run proof, git initialization, GitHub repository creation, push, exact npm publish for `harness-v2@0.1.1` after npm authentication, exact Git tag `v0.1.1`, and exact GitHub release `v0.1.1`;
+- package metadata, local editable package smoke verification, Windows/macOS npm wrapper metadata, local Node wrapper proof, npm dry-run pack proof, npm publish dry-run proof, git initialization, GitHub repository creation, push, exact npm publish for `harness-v2@0.1.2` after npm authentication, exact Git tag `v0.1.2`, and exact GitHub release `v0.1.2`;
 - no Python package registry publish, dependency install, secret access, unrelated external network mutation, or destructive operation outside generated verification artifacts.
 
 This entry records that the local package, GitHub publication, npm wrapper surface, and public npm release surface remain in review until proof is complete. It is not Python package registry publish, product completion, or future-slice transition.

@@ -39,8 +39,8 @@
     ],
     "excluded_side_effects": [
       "Python package registry publish",
-      "npm publish for any package other than harness-v2@0.1.1",
-      "release execution for any tag other than v0.1.1",
+      "npm publish for any package other than harness-v2@0.1.2",
+      "release execution for any tag other than v0.1.2",
       "dependency install from network",
       "secret access",
       "unrelated external network mutation",
@@ -64,14 +64,14 @@
       "git add <intended HARNESS V2 product files>",
       "git commit",
       "git push -u origin <branch>",
-      "git tag v0.1.1",
-      "git push origin v0.1.1",
-      "gh release create v0.1.1 --title \"HARNESS V2 0.1.1\" --notes-file RELEASE_NOTES.md"
+      "git tag v0.1.2",
+      "git push origin v0.1.2",
+      "gh release create v0.1.2 --title \"HARNESS V2 0.1.2\" --notes-file RELEASE_NOTES.md"
     ],
     "denied_side_effects": [
       "Python package registry publish",
-      "npm publish for any package other than harness-v2@0.1.1",
-      "release execution for any tag other than v0.1.1",
+      "npm publish for any package other than harness-v2@0.1.2",
+      "release execution for any tag other than v0.1.2",
       "dependency install from network",
       "secret access",
       "unrelated external network mutation",
@@ -87,13 +87,13 @@
       "node wrapper verify exits 0",
       "npm pack dry-run exits 0 without publishing or generated pycache files",
       "npm publish dry-run exits 0",
-      "npm publish exits 0 for harness-v2@0.1.1 after npm authentication is present",
-      "git tag v0.1.1 and GitHub release creation succeed after npm publish succeeds",
+      "npm publish exits 0 for harness-v2@0.1.2 after npm authentication is present",
+      "git tag v0.1.2 and GitHub release creation succeed after npm publish succeeds",
       "valid fixture accepted",
       "invalid fixture rejected",
       "doctor reports without mutation",
       "GitHub main contains pushed commit",
-      "no Python package registry publish, dependency install, secret access, unrelated external mutation, or release outside harness-v2@0.1.1"
+      "no Python package registry publish, dependency install, secret access, unrelated external mutation, or release outside harness-v2@0.1.2"
     ]
   },
   "lifecycle": {

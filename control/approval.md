@@ -15,7 +15,7 @@ package_metadata_install_smoke_and_github_publish_slice
 Current bound work unit:
 
 ```text
-npm_wrapper_package_slice
+npm_readme_patch_release_slice
 ```
 
 Previous bound user packet:
@@ -63,6 +63,7 @@ Current bound user request:
 ```text
 git hub 배포, 패키지 까지 하자
 그 하네스폴더만 해
+그것도하자
 ```
 
 Current bound amendment:
@@ -145,8 +146,9 @@ Operation type:
 - local editable package smoke verification with generated artifacts limited to temporary paths or ignored build metadata;
 - dependency-free npm wrapper metadata and Windows/macOS Node CLI wrapper creation;
 - local Node wrapper smoke verification and `npm pack --dry-run`;
-- exact npm publish execution for `harness-v2@0.1.1` after npm authentication is present;
-- exact Git tag and GitHub release creation for `v0.1.1`;
+- exact npm publish execution for `harness-v2@0.1.2` after npm authentication is present;
+- exact Git tag and GitHub release creation for `v0.1.2`;
+- documentation patch release that updates the public npm package README surface;
 - git initialization, commit, GitHub repository creation, and push for the `F:\Folder\harness-v2` folder only;
 - no Python package registry publish, dependency install, secret access, or destructive operation outside generated local verification artifacts.
 
@@ -161,6 +163,7 @@ Freshness anchors:
 - fourth-slice amendment for `.gitattributes`, `_build_backend\harness_backend.py`, editable install proof, generated artifact cleanup, and amendment git push.
 - npm wrapper package slice approval for `package.json`, `bin\harness-v2.js`, local Node wrapper proof, npm dry-run proof, and npm publish execution after authentication.
 - public release preparation approval for `LICENSE`, `RELEASE_NOTES.md`, npm public package metadata, npm publish dry-run, tag/release planning, and npm publish execution once npm authentication is present.
+- npm README patch release request for `harness-v2@0.1.2`, with no Python package registry publish, dependency installation, secret access, or unrelated mutation.
 
 Denied by the current approval scope:
 

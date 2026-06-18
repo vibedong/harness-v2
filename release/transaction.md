@@ -37,7 +37,7 @@ A future release transaction must name:
 Target:
 
 ```text
-harness-v2@0.1.1
+harness-v2@0.1.2
 ```
 
 Status:
@@ -48,23 +48,24 @@ RELEASE_PUBLISHED
 
 Reason:
 
-- npm package name `harness-v2` returned registry 404 during readiness check, so the name appears available.
+- npm package `harness-v2` already exists, and `0.1.2` is the next documentation patch version for the same package.
 - GitHub CLI is authenticated for `vibedong/harness-v2`.
 - npm CLI now authenticates successfully with `npm.cmd whoami`.
-- npm registry reports `harness-v2@0.1.1` with tarball `https://registry.npmjs.org/harness-v2/-/harness-v2-0.1.1.tgz`.
-- Git tag `v0.1.1` was pushed to `vibedong/harness-v2`.
-- GitHub release `v0.1.1` was created at `https://github.com/vibedong/harness-v2/releases/tag/v0.1.1`.
+- The `0.1.2` transaction is a documentation patch release for the npm package README surface.
+- npm registry reports `harness-v2@0.1.2` with tarball `https://registry.npmjs.org/harness-v2/-/harness-v2-0.1.2.tgz`.
+- Git tag `v0.1.2` was pushed to `vibedong/harness-v2`.
+- GitHub release `v0.1.2` was created at `https://github.com/vibedong/harness-v2/releases/tag/v0.1.2`.
 - Post-publish npm install verification succeeded from a temporary npm prefix, including installed `README.ko.md` presence.
 - Local verification, Node wrapper verification, and npm pack dry-run are the required pre-publish proof commands.
-- Exact release execution commands are permitted only for `harness-v2@0.1.1`, `v0.1.1`, and the GitHub repository `vibedong/harness-v2`.
+- Exact release execution commands are permitted only for `harness-v2@0.1.2`, `v0.1.2`, and the GitHub repository `vibedong/harness-v2`.
 
 ## Current Permission Ceiling
 
-The current package, GitHub publish, npm wrapper, and npm release scope allows local editable package smoke verification, local Node wrapper proof, npm dry-run pack proof, exact npm publish for `harness-v2@0.1.1`, exact Git tag `v0.1.1`, exact GitHub release `v0.1.1`, and GitHub repository push, but denies:
+The current package, GitHub publish, npm wrapper, and npm release scope allows local editable package smoke verification, local Node wrapper proof, npm dry-run pack proof, exact npm publish for `harness-v2@0.1.2`, exact Git tag `v0.1.2`, exact GitHub release `v0.1.2`, and GitHub repository push, but denies:
 
 - dependency changes;
 - Python package registry publish or deploy work;
-- release execution outside `harness-v2@0.1.1` / `v0.1.1`;
+- release execution outside `harness-v2@0.1.2` / `v0.1.2`;
 - unrelated external network mutation;
 - secret access;
 - destructive action outside generated verification artifacts;

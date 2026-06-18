@@ -293,7 +293,7 @@ Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 
 ## 현재 상태
 
-현재 공개 릴리스는 npm의 `harness-v2@0.1.1`입니다.
+현재 공개 릴리스는 npm의 `harness-v2@0.1.2`입니다.
 
 ## 경계 규칙
 

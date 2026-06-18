@@ -293,7 +293,7 @@ Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 
 ## Status
 
-The current public release is `harness-v2@0.1.1` on npm.
+The current public release is `harness-v2@0.1.2` on npm.
 
 ## Boundary Rule
 
