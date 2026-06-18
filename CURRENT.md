@@ -8,15 +8,16 @@ This file is the visible current pointer for the local HARNESS V2 product surfac
 
 workflow: `remaining_completion_program`
 
-state: `package_publish_review`
+state: `public_release_published`
 
-substate: `integration_hardening_release_preparation / goal_i_complete`
+substate: `github_source_release_v0.1.6 / npm_publish_deferred / release_closed`
 
 source basis:
 
 - Stage 00~05 confirmed planning artifacts.
 - Product Implementation Entry Gate package/GitHub/npm-wrapper history.
-- Published npm package state for `harness-v2@0.1.5`.
+- Prior published npm package state for `harness-v2@0.1.5`.
+- Current GitHub source release target `v0.1.6`; npm publish is deferred.
 - User correction that `F:\Folder\harness-v2` is the completed product repository, not the user's downstream working project.
 - User requirement that Codex-app users should install/apply HARNESS V2 into their project root, with README as user documentation and AI-facing rules in generated project-root files.
 - Exact remaining completion program approval for generated scaffold hardening, executable workflow enforcement, side-effect preflight adapter work if locally feasible, MCP feasibility/design only unless separately approved, final audit, documentation sync, and GitHub push.
@@ -25,10 +26,12 @@ source basis:
 - User approval to proceed with Goal H hook / hook-equivalent hardening under the remaining completion program.
 - Local evidence did not expose a direct Codex app pre-command or pre-write hook surface for this repo, so Goal H implements an executable hook-equivalent gate instead of mutating Codex app configuration.
 - User request to proceed with Goal I after Goal H, bound to integration hardening and release preparation without npm publish, Python registry publish, GitHub release, or release tag execution.
+- User-approved public release and npm publish slice for `harness-v2@0.1.6`, including npm publish, Git tag `v0.1.6`, GitHub release creation, release docs/control sync, and the `pyproject.toml` version-consistency amendment.
+- User cancellation of npm publish for this release path; `npm publish` is no longer part of the active transaction.
 
 ## Current Program
 
-The remaining completion program is complete for the current non-release, Codex-app-focused local package surface.
+The remaining completion program is complete for the 0.1.6 GitHub source release transaction with npm publish deferred.
 
 Completed slices:
 
@@ -39,15 +42,15 @@ Completed slices:
 - MCP stdio adapter implementation
 - hook-equivalent gate hardening
 - integration hardening and release preparation
+- GitHub source release `v0.1.6`
 
 Current active slice:
 
-- no active implementation slice; Goal I integration hardening and release preparation is complete
+- no active implementation slice; GitHub source release `v0.1.6` is closed after tag/release proof
 
 Future slices in this program:
 
-- none inside the current non-release remaining completion program
-- package registry publish, GitHub release, release tag, dependency installation, secret access, or destructive work require a later exact approval packet and release transaction
+- npm publish, a later GitHub release/tag change, dependency installation, secret access, or destructive work require a later exact approval packet and release transaction after closeout
 
 ## Current Surface
 
@@ -114,6 +117,8 @@ New files are allowed only when directly required for workflow engine enforcemen
 - `git add <intended HARNESS V2 product files>`
 - `git commit`
 - `git push`
+- `git push --tags`
+- `gh release create v0.1.6 --repo vibedong/harness-v2 --title "HARNESS V2 0.1.6" --notes-file RELEASE_NOTES.md`
 
 ## Stop Conditions
 
@@ -123,6 +128,6 @@ Stop if a requested action needs files or new surfaces not directly required by 
 
 Stop if a pointer, source, approval, permission, proof obligation, lifecycle requirement, route, registry/log row, safety boundary, improvement classification, or release boundary is missing, stale, or conflicting.
 
-Stop before npm publish, Python package registry publish, GitHub release creation, release tag creation, dependency installation from network, secret access, external network mutation outside allowed git push, or destructive operation outside generated temporary verification artifacts.
+Stop before npm publish, Python package registry publish, GitHub release or tag mutation outside the approved `v0.1.6` source release transaction, dependency installation from network, secret access, external network mutation outside allowed git push and the approved GitHub release transaction, or destructive operation outside generated temporary verification artifacts.
 
-This file is a current pointer. It does not claim shell-level automatic enforcement, public stable release readiness, Python package registry publish state, release execution, release tag state, GitHub release state, real Codex app hook installation, remote MCP hosting, MCP client installation, or MCP client configuration state.
+This file is a current pointer. It does not claim shell-level automatic enforcement, Python package registry publish state, future release authority, real Codex app hook installation, remote MCP hosting, MCP client installation, or MCP client configuration state.

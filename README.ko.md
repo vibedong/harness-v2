@@ -84,14 +84,14 @@ npm install -g harness-v2
 
 npm 명령은 내부적으로 Python CLI에 위임합니다. HARNESS V2를 JavaScript로 다시 구현한 것이 아닙니다.
 
-## 0.1.5 업데이트 내용
+## 0.1.6 업데이트 내용
 
-- `harness-v2 init --root .`가 생성하는 AI-facing project file이 더 강해졌습니다.
-- 생성되는 `AGENTS.md`는 README가 사용자 문서이지 AI 작업 권한 표면이 아니라고 명시합니다.
-- 생성되는 `RULES.md`, `CURRENT.md`, `control\`은 source, approval, permission, proof, lifecycle 분리를 더 명확히 합니다.
+- 현재 Codex-app-focused HARNESS V2 source를 GitHub `v0.1.6` source release 후보로 준비합니다. npm publish는 보류합니다.
 - 적용된 project file은 대상 프로젝트 루트에 바로 있어야 하며, 프로젝트 안에 `harness-v2` 하위 폴더가 남는 구조가 정상 흐름이 아닙니다.
-- 현재 GitHub source는 Codex-app-focused 사용을 위한 hook-equivalent gate 명령을 추가합니다. 이것은 실제 shell/editor 자동 차단을 주장하지 않습니다.
-- 현재 GitHub source는 `doctor`를 read-only integration report로 강화합니다. local surface 순서와 닫힌 release boundary를 보여주지만, public stable release를 만들지는 않습니다.
+- 생성되는 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\` scaffold가 더 강해졌습니다.
+- `status`, `verify`, 선택적 `preflight`를 한 번에 확인하는 hook-equivalent `gate` 명령을 포함합니다.
+- `status`, `verify`, `preflight`, `gate`, `init`, `apply` tool 접근을 위한 local stdio MCP adapter를 포함합니다.
+- `doctor`는 local surface와 닫힌 반복 release boundary를 읽는 read-only integration report로 유지됩니다.
 
 ## HARNESS V2 업데이트 방법
 

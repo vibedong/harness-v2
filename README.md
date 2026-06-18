@@ -84,14 +84,14 @@ Runtime prerequisites:
 
 The npm command delegates to the Python CLI. HARNESS V2 is not rewritten in JavaScript.
 
-## What's New In 0.1.5
+## What's New In 0.1.6
 
-- `harness-v2 init --root .` now generates stronger AI-facing project files.
-- Generated `AGENTS.md` says README files are user documentation, not AI operating authority.
-- Generated `RULES.md`, `CURRENT.md`, and `control\` make source, approval, permission, proof, and lifecycle separation more explicit.
-- Installed project files should appear directly in the target project root, not inside a nested `harness-v2` folder.
-- Current GitHub source adds a hook-equivalent gate command for Codex-app-focused use without claiming real shell/editor blocking.
-- Current GitHub source also hardens `doctor` as a read-only integration report. It shows the local surface sequence and closed release boundary, but it does not make a public stable release.
+- Prepares the current Codex-app-focused HARNESS V2 source for the GitHub `v0.1.6` source release; npm publish is deferred.
+- Keeps installed project files directly in the target project root, not inside a nested `harness-v2` folder.
+- Includes stronger generated `AGENTS.md`, `RULES.md`, `CURRENT.md`, and `control\` scaffold files.
+- Adds the hook-equivalent `gate` command for explicit status, verify, and optional preflight checks.
+- Includes the local stdio MCP adapter for status, verify, preflight, gate, init, and apply tool access.
+- Keeps `doctor` as a read-only integration report over local surfaces and the closed repeat-release boundary.
 
 ## Updating HARNESS V2
 

@@ -37,35 +37,35 @@ A future release transaction must name:
 Target:
 
 ```text
-harness-v2@0.1.5
+GitHub source release v0.1.6
 ```
 
 Status:
 
 ```text
-NPM_PUBLISHED_HISTORICAL / RELEASE_EXECUTION_CLOSED
+GITHUB_SOURCE_RELEASE_PUBLISHED / NPM_PUBLISH_DEFERRED / RELEASE_EXECUTION_CLOSED
 ```
 
 Reason:
 
-- npm package `harness-v2@0.1.5` is already published.
-- The current remaining completion program may verify package shape with `npm pack --dry-run`, but does not authorize repeat npm publish.
+- GitHub source release `v0.1.6` is the current release target.
+- npm publish is deferred by the latest user instruction and is not part of the active transaction.
 - Generated scaffold hardening improves the files created by `harness-v2 init --root .` and `harness-v2 apply --root .` for future package updates.
 - Hook-equivalent gate hardening adds local `gate` checks to the source surface, but it does not execute a release, create a tag, or republish the package.
-- Integration hardening and release preparation add a read-only `doctor` report for local surface composition and closed release boundary, but this does not create public stable release readiness.
-- Git tag creation and GitHub release execution are not permitted by the current transaction.
+- Integration hardening and release preparation add a read-only `doctor` report for local surface composition.
+- Git tag `v0.1.6` and GitHub release creation for `vibedong/harness-v2` are permitted only for this exact transaction.
 - Python package registry publish is not permitted by the current transaction.
 
 ## Current Permission Ceiling
 
-The current remaining completion program allows local verification, generated TEMP project verification, read-only subagent review, `npm pack --dry-run`, and git push after completed slices pass verification and review.
+The current release transaction allows local verification, generated TEMP project verification, read-only subagent review, Git tag `v0.1.6`, GitHub release creation for `vibedong/harness-v2`, and git push after verification and review pass.
 
-The current transaction denies:
+After this transaction completes, the permission ceiling denies:
 
 - npm publish;
 - Python package registry publish or deploy work;
-- GitHub release creation;
-- release tag creation;
+- additional GitHub release mutation;
+- additional release tag mutation;
 - dependency installation from network;
 - secret access;
 - external network mutation outside allowed git push;

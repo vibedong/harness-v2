@@ -30,13 +30,13 @@ Known local states:
 The current remaining completion program entry is:
 
 ```text
-package_publish_review -> package_publish_review
+package_publish_review -> public_release_published
 ```
 
 Active slice:
 
 ```text
-integration_hardening_release_preparation / goal_i_complete
+github_source_release_v0.1.6 / npm_publish_deferred / release_closed
 ```
 
 Scope:
@@ -50,14 +50,15 @@ Scope:
 - hook-equivalent gate hardening is complete for Goal H;
 - the gate is an explicit executable check over status, verify, and optional preflight, not a real Codex app hook, shell blocker, or editor blocker;
 - integration hardening and release preparation are complete for Goal I;
-- `doctor` reports integrated local surfaces and keeps release boundary closed;
-- no remote MCP hosting, MCP client configuration mutation, package registry publish, GitHub release, release tag, dependency install, secret access, or destructive operation is part of this lifecycle entry;
+- the current release path defers npm publish and authorizes Git tag `v0.1.6`, GitHub release creation, release docs/control sync, and the `pyproject.toml` version-consistency amendment;
+- `doctor` reports integrated local surfaces and keeps the repeat-release boundary closed;
+- no remote MCP hosting, MCP client configuration mutation, Python package registry publish, dependency install, secret access, or destructive operation is part of this lifecycle entry;
 - local verification commands named in `control\permission.md`;
 - read-only subagent review with `vowline`;
 - git add, commit, and push after completed slices pass verification and review;
-- no npm publish, Python package registry publish, GitHub release, release tag, dependency install from network, secret access, external network mutation outside allowed git push, or destructive operation outside generated temporary verification artifacts.
+- no npm publish, Python package registry publish, GitHub release or tag mutation outside the approved `v0.1.6` source release transaction, dependency install from network, secret access, external network mutation outside allowed git/GitHub release operations, or destructive operation outside generated temporary verification artifacts.
 
-This entry preserves `package_publish_review` while adding a local MCP stdio adapter, hook-equivalent gate, and read-only integration doctor for Codex-app-focused use. It is not repeat npm publish, Python package registry publish, public stable release readiness, release execution, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, or MCP client configuration.
+This entry moves from `package_publish_review` to `public_release_published` for the exact GitHub source release `v0.1.6`. It is not npm publish, Python package registry publish, future release authority, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, or MCP client configuration.
 
 ## Transition Requirements
 

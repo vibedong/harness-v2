@@ -21,10 +21,10 @@ remaining_completion_program
 Current active slice:
 
 ```text
-integration_hardening_release_preparation
+github_source_release_v0.1.6 / npm_publish_deferred
 ```
 
-Current bound user packet:
+Remaining completion program base packet:
 
 ```text
 Approve HARNESS V2 remaining completion program:
@@ -99,6 +99,69 @@ Current Goal I continuation approval:
 User approved Goal I after Goal H.
 Goal I is bound to integration hardening and release preparation under the remaining completion program.
 It may harden read-only integration reporting and synchronize docs/control surfaces, but it does not authorize npm publish, Python registry publish, GitHub release, release tag creation, dependency installation, secret access, Codex app configuration mutation, real hook installation, or destructive work outside generated verification artifacts.
+
+This Goal I boundary is superseded only by the later exact public release approval for `harness-v2@0.1.6`.
+```
+
+Current public release approval:
+
+```text
+Approve HARNESS V2 public release and npm publish slice:
+work only under F:\Folder\harness-v2.
+
+Purpose:
+publish the current Goal H/I GitHub source state as a new public npm release,
+including release readiness audit, version bump from 0.1.5 to 0.1.6 if needed,
+release notes/update docs/control/release transaction sync, Git commit, Git tag,
+GitHub release, and npm publish.
+
+Allow modifying only release/package/control/doc/test files needed for this release:
+package.json,
+harness_v2\__init__.py,
+README.md,
+README.ko.md,
+RELEASE_NOTES.md,
+CURRENT.md,
+control\approval.md,
+control\permission.md,
+control\proof.md,
+control\lifecycle.md,
+release\transaction.md,
+tests\test_harness_v2.py,
+tests\fixtures\valid-task.json.
+
+Allow verification:
+python -m compileall harness_v2
+python -m unittest discover tests
+node bin\harness-v2.js status --root .
+node bin\harness-v2.js verify tests\fixtures\valid-task.json
+node bin\harness-v2.js gate tests\fixtures\valid-task.json --root .
+node bin\harness-v2.js doctor --root .
+npm pack --dry-run
+npm publish
+
+Allow git/GitHub release operations:
+git add/commit
+git tag for v0.1.6
+git push
+git push --tags
+GitHub release creation for vibedong/harness-v2 v0.1.6.
+```
+
+Current release amendment:
+
+```text
+Approve release slice amendment:
+also allow modifying pyproject.toml under F:\Folder\harness-v2
+for version consistency with package.json and harness_v2\__init__.py during the 0.1.6 npm/GitHub release.
+```
+
+Current npm publish cancellation:
+
+```text
+User cancelled npm publish for the current release path.
+The active transaction keeps Git tag `v0.1.6`, GitHub release creation, release docs/control sync, and GitHub push.
+`npm publish` is deferred and requires a later exact approval packet.
 ```
 
 ## Bound Local Verification Commands
@@ -128,8 +191,10 @@ Operation type:
 
 - local product implementation, documentation, control-plane, test, scaffold, and verification work under `F:\Folder\harness-v2`;
 - completed targets are generated scaffold hardening, executable 8-stage workflow engine enforcement, and side-effect preflight adapter work;
-- current target is integration hardening, release-preparation boundary sync, final quality audit, and GitHub push;
-- no npm publish, Python package registry publish, GitHub release, release tag, dependency install, secret access, or destructive operation outside generated temporary verification artifacts.
+- current target is the 0.1.6 GitHub source release transaction;
+- Git tag `v0.1.6`, GitHub release creation, and git push are allowed only for this exact transaction;
+- npm publish is deferred;
+- no Python package registry publish, dependency install, secret access, or destructive operation outside generated temporary verification artifacts.
 
 Freshness anchors:
 
@@ -145,8 +210,8 @@ Denied by the current approval scope:
 - files or new surfaces not directly required by the remaining completion program;
 - npm publish;
 - Python package registry publish;
-- GitHub release creation;
-- release tag creation;
+- additional GitHub release mutation after `v0.1.6` is created;
+- additional release tag mutation after `v0.1.6` is created;
 - dependency install from network;
 - secret access;
 - external network mutation outside allowed git push;

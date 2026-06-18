@@ -1,6 +1,6 @@
 {
   "task_id": "harness-v2-valid-task",
-  "title": "Validate HARNESS V2 remaining completion program task contract",
+  "title": "Validate HARNESS V2 0.1.6 local release-candidate verification fixture",
   "workflow": "remaining_completion_program",
   "workflow_stage": "development",
   "source": {
@@ -14,7 +14,7 @@
     "current_pointer": "CURRENT.md"
   },
   "approval": {
-    "packet": "Approve HARNESS V2 remaining completion program",
+    "packet": "Approve HARNESS V2 remaining completion program local verification fixture; release execution is authorized only by the separate 0.1.6 release transaction",
     "approved_paths": [
       "AGENTS.md",
       "RULES.md",
@@ -134,11 +134,11 @@
       "generated scaffold is not described as automatic enforcement completion",
       "valid fixture accepted",
       "invalid fixture rejected",
-      "no npm publish, Python package registry publish, dependency install, secret access, external mutation outside allowed git push, remote MCP hosting, MCP client configuration mutation, release tag creation, GitHub release creation, or destructive operation outside generated verification artifacts"
+      "fixture does not authorize npm publish, Python package registry publish, dependency install, secret access, external mutation outside allowed git push, remote MCP hosting, MCP client configuration mutation, release tag creation, GitHub release creation, or destructive operation outside generated verification artifacts"
     ]
   },
   "lifecycle": {
-    "current_state": "package_publish_review",
-    "target_state": "package_publish_review"
+    "current_state": "public_release_published",
+    "target_state": "public_release_published"
   }
 }
