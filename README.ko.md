@@ -71,7 +71,7 @@ harness-v2 init --root .
 
 `harness-v2 apply --root .`는 같은 동작을 하는 alias입니다. 기존 파일은 기본적으로 덮어쓰지 않고, `--force`를 붙였을 때만 덮어씁니다.
 
-패키지 저장소를 `harness-v2`라는 폴더로 clone한 뒤 그 안에서 `harness-v2 init`을 실행하면, HARNESS V2는 패키지 checkout 안이 아니라 한 단계 위 프로젝트 폴더에 scaffold를 적용합니다.
+HARNESS V2는 대상 프로젝트 루트에 파일을 바로 적용합니다. 정상적인 프로젝트 적용 결과는 프로젝트 안에 `harness-v2` 하위 폴더가 생기는 형태가 아닙니다. 대상이 `F:\my-project`라면 결과 파일은 `F:\my-project\AGENTS.md`, `F:\my-project\RULES.md`, `F:\my-project\CURRENT.md`, `F:\my-project\control\`, `F:\my-project\contracts\`, `F:\my-project\templates\`처럼 바로 보여야 합니다.
 
 ## 5분 Quick Start
 
@@ -90,7 +90,7 @@ harness-v2 verify contracts\harness-task.json
 - `status`는 `CURRENT.md`에서 읽은 JSON을 출력합니다.
 - `verify`는 초기 task contract를 통과시키고 `{"ok": true, ...}`를 출력합니다.
 
-현재 위치가 `<project>\harness-v2` 같은 패키지 checkout 자체라면, `init`은 `<project>`에 하네스 파일을 생성합니다.
+대상 폴더 자체가 하네스 파일을 받아야 합니다. 프로젝트 안에 `harness-v2` 하위 폴더가 보인다면 그 폴더는 적용된 하네스 표면이 아닙니다. 실제로 쓰려는 상위 프로젝트 폴더를 대상으로 `harness-v2 init --root <project>`를 실행하세요.
 
 새 task contract를 만들 때는 `templates\task.json`을 복사하거나 참고해서, 현재 `CURRENT.md`와 맞는 값으로 채웁니다.
 
@@ -187,7 +187,7 @@ harness-v2 verify contracts\harness-task.json
 python -m harness_v2 doctor --root .
 ```
 
-로컬 체크아웃에서 Node wrapper를 직접 실행합니다.
+패키지 검증 시에는 패키지 소스 디렉터리에서 Node wrapper를 직접 실행합니다.
 
 ```powershell
 node bin\harness-v2.js status --root .
@@ -232,7 +232,9 @@ harness-v2 init --root .
 
 ### 파일이 엉뚱한 위치에 생긴 것 같습니다
 
-하네스를 적용하려던 폴더를 대상으로 `harness-v2 status --root <project>`를 실행해 보세요. 만약 clone한 `harness-v2` 패키지 checkout 안에 있다면, 그 안에서 `harness-v2 init`을 실행해도 한 단계 위 폴더에 적용됩니다. 다른 구조라면 대상 폴더를 직접 지정하세요.
+하네스를 적용하려던 폴더를 대상으로 `harness-v2 status --root <project>`를 실행해 보세요. 프로젝트 루트에는 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `contracts\`, `templates\`가 바로 있어야 합니다. `harness-v2` 하위 폴더를 열어야만 보이는 구조가 정상 흐름이 아닙니다.
+
+파일이 의도한 프로젝트 루트 바로 아래에 없다면 대상을 직접 지정하세요.
 
 ```powershell
 harness-v2 init --root F:\path\to\your-project

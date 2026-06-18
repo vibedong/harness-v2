@@ -71,7 +71,7 @@ harness-v2 init --root .
 
 `harness-v2 apply --root .` is an alias for the same operation. Existing files are not overwritten unless you pass `--force`.
 
-If you cloned the package repository into a folder named `harness-v2` and run `harness-v2 init` from inside that package checkout, HARNESS V2 applies the scaffold to the parent project folder instead of writing into the package checkout itself.
+HARNESS V2 applies files directly to the target project root. A normal project install should not leave a nested `harness-v2` folder inside the project. If the target is `F:\my-project`, the resulting files should be `F:\my-project\AGENTS.md`, `F:\my-project\RULES.md`, `F:\my-project\CURRENT.md`, `F:\my-project\control\`, `F:\my-project\contracts\`, and `F:\my-project\templates\`.
 
 ## 5-Minute Quick Start
 
@@ -90,7 +90,7 @@ Expected behavior:
 - `status` prints JSON from `CURRENT.md`.
 - `verify` accepts the initial task contract and prints `{"ok": true, ...}`.
 
-If your current directory is the package checkout itself, for example `<project>\harness-v2`, `init` redirects to `<project>` so the project receives the harness files.
+The target folder itself receives the harness files. If a `harness-v2` child folder appears in your project, that folder is not the applied harness surface; run `harness-v2 init --root <project>` against the parent folder you actually want to use.
 
 To start a new task contract, copy or adapt `templates\task.json` and fill in values that match your current `CURRENT.md`.
 
@@ -187,7 +187,7 @@ Inspect project shape without mutating files:
 python -m harness_v2 doctor --root .
 ```
 
-Run the Node wrapper directly from a local checkout:
+For package verification, run the Node wrapper directly from the package source directory:
 
 ```powershell
 node bin\harness-v2.js status --root .
@@ -232,7 +232,9 @@ harness-v2 init --root .
 
 ### The files appeared in the wrong place
 
-Run `harness-v2 status --root <project>` against the folder you expected to receive the harness. If you are inside a cloned `harness-v2` package checkout, run `harness-v2 init` there and HARNESS V2 will apply to the parent folder. For any other layout, pass the target explicitly:
+Run `harness-v2 status --root <project>` against the folder you expected to receive the harness. The project root should contain `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `contracts\`, and `templates\` directly. It should not require opening a nested `harness-v2` folder.
+
+If the files are not directly under the intended project root, pass the target explicitly:
 
 ```powershell
 harness-v2 init --root F:\path\to\your-project
