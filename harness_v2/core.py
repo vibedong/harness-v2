@@ -6,6 +6,38 @@ from pathlib import Path
 from typing import Any
 
 
+CURRENT_SURFACES = (
+    "AGENTS.md",
+    "RULES.md",
+    "CURRENT.md",
+    "rules/workflows.md",
+    "control/source.md",
+    "control/approval.md",
+    "control/permission.md",
+    "control/proof.md",
+    "control/lifecycle.md",
+    "records/README.md",
+    "routing/manifest.md",
+    "artifacts/registry.md",
+    "artifacts/log.md",
+    "safety/regression.md",
+    "safety/improvement.md",
+    "release/transaction.md",
+)
+DEFAULT_KNOWN_STATES = frozenset(
+    {
+        "scaffold_only",
+        "planning_artifact_complete",
+        "product_markdown_mvp_authoring",
+        "product_markdown_mvp_review",
+        "executable_mvp_authoring",
+        "executable_mvp_review",
+        "package_publish_authoring",
+        "package_publish_review",
+        "blocked",
+        "deferred",
+    }
+)
 REQUIRED_TASK_OBJECTS = (
     "source",
     "approval",
@@ -32,16 +64,18 @@ def load_json(path: str | Path) -> dict[str, Any]:
 
 
 def validate_task_file(path: str | Path) -> ValidationResult:
+    payload_path = Path(path)
     try:
-        data = load_json(path)
+        data = load_json(payload_path)
     except Exception as exc:  # pragma: no cover - exact parser messages vary.
         return ValidationResult(False, None, (f"json: {exc}",))
-    return validate_task(data)
+    return validate_task(data, root=_find_project_root(payload_path))
 
 
-def validate_task(data: dict[str, Any]) -> ValidationResult:
+def validate_task(data: dict[str, Any], root: str | Path | None = None) -> ValidationResult:
     errors: list[str] = []
     task_id = data.get("task_id")
+    root_path = Path(root) if root is not None else None
 
     for key in ("task_id", "title", "workflow"):
         if not _non_empty_string(data.get(key)):
@@ -78,6 +112,8 @@ def validate_task(data: dict[str, Any]) -> ValidationResult:
         errors.append("lifecycle.current_state must be a non-empty string")
     if not _non_empty_string(lifecycle.get("target_state")):
         errors.append("lifecycle.target_state must be a non-empty string")
+
+    _validate_current_context(data, root_path, errors)
 
     return ValidationResult(
         ok=not errors,
@@ -136,3 +172,118 @@ def _non_empty_string(value: Any) -> bool:
 
 def _non_empty_list(value: Any) -> bool:
     return isinstance(value, list) and bool(value)
+
+
+def _validate_current_context(data: dict[str, Any], root: Path | None, errors: list[str]) -> None:
+    approval = data.get("approval") if isinstance(data.get("approval"), dict) else {}
+    permission = data.get("permission") if isinstance(data.get("permission"), dict) else {}
+    lifecycle = data.get("lifecycle") if isinstance(data.get("lifecycle"), dict) else {}
+
+    allowed_side_effects = _string_list(permission.get("allowed_side_effects"))
+    denied_side_effects = _string_list(permission.get("denied_side_effects"))
+    excluded_side_effects = _string_list(approval.get("excluded_side_effects"))
+
+    _reject_side_effect_conflicts(
+        allowed_side_effects,
+        denied_side_effects,
+        "permission side effect conflicts with denied side effect",
+        errors,
+    )
+    _reject_side_effect_conflicts(
+        allowed_side_effects,
+        excluded_side_effects,
+        "permission side effect conflicts with approval exclusion",
+        errors,
+    )
+    _reject_author_local_status_commands(allowed_side_effects, errors)
+
+    known_states = _known_lifecycle_states(root)
+    for key in ("current_state", "target_state"):
+        state = lifecycle.get(key)
+        if isinstance(state, str) and state not in known_states:
+            errors.append(f"lifecycle.{key} is not a known state: {state}")
+
+    if root is None:
+        return
+
+    try:
+        current = read_current_status(root)
+    except Exception as exc:
+        errors.append(f"current status: {exc}")
+        current = {}
+
+    workflow = data.get("workflow")
+    current_workflow = current.get("workflow")
+    if isinstance(workflow, str) and current_workflow and workflow != current_workflow:
+        errors.append(f"workflow must match CURRENT.md workflow {current_workflow}")
+
+    current_state = current.get("state")
+    lifecycle_current_state = lifecycle.get("current_state")
+    if isinstance(lifecycle_current_state, str) and current_state and lifecycle_current_state != current_state:
+        errors.append(f"lifecycle.current_state must match CURRENT.md state {current_state}")
+
+    errors.extend(_stale_status_errors(root))
+
+
+def _reject_side_effect_conflicts(
+    allowed: list[str],
+    denied: list[str],
+    message: str,
+    errors: list[str],
+) -> None:
+    denied_by_normalized = {_normalize_side_effect(value): value for value in denied}
+    for value in allowed:
+        if _normalize_side_effect(value) in denied_by_normalized:
+            errors.append(f"{message}: {denied_by_normalized[_normalize_side_effect(value)]}")
+
+
+def _reject_author_local_status_commands(side_effects: list[str], errors: list[str]) -> None:
+    for value in side_effects:
+        normalized = value.lower()
+        if "python -m harness_v2 status" in normalized and "--root " in normalized and ":\\folder\\harness-v2" in normalized:
+            errors.append("status command must use --root <repo root> or --root .")
+
+
+def _known_lifecycle_states(root: Path | None) -> frozenset[str]:
+    if root is None:
+        return DEFAULT_KNOWN_STATES
+    lifecycle_path = root / "control" / "lifecycle.md"
+    if not lifecycle_path.exists():
+        return DEFAULT_KNOWN_STATES
+    states: set[str] = set()
+    for raw_line in lifecycle_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if line.startswith("- `") and line.endswith("`"):
+            states.add(line[3:-1])
+    return frozenset(states) if states else DEFAULT_KNOWN_STATES
+
+
+def _stale_status_errors(root: Path) -> list[str]:
+    errors: list[str] = []
+    for relative_path in CURRENT_SURFACES:
+        path = root / relative_path
+        if not path.exists():
+            continue
+        for raw_line in path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if line.startswith("status:") and "executable_local_mvp_surface / third_slice" in line:
+                errors.append(f"stale status surface: {relative_path}")
+    return errors
+
+
+def _find_project_root(path: Path) -> Path | None:
+    resolved = path.resolve()
+    for candidate in (resolved.parent, *resolved.parents):
+        if (candidate / "CURRENT.md").exists():
+            return candidate
+    return None
+
+
+def _string_list(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [item for item in value if isinstance(item, str)]
+
+
+def _normalize_side_effect(value: str) -> str:
+    return " ".join(value.casefold().split())

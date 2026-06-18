@@ -254,6 +254,92 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertIn("approval", "\n".join(result.errors))
 
+    def test_verifier_rejects_workflow_mismatch_with_current_pointer(self):
+        from harness_v2.core import validate_task
+
+        payload = valid_task_payload()
+        payload["workflow"] = "executable_mvp_review"
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertFalse(result.ok)
+        self.assertIn("workflow must match CURRENT.md workflow package_publish_review", "\n".join(result.errors))
+
+    def test_verifier_rejects_allowed_and_denied_side_effect_conflict(self):
+        from harness_v2.core import validate_task
+
+        payload = valid_task_payload()
+        payload["permission"]["allowed_side_effects"].append("PyPI publish")
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertFalse(result.ok)
+        self.assertIn("permission side effect conflicts with denied side effect: PyPI publish", "\n".join(result.errors))
+
+    def test_verifier_rejects_approval_excluded_side_effect_conflict(self):
+        from harness_v2.core import validate_task
+
+        payload = valid_task_payload()
+        payload["approval"]["excluded_side_effects"].append("external deployment")
+        payload["permission"]["allowed_side_effects"].append("external deployment")
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertFalse(result.ok)
+        self.assertIn("permission side effect conflicts with approval exclusion: external deployment", "\n".join(result.errors))
+
+    def test_verifier_rejects_unknown_lifecycle_state(self):
+        from harness_v2.core import validate_task
+
+        payload = valid_task_payload()
+        payload["lifecycle"]["current_state"] = "unknown_future_state"
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertFalse(result.ok)
+        self.assertIn("lifecycle.current_state is not a known state: unknown_future_state", "\n".join(result.errors))
+
+    def test_verifier_rejects_author_local_status_command_root(self):
+        from harness_v2.core import validate_task
+
+        payload = valid_task_payload()
+        payload["permission"]["allowed_side_effects"].append(
+            "<temporary venv>\\Scripts\\python -m harness_v2 status --root F:\\Folder\\harness-v2"
+        )
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertFalse(result.ok)
+        self.assertIn("status command must use --root <repo root> or --root .", "\n".join(result.errors))
+
+    def test_verifier_rejects_stale_status_surface(self):
+        from harness_v2.core import validate_task
+
+        payload = valid_task_payload()
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            (root / "CURRENT.md").write_text(
+                "\n".join(
+                    [
+                        "workflow: `package_publish_review`",
+                        "state: `package_publish_review`",
+                        "substate: `test`",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            control = root / "control"
+            control.mkdir()
+            (control / "source.md").write_text(
+                "status: executable_local_mvp_surface / third_slice / source_control\n",
+                encoding="utf-8",
+            )
+
+            result = validate_task(payload, root=root)
+
+        self.assertFalse(result.ok)
+        self.assertIn("stale status surface: control/source.md", "\n".join(result.errors))
+
     def test_status_reads_current_workflow_pointer(self):
         from harness_v2.core import read_current_status
 
@@ -317,6 +403,10 @@ def commands_under_heading(path: Path, heading: str) -> set[str]:
         if inside and line.strip().startswith("- `") and line.strip().endswith("`"):
             commands.add(line.strip()[3:-1])
     return commands
+
+
+def valid_task_payload() -> dict:
+    return json.loads(VALID_TASK.read_text())
 
 
 if __name__ == "__main__":
