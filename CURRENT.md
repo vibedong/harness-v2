@@ -1,6 +1,6 @@
 # HARNESS V2 Current State
 
-status: package_github_surface / fourth_slice / current_pointer
+status: package_github_surface / detail_step_20_docs_control_sync / current_pointer
 
 This file is the visible current pointer for the local HARNESS V2 product surface.
 
@@ -10,7 +10,7 @@ workflow: `package_publish_review`
 
 state: `package_publish_review`
 
-substate: `fourth_slice_package_github_surface_authored / npm_wrapper_authored / public_patch_release_published / npm_published / github_release_created / npm_only / npm_0_1_5_published`
+substate: `npm_0_1_5_published / detail_step_20_docs_control_sync / not_automatic_enforcement_completion`
 
 source basis:
 
@@ -21,10 +21,11 @@ source basis:
 - Exact third-slice approval packet for the paths listed in `control\approval.md`.
 - User request to package and publish to GitHub, constrained to `F:\Folder\harness-v2` only.
 - Exact npm wrapper package slice approval for Windows/macOS Node wrapper packaging without npm publish.
-- Historical public npm release workflow for `harness-v2@0.1.4`, now superseded for the current `0.1.5` package-candidate slice.
+- Historical public npm release workflow for `harness-v2@0.1.4`, now superseded by the published `harness-v2@0.1.5` npm state.
 - User request that installing HARNESS V2 should lead directly to project application through `harness-v2 init --root .` / `harness-v2 apply --root .`.
-- User request to strengthen the init-generated AI-facing scaffold and prepare everything up to, but not including, the next npm package publish.
-- User request to proceed with npm publish for the current `harness-v2@0.1.5` candidate.
+- User request to strengthen the init-generated AI-facing scaffold before the `0.1.5` package publish.
+- User request to proceed with npm publish for `harness-v2@0.1.5`, now completed historically.
+- Exact detail step 20 docs/control sync approval for stale wording, proof/permission dry-run mismatch, automatic-enforcement wording, and evidence-scaled readback guidance.
 
 ## Current Surface
 
@@ -75,30 +76,24 @@ Active package, GitHub, and npm wrapper MVP files include:
 - `tests\fixtures\valid-task.json`
 - `tests\fixtures\invalid-missing-approval.json`
 
-## Current Allowed Local Verification Commands
+## Current Allowed Verification And Git Commands
 
-- `python -m compileall harness_v2`
-- `python -m unittest discover tests`
-- `python -m venv <temporary smoke-test venv under TEMP>`
-- `<temporary venv>\Scripts\python -m pip install --no-deps -e .`
-- `<temporary venv>\Scripts\python -m harness_v2 status --root <repo root>`
-- `<temporary venv>\Scripts\python -m harness_v2 verify tests\fixtures\valid-task.json`
-- `python -m harness_v2 init --root <temporary project>`
-- `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
-- `node bin\harness-v2.js status --root .`
-- `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
-- `node bin\harness-v2.js init --root <temporary project>`
-- `npm pack --dry-run`
-- `npm view harness-v2@0.1.5 version dist.tarball`
+For the detail step 20 docs/control sync slice:
 
-These commands are proof material for the current `0.1.5` npm published state. The temporary smoke-test venv is a generated verification artifact and is not part of the product source surface. Repeat npm publish, tag creation, and GitHub release execution require a separate release transaction. These checks do not create Python package registry publish readiness.
+- local file readback, listing, and search commands scoped to this repository;
+- `git status --short`;
+- `git diff -- <intended docs/control files>`;
+- read-only subagent review with `vowline`;
+- `git add`, `git commit`, and `git push` only for this docs/control sync slice after review passes.
+
+Historical package, npm wrapper, npm publish dry-run, and npm registry readback commands are evidence material for prior package slices. They are not current permission for package build, npm publish dry-run, repeat npm publish, release execution, dependency installation, hook work, or MCP work.
 
 ## Stop Conditions
 
-Stop if the requested action needs a file outside the active executable local MVP file list.
+Stop if the requested action needs a file outside the detail step 20 approved docs/control sync file list.
 
 Stop if a pointer, source, approval, permission, proof obligation, lifecycle requirement, route, registry/log row, safety boundary, improvement classification, or release boundary is missing, stale, or conflicting.
 
-Stop if the task asks for npm publish, Python package registry publish, dependency installation, secret access, external network mutation outside the exact npm registry readback and GitHub push commands, release tag creation, GitHub release execution, or destructive operation outside generated local verification artifacts.
+Stop if the task asks for package build, npm publish dry-run, npm publish, Python package registry publish, dependency installation, secret access, external network mutation outside the allowed git push, release tag creation, GitHub release execution, hook work, MCP work, or destructive operation.
 
-This file is a current pointer. The current pointer does not claim Python package registry publish, dogfood proof, or final product completion.
+This file is a current pointer. The current pointer does not claim automatic enforcement completion, Python package registry publish, dogfood proof, release readiness, or final product completion.

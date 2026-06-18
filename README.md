@@ -10,6 +10,8 @@ Korean documentation is available in [README.ko.md](README.ko.md).
 
 HARNESS V2 is not an AI model and it does not write code for you. It is a workflow harness that makes the working boundary visible and checkable.
 
+Current implementation status: HARNESS V2 is a project scaffold, task-contract validator, and CLI helper. It makes boundaries explicit and checkable, but it is not a complete automatic enforcement or completion layer.
+
 Before a task starts, you describe:
 
 - the current source and workflow pointer;
@@ -94,6 +96,8 @@ npm install -g harness-v2@latest
 harness-v2 status --root .
 harness-v2 verify contracts\harness-task.json
 ```
+
+This updates the global CLI only. It does not refresh project-local scaffold files or overwrite `CURRENT.md` / control state.
 
 If a project needs the latest generated scaffold templates, have an AI agent compare the current project files against a fresh temporary scaffold before overwriting anything. Blind `--force` can replace project-local state.
 
@@ -242,6 +246,7 @@ First read:
 - <task.json>
 
 Rules:
+- Scale read depth to the evidence needed, not to minimal reading at all costs. Read enough of the named source/control surfaces to bind scope, approval, permission, proof, and lifecycle; use targeted structural reads first, but read exact source text when authority, conflict, or stale-state decisions depend on wording.
 - Treat approval.approved_paths as the approved write surface.
 - Do not execute approval.excluded_side_effects.
 - Do not execute permission.denied_side_effects.
@@ -322,6 +327,7 @@ HARNESS V2 does not:
 - write code by itself;
 - decide requirements for the user;
 - automatically block every external tool;
+- turn install, init/apply, or CLI availability into automatic enforcement completion;
 - run proof commands automatically;
 - fix failing tests automatically;
 - silently modify an arbitrary directory during `npm install -g`;
@@ -332,6 +338,7 @@ HARNESS V2 does not:
 
 - Start with a small task contract.
 - Keep `approval.approved_paths` narrow.
+- Use evidence-scaled read depth: routine work can begin from `AGENTS.md`, `RULES.md`, `CURRENT.md`, and the active task contract; approval, permission, proof, lifecycle, stale state, release, external mutation, destructive action, or product implementation risk requires deeper source/control readback.
 - Treat package metadata, dependency changes, secrets, deployment, and release actions as separate work.
 - Keep proof obligations short enough to run, but strong enough to prove the task.
 - Preserve failing proof output instead of rewriting it into a pass.

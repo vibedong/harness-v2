@@ -1,6 +1,6 @@
 # HARNESS V2 Approval Control
 
-status: package_github_surface / fourth_slice / approval_control
+status: package_github_surface / detail_step_20_docs_control_sync / approval_control
 
 This file separates approval request, user response, and bound approval scope.
 
@@ -9,13 +9,48 @@ This file separates approval request, user response, and bound approval scope.
 Previous bound work unit:
 
 ```text
-package_metadata_install_smoke_and_github_publish_slice
+generated_agent_binding_package_candidate_slice
 ```
 
 Current bound work unit:
 
 ```text
-generated_agent_binding_package_candidate_slice
+detail_step_20_docs_control_sync_slice
+```
+
+Current bound user packet:
+
+```text
+Approve HARNESS V2 detail step 20 docs/control sync slice:
+work only under F:\Folder\harness-v2.
+
+Allow modifying only:
+AGENTS.md,
+RULES.md,
+CURRENT.md,
+README.md,
+README.ko.md,
+routing\manifest.md,
+control\approval.md,
+control\permission.md,
+control\proof.md,
+control\lifecycle.md,
+release\transaction.md.
+
+Purpose:
+sync stale 0.1.4/0.1.5 wording,
+resolve proof/permission mismatch around npm publish dry-run,
+clarify that HARNESS V2 is currently scaffold + task-contract validator + CLI helper,
+not automatic enforcement completion,
+and update Codex app usage guidance so read depth is evidence-scaled.
+
+Allow local readback/search verification only.
+Allow read-only subagent review with vowline.
+Allow git add/commit/push only for this docs/control sync slice if changes pass review.
+
+No code behavior changes.
+No hook, MCP, package build, npm publish, release execution, dependency install,
+secret read, external network mutation outside git push, or destructive operation.
 ```
 
 Previous bound user packet:
@@ -145,41 +180,31 @@ No destructive operation outside generated verification artifacts.
 
 Operation type:
 
-- local file creation or modification only under `F:\Folder\harness-v2`;
-- local package metadata and dependency-free build backend creation;
-- PEP 660 editable install support in `_build_backend\harness_backend.py`;
-- local editable package smoke verification with generated artifacts limited to temporary paths or ignored build metadata;
-- dependency-free npm wrapper metadata and Windows/macOS Node CLI wrapper creation;
-- local Node wrapper smoke verification and `npm pack --dry-run`;
-- npm publish dry-run verification for the `harness-v2@0.1.5` package candidate;
-- exact npm publish execution completed for `harness-v2@0.1.5`;
-- npm registry readback for `harness-v2@0.1.5`;
-- no release tag creation or GitHub release execution in the current npm publish slice;
-- project application release that adds `harness-v2 init --root .` and `harness-v2 apply --root .`;
-- git initialization, commit, GitHub repository creation, and push for the `F:\Folder\harness-v2` folder only;
-- no repeat npm publish, Python package registry publish, dependency install, secret access, release tag creation, GitHub release execution, or destructive operation outside generated local verification artifacts.
+- local documentation/control-plane modification only under `F:\Folder\harness-v2`;
+- target surface limited to the eleven files named in the current bound user packet;
+- local readback/search verification only;
+- read-only subagent review with `vowline`;
+- git add, commit, and push only for this docs/control sync slice after review passes;
+- no code behavior changes, hook work, MCP work, package build, npm publish, release execution, dependency install, secret read, unrelated external network mutation, or destructive operation.
 
 Freshness anchors:
 
-- exact third-slice user packet;
-- `CURRENT.md` package, GitHub, and npm wrapper pointer;
-- `control\permission.md` exact write and command surface;
-- `control\proof.md` fourth-slice proof obligation;
-- `control\lifecycle.md` package, GitHub, and npm wrapper lifecycle entry.
-- fourth-slice user request constrained to the HARNESS folder only.
-- fourth-slice amendment for `.gitattributes`, `_build_backend\harness_backend.py`, editable install proof, generated artifact cleanup, and amendment git push.
-- historical npm wrapper package slice approval for `package.json`, `bin\harness-v2.js`, local Node wrapper proof, and npm dry-run proof.
-- historical public release preparation approval for `LICENSE`, `RELEASE_NOTES.md`, npm public package metadata, npm publish dry-run, tag/release planning, and npm publish execution.
-- historical npm init/apply release request for `harness-v2@0.1.4`, superseded by the current `0.1.5` package-candidate slice.
-- user request to strengthen generated agent-facing scaffold and prepare the next npm package candidate before any npm publish.
-- user request to proceed with npm publish for the current `harness-v2@0.1.5` candidate.
+- exact detail step 20 docs/control sync user packet;
+- `CURRENT.md` docs/control sync pointer;
+- `control\permission.md` exact write and command surface for this slice;
+- `control\proof.md` readback/search proof obligation for this slice;
+- `control\lifecycle.md` docs/control sync lifecycle boundary.
+- historical npm init/apply release request for `harness-v2@0.1.4`, superseded by the published `0.1.5` package state.
+- historical npm publish execution and npm registry readback for `harness-v2@0.1.5`.
 
 Denied by the current approval scope:
 
-- paths outside `F:\Folder\harness-v2`;
+- paths outside the eleven files named in the current bound user packet;
 - repeat npm publish;
 - Python package registry publish;
-- dependency install outside already available local tooling;
+- package build;
+- dependency install;
+- hook or MCP work;
 - secret access;
 - external network mutation outside GitHub repository push;
 - release tag creation or GitHub release execution;
