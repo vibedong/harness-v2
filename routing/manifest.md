@@ -22,11 +22,11 @@ This file maps operation modes to suggested local routes. Routing is guidance, n
 | development review | source, approval, permission, proof, lifecycle, route, artifact, safety surfaces | findings are not proof |
 | proof check | `control\proof.md` plus readback/search/listing | artifact checks must match obligation |
 | executable local MVP | `harness_v2` CLI with `status`, `verify`, and `doctor` | only approved local commands and no external dependency |
-| package, GitHub, and npm wrapper MVP | `pyproject.toml`, `_build_backend`, `package.json`, `bin\harness-v2.js`, editable install smoke, Node wrapper smoke, npm dry-run pack, and GitHub `main` branch | no npm publish, PyPI publish, release execution, dependency install, secret access, or unrelated external mutation |
+| package, GitHub, and npm wrapper MVP | `pyproject.toml`, `_build_backend`, `package.json`, `bin\harness-v2.js`, editable install smoke, Node wrapper smoke, npm dry-run pack, npm publish dry-run, and GitHub `main` branch | no PyPI publish, dependency install, secret access, or unrelated external mutation |
 | artifact observation | `artifacts\registry.md` and `artifacts\log.md` | registry/log are not source or proof |
 | regression safety | `safety\regression.md` | mapping is not pass evidence |
 | improvement intake | `safety\improvement.md` | candidate is not product change |
-| release boundary | `release\transaction.md` | no npm publish, PyPI publish, deploy, release execution, or release readiness |
+| release boundary | `release\transaction.md` | exact npm publish only for `harness-v2@0.1.0` after npm auth; no PyPI publish or deploy |
 
 ## Specialist And Subagent Guardrail
 

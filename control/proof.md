@@ -19,12 +19,18 @@ For the fourth-slice package, GitHub publish, and npm wrapper surface, verify af
 9. `node bin\harness-v2.js status --root .` exits 0;
 10. `node bin\harness-v2.js verify tests\fixtures\valid-task.json` exits 0;
 11. `npm pack --dry-run` exits 0 without publishing;
-12. the unittest suite proves CLI status can run without external dependency;
-13. the unittest suite proves the verifier rejects `tests\fixtures\invalid-missing-approval.json`;
-14. the unittest suite proves the verifier accepts `tests\fixtures\valid-task.json`;
-15. the unittest suite proves doctor reports next action without mutating files;
-16. GitHub publish proof names repository URL, branch, and pushed commit;
-17. product-local markdown boundaries still deny npm publish, PyPI publish, release execution, dependency install, secret access, unrelated external network mutation, and destructive operation outside generated verification artifacts.
+12. `npm publish --dry-run` exits 0;
+13. `LICENSE`, `RELEASE_NOTES.md`, and public npm metadata are present;
+14. `npm publish` exits 0 for `harness-v2@0.1.0`;
+15. `git tag v0.1.0` and `git push origin v0.1.0` succeed;
+16. `gh release create v0.1.0 --title "HARNESS V2 0.1.0" --notes-file RELEASE_NOTES.md` succeeds;
+17. post-publish fresh install verification succeeds from npm;
+18. the unittest suite proves CLI status can run without external dependency;
+19. the unittest suite proves the verifier rejects `tests\fixtures\invalid-missing-approval.json`;
+20. the unittest suite proves the verifier accepts `tests\fixtures\valid-task.json`;
+21. the unittest suite proves doctor reports next action without mutating files;
+22. GitHub publish proof names repository URL, branch, and pushed commit;
+23. product-local markdown boundaries still deny PyPI publish, dependency install, secret access, unrelated external network mutation, and destructive operation outside generated verification artifacts.
 
 ## Artifact Checks
 

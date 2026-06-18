@@ -46,7 +46,7 @@ function findPython() {
 const python = findPython();
 if (!python) {
   console.error(
-    "HARNESS V2 requires Python 3. Install Python 3 and ensure py -3, python3, or python is on PATH."
+    "HARNESS V2 requires Python 3.11 or newer. Install Python 3.11+ and ensure py -3, python3, or python is on PATH."
   );
   process.exit(1);
 }

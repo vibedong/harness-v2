@@ -1,33 +1,45 @@
 {
   "task_id": "harness-v2-valid-task",
-  "title": "Validate HARNESS V2 package, GitHub, and npm wrapper task contract",
+  "title": "Validate HARNESS V2 public npm release candidate task contract",
   "workflow": "package_publish_review",
   "source": {
     "basis": [
       "CURRENT.md",
       "control\\approval.md",
-      "control\\permission.md"
+      "control\\permission.md",
+      "release\\transaction.md"
     ],
     "current_pointer": "CURRENT.md"
   },
   "approval": {
-    "packet": "Approve HARNESS V2 npm wrapper package slice",
+    "packet": "Approve HARNESS V2 public npm release workflow",
     "approved_paths": [
       "AGENTS.md",
       "RULES.md",
       "CURRENT.md",
       "README.md",
+      "LICENSE",
+      "RELEASE_NOTES.md",
       "package.json",
       "pyproject.toml",
       "_build_backend\\harness_backend.py",
       "bin\\harness-v2.js",
+      "harness_v2\\__init__.py",
       "harness_v2\\core.py",
-      "tests\\test_harness_v2.py"
+      "routing\\manifest.md",
+      "control\\approval.md",
+      "control\\permission.md",
+      "control\\proof.md",
+      "control\\lifecycle.md",
+      "safety\\regression.md",
+      "release\\transaction.md",
+      "tests\\test_harness_v2.py",
+      "tests\\fixtures\\valid-task.json"
     ],
     "excluded_side_effects": [
-      "npm publish",
       "PyPI publish",
-      "release execution",
+      "npm publish for any package other than harness-v2@0.1.0",
+      "release execution for any tag other than v0.1.0",
       "dependency install from network",
       "secret access",
       "unrelated external network mutation",
@@ -46,14 +58,19 @@
       "node bin\\harness-v2.js status --root .",
       "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
       "npm pack --dry-run",
+      "npm publish --dry-run",
+      "npm publish",
       "git add <intended HARNESS V2 product files>",
       "git commit",
-      "git push -u origin <branch>"
+      "git push -u origin <branch>",
+      "git tag v0.1.0",
+      "git push origin v0.1.0",
+      "gh release create v0.1.0 --title \"HARNESS V2 0.1.0\" --notes-file RELEASE_NOTES.md"
     ],
     "denied_side_effects": [
-      "npm publish",
       "PyPI publish",
-      "release execution",
+      "npm publish for any package other than harness-v2@0.1.0",
+      "release execution for any tag other than v0.1.0",
       "dependency install from network",
       "secret access",
       "unrelated external network mutation",
@@ -67,12 +84,15 @@
       "editable install smoke exits 0",
       "node wrapper status exits 0",
       "node wrapper verify exits 0",
-      "npm pack dry-run exits 0 without publishing",
+      "npm pack dry-run exits 0 without publishing or generated pycache files",
+      "npm publish dry-run exits 0",
+      "npm publish exits 0 for harness-v2@0.1.0 after npm authentication is present",
+      "git tag v0.1.0 and GitHub release creation succeed after npm publish succeeds",
       "valid fixture accepted",
       "invalid fixture rejected",
       "doctor reports without mutation",
       "GitHub main contains pushed commit",
-      "no npm publish, PyPI publish, or release execution"
+      "no PyPI publish, dependency install, secret access, unrelated external mutation, or release outside harness-v2@0.1.0"
     ]
   },
   "lifecycle": {

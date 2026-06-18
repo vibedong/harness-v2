@@ -17,6 +17,8 @@ APPROVED_SOURCE_FILES = {
     "RULES.md",
     "CURRENT.md",
     "README.md",
+    "LICENSE",
+    "RELEASE_NOTES.md",
     "package.json",
     "pyproject.toml",
     "_build_backend/harness_backend.py",
@@ -64,6 +66,8 @@ ALLOWED_COMMANDS = {
     "node bin\\harness-v2.js status --root .",
     "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
     "npm pack --dry-run",
+    "npm publish --dry-run",
+    "npm publish",
 }
 PERMISSION_COMMANDS = {
     "python -m compileall harness_v2",
@@ -75,6 +79,8 @@ PERMISSION_COMMANDS = {
     "node bin\\harness-v2.js status --root .",
     "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
     "npm pack --dry-run",
+    "npm publish --dry-run",
+    "npm publish",
 }
 ALLOWED_GIT_COMMANDS = {
     "git init",
@@ -82,6 +88,9 @@ ALLOWED_GIT_COMMANDS = {
     "git commit",
     "gh repo create vibedong/harness-v2 --public --source . --remote origin",
     "git push -u origin <branch>",
+    "git tag v0.1.0",
+    "git push origin v0.1.0",
+    "gh release create v0.1.0 --title \"HARNESS V2 0.1.0\" --notes-file RELEASE_NOTES.md",
 }
 FORBIDDEN_SOURCE_FRAGMENT = "source" + ".fragment.json"
 
@@ -169,19 +178,73 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(package_json["name"], "harness-v2")
         self.assertEqual(package_json["version"], "0.1.0")
+        self.assertEqual(package_json["license"], "MIT")
         self.assertEqual(package_json["bin"], {"harness-v2": "bin/harness-v2.js"})
         self.assertEqual(package_json["os"], ["win32", "darwin"])
         self.assertEqual(package_json["engines"], {"node": ">=18"})
+        self.assertEqual(package_json["repository"], {"type": "git", "url": "git+https://github.com/vibedong/harness-v2.git"})
+        self.assertEqual(package_json["homepage"], "https://github.com/vibedong/harness-v2#readme")
+        self.assertEqual(package_json["bugs"], {"url": "https://github.com/vibedong/harness-v2/issues"})
+        self.assertEqual(package_json["author"], "vibedong")
+        self.assertIn("workflow", package_json["keywords"])
+        self.assertIn("ai", package_json["keywords"])
+        self.assertIn("harness", package_json["keywords"])
         self.assertNotIn("dependencies", package_json)
         self.assertNotIn("devDependencies", package_json)
         self.assertNotIn("optionalDependencies", package_json)
 
-        files = set(package_json["files"])
-        self.assertIn("bin/", files)
-        self.assertIn("harness_v2/", files)
-        self.assertIn("control/", files)
-        self.assertIn("contracts/", files)
-        self.assertIn("templates/", files)
+        self.assertEqual(
+            set(package_json["files"]),
+            {
+                "AGENTS.md",
+                "RULES.md",
+                "CURRENT.md",
+                "README.md",
+                "LICENSE",
+                "RELEASE_NOTES.md",
+                "pyproject.toml",
+                "_build_backend/*.py",
+                "bin/harness-v2.js",
+                "harness_v2/*.py",
+                "tests/test_harness_v2.py",
+                "tests/fixtures/*.json",
+                "contracts/*.schema.json",
+                "templates/*.json",
+                "templates/*.md",
+                "control/*.md",
+                "rules/*.md",
+                "records/README.md",
+                "routing/manifest.md",
+                "artifacts/*.md",
+                "safety/*.md",
+                "release/*.md",
+            },
+        )
+        for entry in package_json["files"]:
+            self.assertNotIn("__pycache__", entry)
+            self.assertNotIn(".pyc", entry)
+
+    def test_public_release_docs_are_present(self):
+        license_text = (ROOT / "LICENSE").read_text()
+        release_notes = (ROOT / "RELEASE_NOTES.md").read_text()
+        readme = (ROOT / "README.md").read_text()
+
+        self.assertIn("MIT License", license_text)
+        self.assertIn("Copyright (c) 2026 vibedong", license_text)
+        self.assertIn("# HARNESS V2 0.1.0 Release Notes", release_notes)
+        self.assertIn("npm install -g harness-v2", readme)
+        self.assertIn("Python 3.11", readme)
+        self.assertIn("Python 3.11", release_notes)
+        self.assertIn("npm publish", release_notes)
+
+    def test_release_version_policy_is_consistent(self):
+        import harness_v2
+
+        package_json = json.loads((ROOT / "package.json").read_text())
+
+        self.assertEqual(harness_v2.__version__, "0.1.0")
+        self.assertEqual(package_json["version"], "0.1.0")
+        self.assertIn("0.1.0", (ROOT / "RELEASE_NOTES.md").read_text())
 
     def test_node_wrapper_delegates_status_and_verify_to_python_cli(self):
         status = subprocess.run(
@@ -215,6 +278,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("harness-v2-0.1.0.tgz", completed.stdout)
+        self.assertNotIn("__pycache__", completed.stdout)
+        self.assertNotIn(".pyc", completed.stdout)
 
     def test_command_authority_lists_only_approved_verification_commands(self):
         self.assertEqual(
@@ -271,7 +336,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         root_rules = (ROOT / "RULES.md").read_text()
         self.assertNotIn("Do not create package metadata", root_rules)
         self.assertIn("Windows/macOS npm wrapper metadata", root_rules)
-        self.assertIn("Do not perform npm publish", root_rules)
+        self.assertIn("npm publish is allowed only for `harness-v2@0.1.0`", root_rules)
 
     def test_task_fixtures_match_package_publish_review_state(self):
         valid = json.loads(VALID_TASK.read_text())
@@ -289,7 +354,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("bin\\harness-v2.js", valid["approval"]["approved_paths"])
         self.assertIn("node bin\\harness-v2.js status --root .", valid["permission"]["allowed_side_effects"])
         self.assertIn("npm pack --dry-run", valid["permission"]["allowed_side_effects"])
-        self.assertIn("npm publish", valid["permission"]["denied_side_effects"])
+        self.assertIn("npm publish", valid["permission"]["allowed_side_effects"])
+        self.assertNotIn("npm publish", valid["permission"]["denied_side_effects"])
         self.assertIn("PyPI publish", valid["permission"]["denied_side_effects"])
 
     def test_artifact_surfaces_include_package_github_scope(self):

@@ -18,16 +18,16 @@ This file maps HARNESS V2 boundary risks to regression guard candidates. It does
 | release boundary treated as release readiness | require a separate release transaction scope |
 | legacy V1 or `F:\Folder\harnessresearch\` reused as source | fail closed unless a later explicit source policy changes this |
 | package/GitHub MVP mistaken for PyPI release | require separate PyPI or release transaction approval |
-| npm wrapper MVP mistaken for npm release | require separate npm publish or release transaction approval |
+| npm wrapper MVP mistaken for npm release | require a separate release transaction and exact npm target approval |
 | author-local paths copied into GitHub-facing commands | require `<repo root>` or current-directory examples for portable docs |
 
 ## Guard Evidence
 
-Valid evidence for this package, GitHub, and npm wrapper MVP is readback, search, listing, unittest output, editable install smoke output, Node wrapper smoke output, npm dry-run pack output, fresh-client clone verification when separately approved, and surface-specific review against current local files.
+Valid evidence for this package, GitHub, npm wrapper, and public npm release candidate is readback, search, listing, unittest output, editable install smoke output, Node wrapper smoke output, npm dry-run pack output, npm publish dry-run output, fresh-client clone verification when separately approved, and surface-specific review against current local files.
 
-Executable tests and fixtures inside `tests\` are part of the current proof material. Package metadata, editable install smoke verification, Windows/macOS npm wrapper metadata, local Node wrapper smoke, npm dry-run pack verification, git initialization, GitHub repository creation, and push are allowed only inside the current fourth-slice scope.
+Executable tests and fixtures inside `tests\` are part of the current proof material. Package metadata, editable install smoke verification, Windows/macOS npm wrapper metadata, local Node wrapper smoke, npm dry-run pack verification, npm publish dry-run verification, exact npm publish for `harness-v2@0.1.0`, git initialization, GitHub repository creation, tag, release, and push are allowed only inside the current release transaction scope.
 
-Npm publish, PyPI publish, release execution, dependency installation from the network, secret access, unrelated external mutation, destructive operations outside generated verification artifacts, and release checks remain outside the current permission ceiling.
+PyPI publish, dependency installation from the network, secret access, unrelated external mutation, destructive operations outside generated verification artifacts, and release work outside `harness-v2@0.1.0` remain outside the current permission ceiling.
 
 ## Non-Authority Boundary
 

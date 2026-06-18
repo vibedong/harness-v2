@@ -2,7 +2,25 @@
   "name": "harness-v2",
   "version": "0.1.0",
   "description": "HARNESS V2 workflow boundary harness with a Windows/macOS npm CLI wrapper.",
-  "license": "UNLICENSED",
+  "license": "MIT",
+  "author": "vibedong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibedong/harness-v2.git"
+  },
+  "homepage": "https://github.com/vibedong/harness-v2#readme",
+  "bugs": {
+    "url": "https://github.com/vibedong/harness-v2/issues"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "automation",
+    "boundary",
+    "cli",
+    "harness",
+    "workflow"
+  ],
   "bin": {
     "harness-v2": "bin/harness-v2.js"
   },
@@ -11,17 +29,24 @@
     "RULES.md",
     "CURRENT.md",
     "README.md",
-    "bin/",
-    "harness_v2/",
-    "contracts/",
-    "templates/",
-    "control/",
-    "rules/",
-    "records/",
-    "routing/",
-    "artifacts/",
-    "safety/",
-    "release/"
+    "LICENSE",
+    "RELEASE_NOTES.md",
+    "pyproject.toml",
+    "_build_backend/*.py",
+    "bin/harness-v2.js",
+    "harness_v2/*.py",
+    "tests/test_harness_v2.py",
+    "tests/fixtures/*.json",
+    "contracts/*.schema.json",
+    "templates/*.json",
+    "templates/*.md",
+    "control/*.md",
+    "rules/*.md",
+    "records/README.md",
+    "routing/manifest.md",
+    "artifacts/*.md",
+    "safety/*.md",
+    "release/*.md"
   ],
   "os": [
     "win32",

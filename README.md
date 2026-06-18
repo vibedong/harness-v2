@@ -4,7 +4,7 @@ HARNESS V2 is a local workflow harness for AI-assisted software work. It keeps s
 
 ## Status
 
-Current build stage: package, GitHub, and npm wrapper MVP.
+Current build stage: public npm release candidate.
 
 This repository currently provides:
 
@@ -15,11 +15,24 @@ This repository currently provides:
 - a dependency-free Windows/macOS npm CLI wrapper that delegates to the Python CLI;
 - fixture-backed unit tests for local task verification.
 
-Npm publish, PyPI publish, release transaction execution, dependency installation, secret access, and destructive operations outside generated local verification artifacts are not part of this slice.
+The public npm release target is `harness-v2@0.1.0`. PyPI publish is not part of this release.
 
 ## Quick Start
 
-From this directory:
+Install from npm after publication:
+
+```powershell
+npm install -g harness-v2
+harness-v2 status --root .
+```
+
+Runtime prerequisites:
+
+- Node.js 18 or newer.
+- Python 3.11 or newer available on PATH.
+- Windows or macOS for the npm wrapper in this release.
+
+From this repository:
 
 ```powershell
 python -m compileall harness_v2
@@ -42,7 +55,7 @@ Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 
 The package smoke test proves that the local package metadata can be consumed by pip in editable mode without dependency installation.
 
-Local npm wrapper smoke test:
+Local npm wrapper smoke test before publication:
 
 ```powershell
 node bin\harness-v2.js status --root .
@@ -50,7 +63,7 @@ node bin\harness-v2.js verify tests\fixtures\valid-task.json
 npm pack --dry-run
 ```
 
-The npm wrapper supports Windows and macOS for this slice. It requires Node.js and Python 3 on PATH, then delegates to the existing Python CLI without rewriting HARNESS V2 in JavaScript. The dry-run pack check does not publish to npm.
+The npm wrapper supports Windows and macOS for this release. It requires Node.js and Python 3.11 or newer on PATH, then delegates to the existing Python CLI without rewriting HARNESS V2 in JavaScript. The dry-run pack check does not publish to npm.
 
 ## Repository Layout
 
@@ -59,6 +72,8 @@ The npm wrapper supports Windows and macOS for this slice. It requires Node.js a
 | `AGENTS.md` | product-local agent entry router |
 | `RULES.md` | product-local root rules |
 | `CURRENT.md` | visible current workflow pointer |
+| `LICENSE` | MIT license |
+| `RELEASE_NOTES.md` | public release notes |
 | `package.json` | npm wrapper package manifest |
 | `bin\harness-v2.js` | Windows/macOS Node CLI wrapper for the Python CLI |
 | `control\` | source, approval, permission, proof, and lifecycle boundaries |

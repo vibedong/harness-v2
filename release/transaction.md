@@ -2,7 +2,7 @@
 
 status: package_github_surface / fourth_slice / release_transaction_boundary
 
-This file defines the local markdown boundary for future install and release transactions. It does not execute or prepare an npm, PyPI, or product release.
+This file defines the local markdown boundary for install and release transactions. It records release readiness inputs but does not execute npm, PyPI, or product release work by itself.
 
 ## Release Separation
 
@@ -32,14 +32,35 @@ A future release transaction must name:
 - lifecycle transition target;
 - stale triggers and rollback path.
 
-## Current Denials
+## Current Release Readiness Audit
 
-The current package, GitHub publish, and npm wrapper scope allows local editable package smoke verification, local Node wrapper proof, npm dry-run pack proof, and GitHub repository push, but denies:
+Target:
+
+```text
+harness-v2@0.1.0
+```
+
+Status:
+
+```text
+RELEASE_PREPARED_AUTH_REQUIRED
+```
+
+Reason:
+
+- npm package name `harness-v2` returned registry 404 during readiness check, so the name appears available.
+- GitHub CLI is authenticated for `vibedong/harness-v2`.
+- npm CLI returned `E401 Unauthorized` for `npm whoami`, so npm publish cannot be executed until npm authentication is present.
+- Local verification, Node wrapper verification, and npm pack dry-run are the required pre-publish proof commands.
+- Exact release execution commands are permitted only for `harness-v2@0.1.0`, `v0.1.0`, and the GitHub repository `vibedong/harness-v2`.
+
+## Current Permission Ceiling
+
+The current package, GitHub publish, npm wrapper, and npm release scope allows local editable package smoke verification, local Node wrapper proof, npm dry-run pack proof, exact npm publish for `harness-v2@0.1.0`, exact Git tag `v0.1.0`, exact GitHub release `v0.1.0`, and GitHub repository push, but denies:
 
 - dependency changes;
-- npm publish or deploy work;
 - PyPI publish or deploy work;
-- release execution;
+- release execution outside `harness-v2@0.1.0` / `v0.1.0`;
 - unrelated external network mutation;
 - secret access;
 - destructive action outside generated verification artifacts;
@@ -47,4 +68,4 @@ The current package, GitHub publish, and npm wrapper scope allows local editable
 
 ## Non-Authority Boundary
 
-This file does not execute, approve, prepare, or validate npm publish, PyPI publish, deploy, release, approval, permission, proof, lifecycle transition, implementation completion, or release readiness.
+This file does not execute npm publish, PyPI publish, deploy, approval, permission, proof, lifecycle transition, or implementation completion by itself.

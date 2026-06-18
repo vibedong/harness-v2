@@ -33,7 +33,7 @@ Local writing is allowed only when the requested work unit is inside the bound a
 
 Package metadata, local editable install verification, Windows/macOS npm wrapper metadata, npm dry-run pack verification, and GitHub repository push are allowed only when the current approval and permission surfaces explicitly name them.
 
-Do not perform npm publish, PyPI publish, release execution, dependency installation from the network, secret access, unrelated external mutation, or destructive action outside generated verification artifacts.
+Do not perform PyPI publish, dependency installation from the network, secret access, unrelated external mutation, or destructive action outside generated verification artifacts. npm publish is allowed only for `harness-v2@0.1.0` when an active release transaction, approval surface, permission surface, and proof obligation all name that exact target and npm authentication is present.
 
 ## Guard Catalog
 

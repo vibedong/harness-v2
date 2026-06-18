@@ -128,10 +128,10 @@ python -m unittest discover tests
 node bin\harness-v2.js status --root .
 node bin\harness-v2.js verify tests\fixtures\valid-task.json
 npm pack --dry-run
+npm publish --dry-run
+npm publish
 
-No npm publish.
 No PyPI publish.
-No release execution.
 No dependency install from network.
 No secret read.
 No destructive operation outside generated verification artifacts.
@@ -145,8 +145,10 @@ Operation type:
 - local editable package smoke verification with generated artifacts limited to temporary paths or ignored build metadata;
 - dependency-free npm wrapper metadata and Windows/macOS Node CLI wrapper creation;
 - local Node wrapper smoke verification and `npm pack --dry-run`;
+- exact npm publish execution for `harness-v2@0.1.0` after npm authentication is present;
+- exact Git tag and GitHub release creation for `v0.1.0`;
 - git initialization, commit, GitHub repository creation, and push for the `F:\Folder\harness-v2` folder only;
-- no npm publish, PyPI publish, release execution, dependency install, secret access, or destructive operation outside generated local verification artifacts.
+- no PyPI publish, dependency install, secret access, or destructive operation outside generated local verification artifacts.
 
 Freshness anchors:
 
@@ -157,12 +159,13 @@ Freshness anchors:
 - `control\lifecycle.md` package, GitHub, and npm wrapper lifecycle entry.
 - fourth-slice user request constrained to the HARNESS folder only.
 - fourth-slice amendment for `.gitattributes`, `_build_backend\harness_backend.py`, editable install proof, generated artifact cleanup, and amendment git push.
-- npm wrapper package slice approval for `package.json`, `bin\harness-v2.js`, local Node wrapper proof, npm dry-run proof, and no npm publish.
+- npm wrapper package slice approval for `package.json`, `bin\harness-v2.js`, local Node wrapper proof, npm dry-run proof, and npm publish execution after authentication.
+- public release preparation approval for `LICENSE`, `RELEASE_NOTES.md`, npm public package metadata, npm publish dry-run, tag/release planning, and npm publish execution once npm authentication is present.
 
 Denied by the current approval scope:
 
 - paths outside `F:\Folder\harness-v2`;
-- npm publish, PyPI publish, release execution;
+- PyPI publish;
 - dependency install outside already available local tooling;
 - secret access;
 - external network mutation outside GitHub repository creation and push;
