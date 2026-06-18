@@ -10,7 +10,7 @@ workflow: `package_publish_review`
 
 state: `package_publish_review`
 
-substate: `fourth_slice_package_github_surface_authored / npm_wrapper_authored / public_patch_release_candidate / npm_publish_ready / npm_only`
+substate: `fourth_slice_package_github_surface_authored / npm_wrapper_authored / public_patch_release_published / npm_published / github_release_created / npm_only`
 
 source basis:
 
