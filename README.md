@@ -71,6 +71,8 @@ harness-v2 init --root .
 
 `harness-v2 apply --root .` is an alias for the same operation. Existing files are not overwritten unless you pass `--force`.
 
+If you cloned the package repository into a folder named `harness-v2` and run `harness-v2 init` from inside that package checkout, HARNESS V2 applies the scaffold to the parent project folder instead of writing into the package checkout itself.
+
 ## 5-Minute Quick Start
 
 The fastest first success is to apply HARNESS V2 to the current project and verify the initial task contract.
@@ -87,6 +89,8 @@ Expected behavior:
 - `init` creates `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `contracts\harness-task.json`, and `templates\task.json`.
 - `status` prints JSON from `CURRENT.md`.
 - `verify` accepts the initial task contract and prints `{"ok": true, ...}`.
+
+If your current directory is the package checkout itself, for example `<project>\harness-v2`, `init` redirects to `<project>` so the project receives the harness files.
 
 To start a new task contract, copy or adapt `templates\task.json` and fill in values that match your current `CURRENT.md`.
 
@@ -226,6 +230,14 @@ If the project has not been initialized yet, run:
 harness-v2 init --root .
 ```
 
+### The files appeared in the wrong place
+
+Run `harness-v2 status --root <project>` against the folder you expected to receive the harness. If you are inside a cloned `harness-v2` package checkout, run `harness-v2 init` there and HARNESS V2 will apply to the parent folder. For any other layout, pass the target explicitly:
+
+```powershell
+harness-v2 init --root F:\path\to\your-project
+```
+
 ### `harness-v2 verify <task.json>` fails
 
 Common causes:
@@ -315,7 +327,7 @@ Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 
 ## Status
 
-The current public release is `harness-v2@0.1.3` on npm.
+The current public release is `harness-v2@0.1.4` on npm.
 
 ## Boundary Rule
 

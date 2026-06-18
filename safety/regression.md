@@ -25,9 +25,9 @@ This file maps HARNESS V2 boundary risks to regression guard candidates. It does
 
 Valid evidence for this package, GitHub, npm wrapper, and public npm release surface is readback, search, listing, unittest output, editable install smoke output, Node wrapper smoke output, npm dry-run pack output, npm publish dry-run output, fresh-client clone verification when separately approved, and surface-specific review against current local files.
 
-Executable tests and fixtures inside `tests\` are part of the current proof material. Package metadata, editable install smoke verification, Windows/macOS npm wrapper metadata, local Node wrapper smoke, npm dry-run pack verification, npm publish dry-run verification, exact npm publish for `harness-v2@0.1.3`, git initialization, GitHub repository creation, tag, release, and push are allowed only inside the current release transaction scope.
+Executable tests and fixtures inside `tests\` are part of the current proof material. Package metadata, editable install smoke verification, Windows/macOS npm wrapper metadata, local Node wrapper smoke, npm dry-run pack verification, npm publish dry-run verification, exact npm publish for `harness-v2@0.1.4`, git initialization, GitHub repository creation, tag, release, and push are allowed only inside the current release transaction scope.
 
-Python package registry publish, dependency installation from the network, secret access, unrelated external mutation, destructive operations outside generated verification artifacts, and release work outside `harness-v2@0.1.3` remain outside the current permission ceiling.
+Python package registry publish, dependency installation from the network, secret access, unrelated external mutation, destructive operations outside generated verification artifacts, and release work outside `harness-v2@0.1.4` remain outside the current permission ceiling.
 
 ## Non-Authority Boundary
 

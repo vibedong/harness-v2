@@ -1,14 +1,13 @@
-# HARNESS V2 0.1.3 Release Notes
+# HARNESS V2 0.1.4 Release Notes
 
-Project application release for HARNESS V2.
+Project application polish release for HARNESS V2.
 
 ## Changed
 
-- Added `harness-v2 init --root .` to apply HARNESS V2 scaffold files to a project.
-- Added `harness-v2 apply --root .` as an alias for `init`.
-- Added an initial valid task contract at `contracts\harness-task.json` in initialized projects.
-- Added idempotent scaffold behavior: existing files are skipped unless `--force` is passed.
-- Updated English and Korean README quick starts to use install, init, status, and verify.
+- Detects a cloned `harness-v2` package checkout during `init` and applies the scaffold to the parent project folder.
+- Reports both `requested_root` and final `root` in `init` / `apply` JSON output.
+- Keeps existing `init` / `apply` behavior for ordinary project folders.
+- Updated English and Korean troubleshooting for package-checkout versus project-root placement.
 
 ## Runtime Requirements
 
@@ -37,11 +36,11 @@ npm publish
 Published npm package:
 
 ```text
-harness-v2@0.1.3
+harness-v2@0.1.4
 ```
 
 GitHub release:
 
 ```text
-https://github.com/vibedong/harness-v2/releases/tag/v0.1.3
+https://github.com/vibedong/harness-v2/releases/tag/v0.1.4
 ```

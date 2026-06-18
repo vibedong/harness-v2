@@ -73,20 +73,24 @@ class ValidationResult:
 @dataclass(frozen=True)
 class InitResult:
     ok: bool
+    requested_root: str
     root: str
     initial_task: str
     created: tuple[str, ...]
     skipped: tuple[str, ...]
     overwritten: tuple[str, ...]
+    redirected_from_package_root: bool
 
     def to_json(self) -> dict[str, Any]:
         return {
             "ok": self.ok,
+            "requested_root": self.requested_root,
             "root": self.root,
             "initial_task": self.initial_task,
             "created": list(self.created),
             "skipped": list(self.skipped),
             "overwritten": list(self.overwritten),
+            "redirected_from_package_root": self.redirected_from_package_root,
             "next": [
                 "harness-v2 status --root .",
                 f"harness-v2 verify {self.initial_task}",
@@ -113,7 +117,9 @@ def validate_task_file(path: str | Path) -> ValidationResult:
 
 
 def initialize_project(root: str | Path, force: bool = False) -> InitResult:
-    root_path = Path(root)
+    requested_root = Path(root).resolve()
+    redirected = _looks_like_harness_package_root(requested_root)
+    root_path = requested_root.parent if redirected else requested_root
     root_path.mkdir(parents=True, exist_ok=True)
 
     created: list[str] = []
@@ -136,11 +142,13 @@ def initialize_project(root: str | Path, force: bool = False) -> InitResult:
 
     return InitResult(
         ok=True,
+        requested_root=str(requested_root),
         root=str(root_path.resolve()),
         initial_task=INITIAL_TASK_PATH,
         created=tuple(created),
         skipped=tuple(skipped),
         overwritten=tuple(overwritten),
+        redirected_from_package_root=redirected,
     )
 
 
@@ -359,6 +367,23 @@ def _string_list(value: Any) -> list[str]:
 
 def _normalize_side_effect(value: str) -> str:
     return " ".join(value.casefold().split())
+
+
+def _looks_like_harness_package_root(path: Path) -> bool:
+    if path.parent == path:
+        return False
+    package_json = path / "package.json"
+    if not package_json.exists():
+        return False
+    if not (path / "harness_v2" / "core.py").exists():
+        return False
+    if not (path / "bin" / "harness-v2.js").exists():
+        return False
+    try:
+        package_data = json.loads(package_json.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+    return package_data.get("name") == "harness-v2"
 
 
 def _display_path(parts: tuple[str, ...]) -> str:

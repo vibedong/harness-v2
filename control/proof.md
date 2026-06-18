@@ -24,9 +24,9 @@ For the fourth-slice package, GitHub publish, and npm wrapper surface, verify af
 14. `npm pack --dry-run` exits 0 without publishing;
 15. `npm publish --dry-run` exits 0;
 16. `LICENSE`, `RELEASE_NOTES.md`, and public npm metadata are present;
-17. `npm publish` exits 0 for `harness-v2@0.1.3`;
-18. `git tag v0.1.3` and `git push origin v0.1.3` succeed;
-19. `gh release create v0.1.3 --title "HARNESS V2 0.1.3" --notes-file RELEASE_NOTES.md` succeeds;
+17. `npm publish` exits 0 for `harness-v2@0.1.4`;
+18. `git tag v0.1.4` and `git push origin v0.1.4` succeed;
+19. `gh release create v0.1.4 --title "HARNESS V2 0.1.4" --notes-file RELEASE_NOTES.md` succeeds;
 20. post-publish fresh install verification succeeds from npm;
 21. the unittest suite proves CLI status can run without external dependency;
 22. the unittest suite proves the verifier rejects `tests\fixtures\invalid-missing-approval.json`;
