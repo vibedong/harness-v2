@@ -1138,6 +1138,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertEqual(status["workflow"], "remaining_completion_program")
         self.assertEqual(status["state"], "package_publish_review")
         self.assertIn("mcp_stdio_adapter_implementation", status["substate"])
+        self.assertIn("goal_g_complete", status["substate"])
 
     def test_doctor_reports_next_action_without_mutation(self):
         from harness_v2.doctor import inspect_project

@@ -10,7 +10,7 @@ workflow: `remaining_completion_program`
 
 state: `package_publish_review`
 
-substate: `mcp_stdio_adapter_implementation / active_goal_g`
+substate: `mcp_stdio_adapter_implementation / goal_g_complete`
 
 source basis:
 
@@ -33,10 +33,11 @@ Completed slices:
 - executable 8-stage workflow engine enforcement
 - side-effect preflight adapter
 - MCP feasibility/design and final quality audit/docs-control sync
+- MCP stdio adapter implementation
 
 Current active slice:
 
-- MCP stdio adapter implementation
+- no active implementation slice; waiting for Goal H hook or hook-equivalent hardening
 
 Future slices in this program:
 

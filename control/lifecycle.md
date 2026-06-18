@@ -36,7 +36,7 @@ package_publish_review -> package_publish_review
 Active slice:
 
 ```text
-mcp_stdio_adapter_implementation
+mcp_stdio_adapter_implementation / goal_g_complete
 ```
 
 Scope:
@@ -46,7 +46,8 @@ Scope:
 - executable 8-stage workflow enforcement is complete;
 - side-effect preflight adapter work is complete;
 - MCP feasibility/design and final quality audit/docs-control sync is complete;
-- current work covers local MCP stdio adapter implementation, final quality audit, documentation sync, and GitHub push;
+- local MCP stdio adapter implementation, final quality audit, documentation sync, and GitHub push are complete for Goal G;
+- no implementation slice is currently active until Goal H hook or hook-equivalent hardening begins;
 - no remote MCP hosting, MCP client configuration mutation, package registry publish, GitHub release, release tag, dependency install, secret access, or destructive operation is part of this lifecycle entry;
 - local verification commands named in `control\permission.md`;
 - read-only subagent review with `vowline`;
