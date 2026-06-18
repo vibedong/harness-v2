@@ -63,6 +63,40 @@ npm install -g harness-v2
 
 npm 명령은 내부적으로 Python CLI에 위임합니다. HARNESS V2를 JavaScript로 다시 구현한 것이 아닙니다.
 
+## 0.1.5 업데이트 내용
+
+- `harness-v2 init --root .`가 생성하는 AI-facing project file이 더 강해졌습니다.
+- 생성되는 `AGENTS.md`는 README가 사용자 문서이지 AI 작업 권한 표면이 아니라고 명시합니다.
+- 생성되는 `RULES.md`, `CURRENT.md`, `control\`은 source, approval, permission, proof, lifecycle 분리를 더 명확히 합니다.
+- 적용된 project file은 대상 프로젝트 루트에 바로 있어야 하며, 프로젝트 안에 `harness-v2` 하위 폴더가 남는 구조가 정상 흐름이 아닙니다.
+
+## HARNESS V2 업데이트 방법
+
+가장 간단한 방법은 AI 코딩 도구에게 그대로 말하는 것입니다.
+
+```text
+하네스 업데이트해줘.
+```
+
+AI는 이 요청을 다음 작업으로 처리해야 합니다.
+
+1. 현재 프로젝트 루트와 기존 HARNESS 파일을 확인합니다.
+2. 전역 CLI를 `npm install -g harness-v2@latest`로 업데이트합니다.
+3. 최신 CLI로 임시 fresh scaffold를 만든 뒤 현재 프로젝트와 비교합니다.
+4. 안전하게 갱신 가능한 HARNESS-managed surface만 업데이트하고, 사용자가 reset을 명시하지 않았다면 프로젝트별 `CURRENT.md`, approval, permission, proof, lifecycle, active task 상태를 보존합니다.
+5. 프로젝트 안에 `harness-v2` 하위 폴더를 만들거나 남기지 않습니다.
+6. `harness-v2 status --root .`와 `harness-v2 verify contracts\harness-task.json`를 실행합니다.
+
+직접 명령으로 CLI만 업데이트할 때는 아래처럼 실행합니다.
+
+```powershell
+npm install -g harness-v2@latest
+harness-v2 status --root .
+harness-v2 verify contracts\harness-task.json
+```
+
+프로젝트 scaffold 자체를 최신 템플릿으로 갱신해야 한다면 AI에게 현재 파일과 임시 fresh scaffold를 비교하게 하세요. 무작정 `--force`를 쓰면 프로젝트-local 상태가 덮어써질 수 있습니다.
+
 현재 프로젝트에 HARNESS V2를 적용합니다.
 
 ```powershell

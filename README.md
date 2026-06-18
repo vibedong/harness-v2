@@ -63,6 +63,40 @@ Runtime prerequisites:
 
 The npm command delegates to the Python CLI. HARNESS V2 is not rewritten in JavaScript.
 
+## What's New In 0.1.5
+
+- `harness-v2 init --root .` now generates stronger AI-facing project files.
+- Generated `AGENTS.md` says README files are user documentation, not AI operating authority.
+- Generated `RULES.md`, `CURRENT.md`, and `control\` make source, approval, permission, proof, and lifecycle separation more explicit.
+- Installed project files should appear directly in the target project root, not inside a nested `harness-v2` folder.
+
+## Updating HARNESS V2
+
+For the simplest path, ask your AI coding agent:
+
+```text
+하네스 업데이트해줘.
+```
+
+The agent should treat that request as:
+
+1. Check the current project root and existing HARNESS files.
+2. Update the global CLI with `npm install -g harness-v2@latest`.
+3. Create a temporary fresh scaffold with the latest CLI and compare it with the project.
+4. Update only HARNESS-managed surfaces that are safe to refresh, preserving project-specific `CURRENT.md`, approval, permission, proof, lifecycle, and active task state unless the user explicitly asks to reset them.
+5. Do not create or leave a nested `harness-v2` folder inside the project.
+6. Run `harness-v2 status --root .` and `harness-v2 verify contracts\harness-task.json`.
+
+Manual CLI update:
+
+```powershell
+npm install -g harness-v2@latest
+harness-v2 status --root .
+harness-v2 verify contracts\harness-task.json
+```
+
+If a project needs the latest generated scaffold templates, have an AI agent compare the current project files against a fresh temporary scaffold before overwriting anything. Blind `--force` can replace project-local state.
+
 Apply HARNESS V2 to a project:
 
 ```powershell
