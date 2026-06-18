@@ -26,7 +26,7 @@ This file maps operation modes to suggested local routes. Routing is guidance, n
 | artifact observation | `artifacts\registry.md` and `artifacts\log.md` | registry/log are not source or proof |
 | regression safety | `safety\regression.md` | mapping is not pass evidence |
 | improvement intake | `safety\improvement.md` | candidate is not product change |
-| release boundary | `release\transaction.md` | exact npm publish only for `harness-v2@0.1.0` after npm auth; no Python package registry publish or deploy |
+| release boundary | `release\transaction.md` | exact npm publish only for `harness-v2@0.1.1` after npm auth; no Python package registry publish or deploy |
 
 ## Specialist And Subagent Guardrail
 

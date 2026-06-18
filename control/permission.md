@@ -12,7 +12,7 @@ This file separates approved intent from allowed side effects.
 | local file write | allowed only under `F:\Folder\harness-v2` |
 | local command execution | allowed for verification, editable package smoke, Node wrapper smoke, npm dry-run pack, npm publish, and git/GitHub release commands below |
 | package metadata, package build, local editable smoke install | allowed only for this product |
-| npm wrapper metadata, dry-run pack, and npm publish | allowed only for `harness-v2@0.1.0` release execution |
+| npm wrapper metadata, dry-run pack, and npm publish | allowed only for `harness-v2@0.1.1` release execution |
 | GitHub repository creation and push | allowed only for this product folder |
 | Python package registry publish, dependency install | denied |
 | secret access, unrelated external network mutation, destructive action | denied |
@@ -46,9 +46,9 @@ The temporary smoke-test venv, generated `harness_v2.egg-info`, generated `__pyc
 - `git commit`
 - `gh repo create vibedong/harness-v2 --public --source . --remote origin`
 - `git push -u origin <branch>`
-- `git tag v0.1.0`
-- `git push origin v0.1.0`
-- `gh release create v0.1.0 --title "HARNESS V2 0.1.0" --notes-file RELEASE_NOTES.md`
+- `git tag v0.1.1`
+- `git push origin v0.1.1`
+- `gh release create v0.1.1 --title "HARNESS V2 0.1.1" --notes-file RELEASE_NOTES.md`
 
 ## Permission Boundaries
 

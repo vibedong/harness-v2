@@ -89,9 +89,9 @@ ALLOWED_GIT_COMMANDS = {
     "git commit",
     "gh repo create vibedong/harness-v2 --public --source . --remote origin",
     "git push -u origin <branch>",
-    "git tag v0.1.0",
-    "git push origin v0.1.0",
-    "gh release create v0.1.0 --title \"HARNESS V2 0.1.0\" --notes-file RELEASE_NOTES.md",
+    "git tag v0.1.1",
+    "git push origin v0.1.1",
+    "gh release create v0.1.1 --title \"HARNESS V2 0.1.1\" --notes-file RELEASE_NOTES.md",
 }
 FORBIDDEN_SOURCE_FRAGMENT = "source" + ".fragment.json"
 REMOVED_PACKAGE_REGISTRY_ACRONYM = "Py" + "PI"
@@ -126,8 +126,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
             self.assertIn("harness_v2/cli.py", names)
             self.assertIn("harness_v2/core.py", names)
-            self.assertIn("harness_v2-0.1.0.dist-info/METADATA", names)
-            self.assertIn("harness_v2-0.1.0.dist-info/entry_points.txt", names)
+            self.assertIn("harness_v2-0.1.1.dist-info/METADATA", names)
+            self.assertIn("harness_v2-0.1.1.dist-info/entry_points.txt", names)
         finally:
             sys.path.remove(str(ROOT / "_build_backend"))
 
@@ -148,8 +148,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
             self.assertEqual(pth, str(ROOT))
             self.assertNotIn("harness_v2/cli.py", names)
-            self.assertIn("harness_v2-0.1.0.dist-info/METADATA", names)
-            self.assertIn("harness_v2-0.1.0.dist-info/entry_points.txt", names)
+            self.assertIn("harness_v2-0.1.1.dist-info/METADATA", names)
+            self.assertIn("harness_v2-0.1.1.dist-info/entry_points.txt", names)
         finally:
             sys.path.remove(str(ROOT / "_build_backend"))
 
@@ -179,7 +179,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         package_json = json.loads((ROOT / "package.json").read_text())
 
         self.assertEqual(package_json["name"], "harness-v2")
-        self.assertEqual(package_json["version"], "0.1.0")
+        self.assertEqual(package_json["version"], "0.1.1")
         self.assertEqual(package_json["license"], "MIT")
         self.assertEqual(package_json["bin"], {"harness-v2": "bin/harness-v2.js"})
         self.assertEqual(package_json["os"], ["win32", "darwin"])
@@ -235,7 +235,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertIn("MIT License", license_text)
         self.assertIn("Copyright (c) 2026 vibedong", license_text)
-        self.assertIn("# HARNESS V2 0.1.0 Release Notes", release_notes)
+        self.assertIn("# HARNESS V2 0.1.1 Release Notes", release_notes)
         self.assertIn("npm install -g harness-v2", readme)
         self.assertIn("README.ko.md", readme)
         self.assertIn("# HARNESS V2 사용설명서", korean_readme)
@@ -252,9 +252,9 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         package_json = json.loads((ROOT / "package.json").read_text())
 
-        self.assertEqual(harness_v2.__version__, "0.1.0")
-        self.assertEqual(package_json["version"], "0.1.0")
-        self.assertIn("0.1.0", (ROOT / "RELEASE_NOTES.md").read_text())
+        self.assertEqual(harness_v2.__version__, "0.1.1")
+        self.assertEqual(package_json["version"], "0.1.1")
+        self.assertIn("0.1.1", (ROOT / "RELEASE_NOTES.md").read_text())
 
     def test_node_wrapper_delegates_status_and_verify_to_python_cli(self):
         status = subprocess.run(
@@ -287,7 +287,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         )
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
-        self.assertIn("harness-v2-0.1.0.tgz", completed.stdout)
+        self.assertIn("harness-v2-0.1.1.tgz", completed.stdout)
         self.assertNotIn("__pycache__", completed.stdout)
         self.assertNotIn(".pyc", completed.stdout)
 
@@ -346,7 +346,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         root_rules = (ROOT / "RULES.md").read_text()
         self.assertNotIn("Do not create package metadata", root_rules)
         self.assertIn("Windows/macOS npm wrapper metadata", root_rules)
-        self.assertIn("npm publish is allowed only for `harness-v2@0.1.0`", root_rules)
+        self.assertIn("npm publish is allowed only for `harness-v2@0.1.1`", root_rules)
 
     def test_task_fixtures_match_package_publish_review_state(self):
         valid = json.loads(VALID_TASK.read_text())

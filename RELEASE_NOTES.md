@@ -1,16 +1,13 @@
-# HARNESS V2 0.1.0 Release Notes
+# HARNESS V2 0.1.1 Release Notes
 
-Initial public npm release for HARNESS V2.
+Documentation patch release for HARNESS V2.
 
-## Included
+## Changed
 
-- Product-local HARNESS V2 control-plane documents for source, approval, permission, proof, lifecycle, routing, artifacts, regression, improvement, and release boundaries.
-- Standard-library Python CLI with `status`, `verify`, and `doctor` commands.
-- Executable verifier hardening for workflow/current pointer mismatch, side-effect conflicts, lifecycle known states, stale status surfaces, and author-local status command roots.
-- Dependency-free Python editable install support through the local build backend included in the source and npm tarball.
-- Dependency-free Windows/macOS npm CLI wrapper that delegates to the Python CLI.
-- Unit tests and fixtures for the local verifier and npm wrapper, included in the source and npm tarball.
-- Korean user manual in `README.ko.md`.
+- Reworked `README.md` into a practical user manual.
+- Added Korean documentation in `README.ko.md`.
+- Replaced the package-registry acronym in user-facing and control-plane documentation with the clearer phrase `Python package registry publish`.
+- Updated release notes and control surfaces to reflect that the public npm release is already published.
 
 ## Runtime Requirements
 
@@ -28,20 +25,19 @@ python -m unittest discover tests
 node bin\harness-v2.js status --root .
 node bin\harness-v2.js verify tests\fixtures\valid-task.json
 npm pack --dry-run
+npm publish --dry-run
 ```
-
-Post-publish installation from npm was also verified with a temporary npm prefix.
 
 ## Publish Scope
 
 Published npm package:
 
 ```text
-harness-v2@0.1.0
+harness-v2@0.1.1
 ```
 
 GitHub release:
 
 ```text
-https://github.com/vibedong/harness-v2/releases/tag/v0.1.0
+https://github.com/vibedong/harness-v2/releases/tag/v0.1.1
 ```

@@ -145,8 +145,8 @@ Operation type:
 - local editable package smoke verification with generated artifacts limited to temporary paths or ignored build metadata;
 - dependency-free npm wrapper metadata and Windows/macOS Node CLI wrapper creation;
 - local Node wrapper smoke verification and `npm pack --dry-run`;
-- exact npm publish execution for `harness-v2@0.1.0` after npm authentication is present;
-- exact Git tag and GitHub release creation for `v0.1.0`;
+- exact npm publish execution for `harness-v2@0.1.1` after npm authentication is present;
+- exact Git tag and GitHub release creation for `v0.1.1`;
 - git initialization, commit, GitHub repository creation, and push for the `F:\Folder\harness-v2` folder only;
 - no Python package registry publish, dependency install, secret access, or destructive operation outside generated local verification artifacts.
 

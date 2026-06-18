@@ -6,7 +6,7 @@ Korean documentation is available in [README.ko.md](README.ko.md).
 
 ## Status
 
-The current public release is `harness-v2@0.1.0` on npm.
+The current public release is `harness-v2@0.1.1` on npm.
 
 This repository provides:
 
