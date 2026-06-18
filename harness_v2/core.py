@@ -396,24 +396,23 @@ def _agents_md() -> str:
 
 This project has HARNESS V2 applied at the project root. This file is the AI agent entry point.
 
+The applied surface is a scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, or lifecycle transition engine.
+
 `README.md` and `README.ko.md` are user documentation. They explain the tool, but they do not grant source authority, approval, permission, proof, lifecycle state, or release authority.
 
-## Required Read Order
+## Evidence-Scaled Read Order
 
-Before doing project work, read:
+For routine current-task work, read:
 
 1. `RULES.md`
 2. `CURRENT.md`
-3. `control\\source.md`
-4. `control\\approval.md`
-5. `control\\permission.md`
-6. `control\\proof.md`
-7. `control\\lifecycle.md`
-8. The active task contract, initially `contracts\\harness-task.json`
+3. The active task contract, initially `contracts\\harness-task.json`
+
+Then read only the owner surface required by the task. Expand to exact `control\\source.md`, `control\\approval.md`, `control\\permission.md`, `control\\proof.md`, or `control\\lifecycle.md` text before approval binding, permission-sensitive commands, proof/completion claims, lifecycle movement, stale/conflicting state, release work, external mutation, destructive action, or product implementation risk.
 
 ## Required Preflight
 
-Run these checks before changing files:
+Run these checks before changing files or side-effectful commands:
 
 ```powershell
 harness-v2 status --root .
@@ -422,7 +421,7 @@ harness-v2 verify contracts\\harness-task.json
 
 ## Working Boundary
 
-Installation alone does not approve arbitrary work. Stay inside `approval.approved_paths`. Do not execute `approval.excluded_side_effects` or `permission.denied_side_effects`.
+Installation, `init`, `apply`, and CLI availability do not approve arbitrary future work. Stay inside `approval.approved_paths`. Do not execute `approval.excluded_side_effects` or `permission.denied_side_effects`.
 
 If the current user request does not fit the active task contract, stop before mutating files or running side-effectful commands and ask for a new or amended task contract.
 
@@ -433,7 +432,7 @@ Completion requires current proof from `proof.obligations`; previous chat, READM
 def _rules_md() -> str:
     return """# HARNESS V2 Project Rules
 
-HARNESS V2 records the current task boundary for AI-assisted work. It is not a sandbox and does not replace human approval.
+HARNESS V2 records the current task boundary for AI-assisted work. It is a scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, lifecycle transition engine, editor, shell, network, or release sandbox.
 
 README files are user-facing documentation only. They never grant approval, permission, proof, lifecycle state, route authority, release readiness, or package publish authority.
 
@@ -445,6 +444,12 @@ README files are user-facing documentation only. They never grant approval, perm
 4. Modify only paths named in `approval.approved_paths`.
 5. Do not execute side effects named in `approval.excluded_side_effects` or `permission.denied_side_effects`.
 6. Before completion, run or report every item in `proof.obligations`.
+
+## Evidence-Scaled Readback
+
+Routine current-task work may start from this file, `CURRENT.md`, and the active task contract.
+
+Read exact source, approval, permission, proof, and lifecycle control text before approval binding, permission-sensitive commands, proof/completion claims, lifecycle movement, stale/conflicting state, release work, external mutation, destructive action, or product implementation risk. Extra reading must improve the current decision evidence; it does not widen the active contract.
 
 ## Authority Separation
 
@@ -467,11 +472,13 @@ status: applied_project_surface / init / current_pointer
 
 This project root has HARNESS V2 applied. AI agents should use `AGENTS.md`, `RULES.md`, this file, `control\\`, and the active task contract as the operating boundary.
 
+The applied surface is a scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, or lifecycle transition engine, and it does not approve future work by installation, `init`, `apply`, or CLI availability.
+
 workflow: `default`
 
 state: `ready`
 
-substate: `initialized`
+substate: `initialized / not_automatic_enforcement_completion`
 
 source basis:
 
@@ -483,7 +490,7 @@ source basis:
 
 The initial task contract is `contracts\\harness-task.json`.
 
-That initial contract proves the scaffold was applied. It does not authorize arbitrary feature work, package work, dependency changes, release execution, secrets, destructive operations, or external mutation.
+That initial contract proves the scaffold was applied and can be verified. It does not authorize arbitrary feature work, package work, dependency changes, release execution, secrets, destructive operations, or external mutation.
 
 For each real task, create or receive a task contract whose source, approval, permission, proof, and lifecycle fields match the requested work.
 
@@ -515,7 +522,7 @@ Approval is declared by each task contract in `approval.packet` and `approval.ap
 
 No file path is approved unless the active task contract names it.
 
-Broad phrases such as "go ahead", installation success, README examples, or tool availability do not approve extra paths, package publish, release execution, dependency installation, secrets, external mutation, or destructive operations.
+Broad phrases such as "go ahead", installation success, init/apply success, README examples, or tool availability do not approve extra paths, package publish, release execution, dependency installation, secrets, external mutation, or destructive operations.
 """
 
 
@@ -529,6 +536,8 @@ Permission is declared by each task contract in `permission.allowed_side_effects
 Denied side effects win over broad requests. Secrets, dependency installation, package publish, release execution, external mutation, and destructive operations require a separate explicit task contract.
 
 Approval text does not become permission by itself. Permission must be checked against the active task contract before running commands or changing files.
+
+`harness-v2 init`, `harness-v2 apply`, and successful verification do not grant permission for the next task.
 """
 
 
@@ -541,7 +550,7 @@ Proof obligations are declared by each task contract in `proof.obligations`.
 
 Do not claim completion until the active proof obligations are run or their blocked status is reported.
 
-Proof must be current evidence from the actual project root or the consumer surface named by the task. README text, previous success, installation success, and unverified assumptions are not proof.
+Proof must be current evidence from the actual project root or the consumer surface named by the task. README text, previous success, installation/init/apply success, and unverified assumptions are not proof.
 """
 
 
@@ -559,14 +568,14 @@ Known local states:
 
 Lifecycle movement must be named in the active task contract. Progress notes are not lifecycle transitions.
 
-Do not mark work done, release-ready, published, or migrated unless the active task contract names that transition and current proof satisfies it.
+Do not mark work done, release-ready, published, migrated, or automatically enforced unless the active task contract names that transition and current proof satisfies it.
 """
 
 
 def _initial_task_json() -> str:
     return """{
   "task_id": "harness-v2-initial-task",
-  "title": "Initial HARNESS V2 project binding",
+    "title": "Scaffold-only initial HARNESS V2 project binding",
   "workflow": "default",
   "source": {
     "basis": [
@@ -577,7 +586,7 @@ def _initial_task_json() -> str:
     "current_pointer": "CURRENT.md"
   },
   "approval": {
-    "packet": "Initial local HARNESS V2 project application",
+    "packet": "Scaffold-only initial local HARNESS V2 project application as scaffold, task-contract validator, and CLI helper",
     "approved_paths": [
       "AGENTS.md",
       "RULES.md",
@@ -602,6 +611,7 @@ def _initial_task_json() -> str:
   "permission": {
     "allowed_side_effects": [
       "local file writes to initial HARNESS V2 scaffold files",
+      "local readback of generated HARNESS V2 scaffold files",
       "harness-v2 status --root .",
       "harness-v2 verify contracts\\\\harness-task.json"
     ],
@@ -616,6 +626,7 @@ def _initial_task_json() -> str:
   },
   "proof": {
     "obligations": [
+      "generated AGENTS/RULES/CURRENT bind AI agents without relying on README authority",
       "harness-v2 status --root .",
       "harness-v2 verify contracts\\\\harness-task.json"
     ]

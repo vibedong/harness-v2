@@ -1,10 +1,10 @@
 # HARNESS V2 Product Entry
 
-status: package_github_surface / detail_step_20_docs_control_sync / entry_router
+status: package_github_surface / remaining_completion_program / entry_router
 
 This file is the product-local entry router for HARNESS V2. Keep it short and use it only to find the current authority surface.
 
-Current HARNESS V2 is a project scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox and it does not complete workflow transitions by itself.
+Current HARNESS V2 is a project scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, or lifecycle transition engine.
 
 ## Read Order
 

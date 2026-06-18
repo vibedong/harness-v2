@@ -20,14 +20,15 @@ This file maps HARNESS V2 boundary risks to regression guard candidates. It does
 | package/GitHub MVP mistaken for Python package registry release | require separate Python package registry or release transaction approval |
 | npm wrapper MVP mistaken for npm release | require a separate release transaction and exact npm target approval |
 | author-local paths copied into GitHub-facing commands | require `<repo root>` or current-directory examples for portable docs |
+| generated scaffold mistaken for automatic enforcement completion | require generated AGENTS/RULES/CURRENT to say scaffold + task-contract validator + CLI helper, not automatic enforcement sandbox or completion layer |
 
 ## Guard Evidence
 
-Valid evidence for this package, GitHub, npm wrapper, and public npm release surface is readback, search, listing, unittest output, editable install smoke output, Node wrapper smoke output, npm dry-run pack output, npm publish dry-run output, fresh-client clone verification when separately approved, and surface-specific review against current local files.
+Valid evidence for this package, GitHub, npm wrapper, generated scaffold, and remaining completion program surface is readback, search, listing, unittest output, Node wrapper smoke output, fresh TEMP init/verify output, npm dry-run pack output, and surface-specific review against current local files.
 
-Executable tests and fixtures inside `tests\` are part of the current proof material. Package metadata, editable install smoke verification, Windows/macOS npm wrapper metadata, local Node wrapper smoke, npm dry-run pack verification, npm publish dry-run verification, exact npm publish for `harness-v2@0.1.4`, git initialization, GitHub repository creation, tag, release, and push are allowed only inside the current release transaction scope.
+Executable tests and fixtures inside `tests\` are part of the current proof material. Package metadata, Windows/macOS npm wrapper metadata, local Node wrapper smoke, npm dry-run pack verification, fresh scaffold verification, and git push are allowed only inside the current remaining completion approval and permission scope.
 
-Python package registry publish, dependency installation from the network, secret access, unrelated external mutation, destructive operations outside generated verification artifacts, and release work outside `harness-v2@0.1.4` remain outside the current permission ceiling.
+Npm publish, Python package registry publish, dependency installation from the network, secret access, unrelated external mutation, destructive operations outside generated verification artifacts, GitHub release creation, release tag creation, and release execution remain outside the current permission ceiling.
 
 ## Non-Authority Boundary
 

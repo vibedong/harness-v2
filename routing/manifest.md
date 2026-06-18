@@ -1,6 +1,6 @@
 # HARNESS V2 Routing Manifest
 
-status: package_github_surface / detail_step_20_docs_control_sync / routing_manifest
+status: package_github_surface / remaining_completion_program / routing_manifest
 
 This file maps operation modes to suggested local routes. Routing is guidance, not permission.
 
@@ -23,7 +23,8 @@ This file maps operation modes to suggested local routes. Routing is guidance, n
 | development review | source, approval, permission, proof, lifecycle, route, artifact, safety surfaces | findings are not proof |
 | proof check | `control\proof.md` plus readback/search/listing | artifact checks must match obligation |
 | executable local MVP | `harness_v2` CLI with `status`, `verify`, and `doctor` | only approved local commands and no external dependency |
-| package, GitHub, and npm wrapper MVP | package metadata and wrapper surfaces named by a future explicit package slice | package, npm dry-run, registry readback, or release work require current approval, permission, and proof |
+| remaining completion program | generated scaffold, workflow engine, preflight adapter, tests, docs/control, and audit surfaces named by current approval | no npm publish, Python package registry publish, release tag, GitHub release, dependency install, secrets, or destructive action outside generated verification artifacts |
+| package, GitHub, and npm wrapper MVP | package metadata and wrapper surfaces named by an explicit package slice | package, npm dry-run, registry readback, or release work require current approval, permission, and proof |
 | artifact observation | `artifacts\registry.md` and `artifacts\log.md` | registry/log are not source or proof |
 | regression safety | `safety\regression.md` | mapping is not pass evidence |
 | improvement intake | `safety\improvement.md` | candidate is not product change |

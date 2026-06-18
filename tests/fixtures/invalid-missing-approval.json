@@ -1,7 +1,7 @@
 {
   "task_id": "harness-v2-invalid-missing-approval",
-  "title": "Reject missing package and GitHub approval contract",
-  "workflow": "package_publish_review",
+  "title": "Reject missing remaining completion approval contract",
+  "workflow": "remaining_completion_program",
   "source": {
     "basis": [
       "CURRENT.md"

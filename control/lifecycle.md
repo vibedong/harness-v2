@@ -1,6 +1,6 @@
 # HARNESS V2 Lifecycle Control
 
-status: package_github_surface / detail_step_20_docs_control_sync / lifecycle_control
+status: package_github_surface / remaining_completion_program / lifecycle_control
 
 This file separates current pointer, progress note, and lifecycle state movement.
 
@@ -27,21 +27,29 @@ Known local states:
 
 ## Current Entry
 
-The current detail step 20 entry is:
+The current remaining completion program entry is:
 
 ```text
 package_publish_review -> package_publish_review
 ```
 
+Active slice:
+
+```text
+generated_scaffold_hardening
+```
+
 Scope:
 
-- eleven docs/control files named in `control\approval.md` only;
-- local readback/search verification named in `control\permission.md`;
+- product writes only under `F:\Folder\harness-v2`;
+- generated scaffold hardening first;
+- later slices may cover executable 8-stage workflow enforcement, side-effect preflight adapter work if locally feasible, MCP feasibility/design only unless separately approved, final quality audit, documentation sync, and GitHub push;
+- local verification commands named in `control\permission.md`;
 - read-only subagent review with `vowline`;
-- git add, commit, and push only for this docs/control sync slice after review passes;
-- no package build, npm publish dry-run, repeat npm publish, Python package registry publish, dependency install, secret access, release tag creation, GitHub release execution, hook work, MCP work, unrelated external network mutation, or destructive operation.
+- git add, commit, and push after completed slices pass verification and review;
+- no npm publish, Python package registry publish, GitHub release, release tag, dependency install from network, secret access, external network mutation outside allowed git push, or destructive operation outside generated temporary verification artifacts.
 
-This entry records docs/control sync review while preserving the `package_publish_review` state. It is not repeat npm publish, Python package registry publish, release readiness, automatic enforcement completion, product completion, or a future-slice transition.
+This entry preserves `package_publish_review` while completing missing local behavior and documentation needed for Codex-app-focused use. It is not repeat npm publish, Python package registry publish, public stable release readiness, release execution, automatic enforcement completion, or final product completion.
 
 ## Transition Requirements
 
@@ -58,6 +66,6 @@ A later state movement must name:
 
 ## Backtrack Rule
 
-Backtrack to `package_publish_review`, `package_publish_authoring`, `npm_wrapper_authoring`, or `public_release_candidate` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, npm wrapper surface, GitHub target, npm target, automatic-enforcement wording, or target surface becomes stale or conflicting.
+Backtrack to `package_publish_review`, `package_publish_authoring`, `npm_wrapper_authoring`, or `public_release_candidate` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, npm wrapper surface, GitHub target, npm target, generated scaffold behavior, automatic-enforcement wording, or target surface becomes stale or conflicting.
 
 This file does not produce proof, approval, npm publish state, Python package registry publish state, release state, route permission, regression pass, improvement execution, or permission for future slices.

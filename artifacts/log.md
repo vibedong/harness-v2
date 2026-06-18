@@ -19,6 +19,7 @@ Do not use this file as a transcript, scratchpad, or complete audit database.
 | third-slice executable local MVP | approved contracts, templates, `harness_v2`, tests, fixtures, README, and updated markdown controls | historical executable local MVP implementation scope |
 | fourth-slice package and GitHub MVP | `pyproject.toml`, `_build_backend`, editable install proof path, git repo, and GitHub `main` branch | current package and GitHub MVP publication scope |
 | docs/control sync | root rules, route, artifact, safety, README, CURRENT, and tests | current stale-surface reconciliation scope |
+| generated scaffold hardening | `harness_v2\core.py`, generated project-root scaffold, fixtures, tests, and current control surfaces | active remaining completion program slice |
 
 ## Freshness
 

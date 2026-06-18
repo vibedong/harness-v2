@@ -1,25 +1,27 @@
 # HARNESS V2 Permission Control
 
-status: package_github_surface / detail_step_20_docs_control_sync / permission_control
+status: package_github_surface / remaining_completion_program / permission_control
 
 This file separates approved intent from allowed side effects.
 
 ## Side Effect Classes
 
-| class | detail step 20 local decision |
+| class | remaining completion program decision |
 | --- | --- |
-| local read | allowed for HARNESS V2 product files and planning context needed for this docs/control sync |
-| local file write | allowed only for the eleven files named in `control\approval.md` |
-| local command execution | allowed only for local readback/search verification and the git commands below |
-| package metadata, package build, local editable smoke install | denied for this slice |
-| npm wrapper metadata, dry-run pack, npm registry readback | denied for this slice |
-| GitHub repository push | allowed only for this docs/control sync slice after review passes |
-| npm publish, npm publish dry-run, Python package registry publish, dependency install | denied |
-| secret access, unrelated external network mutation, destructive action | denied |
+| local read | allowed under `F:\Folder\harness-v2` and generated TEMP verification folders |
+| local file write | allowed under `F:\Folder\harness-v2` only when directly required by the active remaining completion program |
+| new files | allowed only for workflow engine enforcement, lifecycle ledger/read-set/preflight implementation, generated scaffold templates, tests/fixtures, hook or equivalent local preflight adapter, or documentation needed to explain implemented surfaces |
+| local command execution | allowed only for the commands listed below |
+| temporary verification folders | allowed under TEMP |
+| cleanup | allowed only for generated TEMP folders, `__pycache__`, `*.egg-info`, and npm pack dry-run output |
+| read-only subagent review | allowed with `vowline`; subagents may not edit, mutate git/network, grant approval, produce proof, or declare lifecycle transition |
+| GitHub repository push | allowed after a completed slice passes verification and review |
+| npm publish, Python package registry publish, GitHub release, release tag | denied |
+| dependency install from network, secret read, destructive action outside generated verification artifacts | denied |
 
 ## Exact Write Surface
 
-Allowed write paths are:
+Allowed write paths are product files under `F:\Folder\harness-v2` needed for the remaining completion program, including:
 
 - `AGENTS.md`
 - `RULES.md`
@@ -27,21 +29,47 @@ Allowed write paths are:
 - `README.md`
 - `README.ko.md`
 - `routing\manifest.md`
+- `control\source.md`
 - `control\approval.md`
 - `control\permission.md`
 - `control\proof.md`
 - `control\lifecycle.md`
+- `rules\workflows.md`
+- `records\README.md`
+- `artifacts\registry.md`
+- `artifacts\log.md`
+- `safety\regression.md`
+- `safety\improvement.md`
 - `release\transaction.md`
+- `contracts\*.schema.json`
+- `templates\*.json`
+- `templates\*.md`
+- `harness_v2\*.py`
+- `tests\*.py`
+- `tests\fixtures\*.json`
+- `package.json`
+- `bin\harness-v2.js`
+- `pyproject.toml`
+- `_build_backend\harness_backend.py`
+- `LICENSE`
+- `RELEASE_NOTES.md`
+- `.gitignore`
+- `.gitattributes`
 
-Any write outside those files fails closed.
+Any mutation outside `F:\Folder\harness-v2` fails closed except generated TEMP verification artifacts and their cleanup.
 
 ## Allowed Local Commands
 
-- local file readback, listing, and search commands scoped to this repository;
-- `git status --short`
-- `git diff -- <intended docs/control files>`
-
-No package build, npm pack, npm publish dry-run, npm registry readback, Python package smoke install, dependency install, hook work, or MCP work is allowed by this slice.
+- `python -m compileall harness_v2`
+- `python -m unittest discover tests`
+- `node bin\harness-v2.js status --root .`
+- `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
+- `node bin\harness-v2.js init --root <temporary project>`
+- `python -m harness_v2 status --root <repo root>`
+- `python -m harness_v2 verify tests\fixtures\valid-task.json`
+- `python -m harness_v2 init --root <temporary project>`
+- `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
+- `npm pack --dry-run`
 
 ## Allowed Git/GitHub Commands
 
@@ -51,6 +79,6 @@ No package build, npm pack, npm publish dry-run, npm registry readback, Python p
 
 ## Permission Boundaries
 
-Permission cannot widen approval scope and cannot produce proof, lifecycle state, route permission, regression pass, improvement execution, or Python package registry publish readiness.
+Permission cannot widen approval scope and cannot produce proof, lifecycle state, route permission, regression pass, improvement execution, package registry publish readiness, release readiness, or automatic enforcement completion.
 
-The release transaction file may describe release boundaries, but this permission surface still denies npm publish, npm publish dry-run, Python package registry publish, package build, dependency install, secret access, release tag creation, GitHub release execution, unrelated external network mutation outside the allowed git push, and destructive actions.
+This permission surface denies npm publish, Python package registry publish, GitHub release creation, release tag creation, dependency installation from network, secret access, external network mutation outside allowed git push, and destructive action outside generated verification artifacts.
