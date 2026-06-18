@@ -1,7 +1,7 @@
 {
   "task_id": "harness-v2-valid-task",
-  "title": "Validate HARNESS V2 local task contract",
-  "workflow": "product_markdown_mvp_review",
+  "title": "Validate HARNESS V2 package and GitHub task contract",
+  "workflow": "package_publish_review",
   "source": {
     "basis": [
       "CURRENT.md",
@@ -11,56 +11,62 @@
     "current_pointer": "CURRENT.md"
   },
   "approval": {
-    "packet": "Approve third HARNESS V2 executable local MVP slice",
+    "packet": "Approve fourth HARNESS V2 package and GitHub publish slice",
     "approved_paths": [
       "AGENTS.md",
       "RULES.md",
       "CURRENT.md",
       "README.md",
+      "pyproject.toml",
+      "_build_backend\\harness_backend.py",
       "harness_v2\\core.py",
       "tests\\test_harness_v2.py"
     ],
     "excluded_side_effects": [
-      "package metadata",
-      "package build",
-      "install",
-      "publish",
-      "deploy",
-      "release",
-      "git",
-      "dependency install",
+      "PyPI publish",
+      "release execution",
+      "dependency install from network",
       "secret access",
-      "external network mutation",
-      "destructive operation"
+      "unrelated external network mutation",
+      "destructive operation outside generated verification artifacts"
     ]
   },
   "permission": {
     "allowed_side_effects": [
-      "local file writes inside approved paths",
+      "local file writes under F:\\Folder\\harness-v2",
       "python -m compileall harness_v2",
-      "python -m unittest discover tests"
+      "python -m unittest discover tests",
+      "python -m venv <temporary smoke-test venv under TEMP>",
+      "<temporary venv>\\Scripts\\python -m pip install --no-deps -e .",
+      "<temporary venv>\\Scripts\\python -m harness_v2 status --root <repo root>",
+      "<temporary venv>\\Scripts\\python -m harness_v2 verify tests\\fixtures\\valid-task.json",
+      "git add <intended HARNESS V2 product files>",
+      "git commit",
+      "git push -u origin <branch>"
     ],
     "denied_side_effects": [
-      "package metadata",
-      "release",
-      "dependency install",
-      "git",
+      "PyPI publish",
+      "release execution",
+      "dependency install from network",
       "secret access",
-      "external network mutation",
-      "destructive operation"
+      "unrelated external network mutation",
+      "destructive operation outside generated verification artifacts"
     ]
   },
   "proof": {
     "obligations": [
       "compileall exits 0",
       "unittest exits 0",
+      "editable install smoke exits 0",
       "valid fixture accepted",
       "invalid fixture rejected",
-      "doctor reports without mutation"
+      "doctor reports without mutation",
+      "GitHub main contains pushed commit",
+      "no PyPI publish or release execution"
     ]
   },
   "lifecycle": {
-    "current_state": "product_markdown_mvp_review",
-    "target_state": "executable_mvp_review"
+    "current_state": "package_publish_review",
+    "target_state": "package_publish_review"
   }
 }

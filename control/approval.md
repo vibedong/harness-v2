@@ -80,7 +80,7 @@ python -m compileall harness_v2
 python -m unittest discover tests
 python -m venv <temporary smoke-test venv under TEMP>
 <temporary venv>\Scripts\python -m pip install --no-deps -e .
-<temporary venv>\Scripts\python -m harness_v2 status --root F:\Folder\harness-v2
+<temporary venv>\Scripts\python -m harness_v2 status --root <repo root>
 <temporary venv>\Scripts\python -m harness_v2 verify tests\fixtures\valid-task.json
 
 Allow cleaning generated verification artifacts:
@@ -110,7 +110,7 @@ Freshness anchors:
 - exact third-slice user packet;
 - `CURRENT.md` executable local MVP pointer;
 - `control\permission.md` exact write and command surface;
-- `control\proof.md` third-slice proof obligation;
+- `control\proof.md` fourth-slice proof obligation;
 - `control\lifecycle.md` executable local MVP lifecycle entry.
 - fourth-slice user request constrained to the HARNESS folder only.
 - fourth-slice amendment for `.gitattributes`, `_build_backend\harness_backend.py`, editable install proof, generated artifact cleanup, and amendment git push.

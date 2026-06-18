@@ -28,7 +28,7 @@ Any write outside that folder fails closed, except generated package smoke artif
 - `python -m unittest discover tests`
 - `python -m venv <temporary smoke-test venv under TEMP>`
 - `<temporary venv>\Scripts\python -m pip install --no-deps -e .`
-- `<temporary venv>\Scripts\python -m harness_v2 status --root F:\Folder\harness-v2`
+- `<temporary venv>\Scripts\python -m harness_v2 status --root <repo root>`
 - `<temporary venv>\Scripts\python -m harness_v2 verify tests\fixtures\valid-task.json`
 
 The temporary smoke-test venv, generated `harness_v2.egg-info`, and generated `__pycache__` directories under `F:\Folder\harness-v2` may be removed after verification because they are generated proof material, not product source.

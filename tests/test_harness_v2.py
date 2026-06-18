@@ -65,7 +65,7 @@ PERMISSION_COMMANDS = {
     "python -m unittest discover tests",
     "python -m venv <temporary smoke-test venv under TEMP>",
     "<temporary venv>\\Scripts\\python -m pip install --no-deps -e .",
-    "<temporary venv>\\Scripts\\python -m harness_v2 status --root F:\\Folder\\harness-v2",
+    "<temporary venv>\\Scripts\\python -m harness_v2 status --root <repo root>",
     "<temporary venv>\\Scripts\\python -m harness_v2 verify tests\\fixtures\\valid-task.json",
 }
 ALLOWED_GIT_COMMANDS = {
@@ -172,6 +172,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
     def test_github_facing_commands_are_portable(self):
         readme = (ROOT / "README.md").read_text()
+        approval = (ROOT / "control" / "approval.md").read_text()
+        permission = (ROOT / "control" / "permission.md").read_text()
         current_commands = commands_under_heading(
             ROOT / "CURRENT.md",
             "## Current Allowed Local Verification Commands",
@@ -179,16 +181,26 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertIn("--root .", readme)
         self.assertNotIn("--root F:\\Folder\\harness-v2", readme)
+        self.assertNotIn("--root F:\\Folder\\harness-v2", approval)
+        self.assertNotIn("--root F:\\Folder\\harness-v2", permission)
+        self.assertIn("--root <repo root>", approval)
+        self.assertIn("--root <repo root>", permission)
         self.assertIn("<temporary venv>\\Scripts\\python -m harness_v2 status --root <repo root>", current_commands)
 
     def test_docs_control_sync_surfaces_are_fourth_slice(self):
         synced_files = [
             ROOT / "AGENTS.md",
             ROOT / "RULES.md",
+            ROOT / "control" / "source.md",
+            ROOT / "control" / "approval.md",
+            ROOT / "control" / "permission.md",
+            ROOT / "rules" / "workflows.md",
+            ROOT / "records" / "README.md",
             ROOT / "routing" / "manifest.md",
             ROOT / "artifacts" / "registry.md",
             ROOT / "artifacts" / "log.md",
             ROOT / "safety" / "regression.md",
+            ROOT / "safety" / "improvement.md",
         ]
 
         for path in synced_files:
@@ -199,6 +211,20 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         root_rules = (ROOT / "RULES.md").read_text()
         self.assertNotIn("Do not create package metadata", root_rules)
         self.assertIn("Package metadata, local editable install verification, and GitHub repository push", root_rules)
+
+    def test_task_fixtures_match_package_publish_review_state(self):
+        valid = json.loads(VALID_TASK.read_text())
+        invalid = json.loads(INVALID_TASK.read_text())
+
+        self.assertEqual(valid["workflow"], "package_publish_review")
+        self.assertEqual(valid["lifecycle"]["current_state"], "package_publish_review")
+        self.assertEqual(valid["lifecycle"]["target_state"], "package_publish_review")
+        self.assertEqual(invalid["workflow"], "package_publish_review")
+        self.assertEqual(invalid["lifecycle"]["current_state"], "package_publish_review")
+        self.assertEqual(invalid["lifecycle"]["target_state"], "package_publish_review")
+        self.assertIn("pyproject.toml", valid["approval"]["approved_paths"])
+        self.assertIn("_build_backend\\harness_backend.py", valid["approval"]["approved_paths"])
+        self.assertIn("PyPI publish", valid["permission"]["denied_side_effects"])
 
     def test_artifact_surfaces_include_package_github_scope(self):
         registry = (ROOT / "artifacts" / "registry.md").read_text()

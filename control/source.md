@@ -1,8 +1,8 @@
 # HARNESS V2 Source Control
 
-status: executable_local_mvp_surface / third_slice / source_control
+status: package_github_surface / fourth_slice / source_control
 
-This file defines source authority for local HARNESS V2 operation.
+This file defines source authority for local HARNESS V2 package and GitHub MVP operation.
 
 ## Source Tiers
 

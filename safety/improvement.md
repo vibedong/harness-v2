@@ -1,6 +1,6 @@
 # HARNESS V2 Improvement Safety
 
-status: executable_local_mvp_surface / third_slice / improvement_safety
+status: package_github_surface / fourth_slice / improvement_safety
 
 This file classifies improvement observations without directly changing product rules.
 

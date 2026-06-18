@@ -1,6 +1,6 @@
 # HARNESS V2 Workflow Rules
 
-status: executable_local_mvp_surface / third_slice / workflow_rules
+status: package_github_surface / fourth_slice / workflow_rules
 
 Workflow rules specialize `RULES.md`. They cannot weaken root rules or create approval, permission, proof, lifecycle state, routing authority, artifact authority, regression pass, improvement execution, or release state.
 
@@ -24,7 +24,7 @@ Approval binding does not grant side effects. Side effects must pass `control\pe
 
 Development work may write only the target surface named in `CURRENT.md`, bound by `control\approval.md`, and accepted by `control\permission.md`.
 
-Development work must keep package metadata, release artifacts, dependencies, git, secrets, external mutations, destructive operations, and paths outside the exact packet out of scope unless a later exact packet opens that work.
+Development work must keep package metadata, release artifacts, dependencies, git, secrets, external mutations, destructive operations, and paths outside the exact packet out of scope unless the current exact packet opens that work.
 
 ## Development Review Workflow
 
@@ -52,9 +52,9 @@ Improvement work may classify candidate changes and lessons. It does not directl
 
 ## Release Boundary Workflow
 
-Release work is boundary analysis only in this executable local MVP surface.
+Release work is boundary analysis only in this package and GitHub MVP surface.
 
-Install, package, publish, deploy, release readiness, rollback execution, and external mutation require a later release transaction scope.
+PyPI publish, deploy, release readiness, rollback execution, and unrelated external mutation require a later release transaction scope.
 
 ## Root Precedence
 
