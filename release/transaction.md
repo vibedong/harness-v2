@@ -34,7 +34,7 @@ A future release transaction must name:
 
 ## Current Denials
 
-The current package and GitHub publish scope allows local package smoke verification and GitHub repository push, but denies:
+The current package and GitHub publish scope allows local editable package smoke verification and GitHub repository push, but denies:
 
 - dependency changes;
 - PyPI publish or deploy work;

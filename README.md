@@ -27,19 +27,19 @@ python -m unittest discover tests
 
 The unittest suite covers the local CLI `status`, `verify`, and `doctor` behavior for this slice.
 
-Package smoke test without dependency installation:
+Editable package smoke test without dependency installation:
 
 ```powershell
-$target = Join-Path $env:TEMP "harness-v2-smoke-target"
-Remove-Item -Recurse -Force $target -ErrorAction SilentlyContinue
-python -m pip install --target $target --no-deps --no-build-isolation .
-$env:PYTHONPATH = $target
-python -m harness_v2 status --root .
-python -m harness_v2 verify tests\fixtures\valid-task.json
-Remove-Item -Recurse -Force $target -ErrorAction SilentlyContinue
+$venv = Join-Path $env:TEMP "harness-v2-smoke-venv"
+Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
+python -m venv $venv
+& (Join-Path $venv "Scripts\python.exe") -m pip install --no-deps -e .
+& (Join-Path $venv "Scripts\python.exe") -m harness_v2 status --root F:\Folder\harness-v2
+& (Join-Path $venv "Scripts\python.exe") -m harness_v2 verify tests\fixtures\valid-task.json
+Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 ```
 
-The package smoke test proves that the local package metadata can be consumed by pip without dependency installation.
+The package smoke test proves that the local package metadata can be consumed by pip in editable mode without dependency installation.
 
 ## Repository Layout
 

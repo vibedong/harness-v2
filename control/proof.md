@@ -9,11 +9,11 @@ This file separates proof obligation, artifact check, and proof result.
 For the fourth-slice package and GitHub publish surface, verify after authoring:
 
 1. all product source changes are under `F:\Folder\harness-v2`;
-2. package metadata and build backend install without dependency installation;
+2. package metadata and build backend install in editable mode without dependency installation;
 3. no non-source generated package artifacts remain under `F:\Folder\harness-v2` after cleanup;
 4. `python -m compileall harness_v2` exits 0;
 5. `python -m unittest discover tests` exits 0;
-6. local package smoke install accepts the source package with `--no-deps --no-build-isolation`;
+6. local package smoke install accepts the source package with `--no-deps -e .`;
 7. installed package smoke can run `harness_v2 status`;
 8. installed package smoke can verify `tests\fixtures\valid-task.json`;
 9. the unittest suite proves CLI status can run without external dependency;

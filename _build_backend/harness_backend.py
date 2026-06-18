@@ -22,6 +22,10 @@ def get_requires_for_build_sdist(config_settings=None):
     return []
 
 
+def get_requires_for_build_editable(config_settings=None):
+    return []
+
+
 def prepare_metadata_for_build_wheel(metadata_directory, config_settings=None):
     metadata_root = Path(metadata_directory)
     dist_info = _dist_info_name()
@@ -29,6 +33,10 @@ def prepare_metadata_for_build_wheel(metadata_directory, config_settings=None):
     target.mkdir(parents=True, exist_ok=True)
     _write_dist_info(target)
     return dist_info
+
+
+def prepare_metadata_for_build_editable(metadata_directory, config_settings=None):
+    return prepare_metadata_for_build_wheel(metadata_directory, config_settings)
 
 
 def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
@@ -46,6 +54,28 @@ def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
         archive_name = f"harness_v2/{source.name}"
         entries.append((archive_name, source.read_bytes()))
 
+    _append_dist_info(entries, dist_info)
+    _write_wheel(wheel_path, dist_info, entries)
+    return wheel_name
+
+
+def build_editable(wheel_directory, config_settings=None, metadata_directory=None):
+    wheel_root = Path(wheel_directory)
+    wheel_root.mkdir(parents=True, exist_ok=True)
+
+    name = _normalized_name()
+    version = _project()["project"]["version"]
+    dist_info = _dist_info_name()
+    wheel_name = f"{name}-{version}-0.editable-py3-none-any.whl"
+    wheel_path = wheel_root / wheel_name
+
+    entries = [("harness_v2_editable.pth", f"{PROJECT_ROOT}\n".encode("utf-8"))]
+    _append_dist_info(entries, dist_info)
+    _write_wheel(wheel_path, dist_info, entries)
+    return wheel_name
+
+
+def _append_dist_info(entries: list[tuple[str, bytes]], dist_info: str) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         dist_info_root = Path(temp_dir) / dist_info
         dist_info_root.mkdir()
@@ -53,6 +83,8 @@ def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
         for source in sorted(dist_info_root.iterdir()):
             entries.append((f"{dist_info}/{source.name}", source.read_bytes()))
 
+
+def _write_wheel(wheel_path: Path, dist_info: str, entries: list[tuple[str, bytes]]) -> None:
     record_path = f"{dist_info}/RECORD"
     record_rows = []
     for archive_name, content in entries:
@@ -68,8 +100,6 @@ def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
     with ZipFile(wheel_path, "w", compression=ZIP_DEFLATED) as wheel:
         for archive_name, content in entries:
             wheel.writestr(archive_name, content)
-
-    return wheel_name
 
 
 def build_sdist(sdist_directory, config_settings=None):

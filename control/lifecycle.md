@@ -31,7 +31,7 @@ Scope:
 
 - `F:\Folder\harness-v2` folder only;
 - local verification commands named in `control\permission.md`;
-- package metadata, local package smoke verification, git initialization, GitHub repository creation, and push;
+- package metadata, local editable package smoke verification, git initialization, GitHub repository creation, and push;
 - no PyPI publish, release execution, dependency install, secret access, unrelated external network mutation, or destructive operation outside generated verification artifacts.
 
 This entry records that the local package and GitHub publication surface has moved into review after authoring. It is not PyPI publish, release execution, product completion, or future-slice transition.

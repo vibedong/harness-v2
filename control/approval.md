@@ -65,11 +65,43 @@ git hub 배포, 패키지 까지 하자
 그 하네스폴더만 해
 ```
 
+Current bound amendment:
+
+```text
+Approve fourth-slice amendment:
+also allow keeping and modifying these existing files under F:\Folder\harness-v2:
+.gitattributes,
+_build_backend\harness_backend.py.
+
+Allow implementing PEP 660 editable install support in _build_backend\harness_backend.py.
+
+Allow rerunning:
+python -m compileall harness_v2
+python -m unittest discover tests
+python -m venv <temporary smoke-test venv under TEMP>
+<temporary venv>\Scripts\python -m pip install --no-deps -e .
+<temporary venv>\Scripts\python -m harness_v2 status --root F:\Folder\harness-v2
+<temporary venv>\Scripts\python -m harness_v2 verify tests\fixtures\valid-task.json
+
+Allow cleaning generated verification artifacts:
+temporary smoke-test venv under TEMP,
+harness_v2.egg-info if generated,
+__pycache__ directories generated under F:\Folder\harness-v2.
+
+Allow git add/commit/push only for this amendment to vibedong/harness-v2.
+
+No PyPI publish.
+No secrets read.
+No dependency install from network.
+No destructive operation outside the named generated verification artifacts.
+```
+
 Operation type:
 
 - local file creation or modification only under `F:\Folder\harness-v2`;
 - local package metadata and dependency-free build backend creation;
-- local package smoke verification with generated artifacts limited to temporary paths or ignored build metadata;
+- PEP 660 editable install support in `_build_backend\harness_backend.py`;
+- local editable package smoke verification with generated artifacts limited to temporary paths or ignored build metadata;
 - git initialization, commit, GitHub repository creation, and push for the `F:\Folder\harness-v2` folder only;
 - no PyPI publish, release execution, dependency install, secret access, or destructive operation outside generated local verification artifacts.
 
@@ -81,6 +113,7 @@ Freshness anchors:
 - `control\proof.md` third-slice proof obligation;
 - `control\lifecycle.md` executable local MVP lifecycle entry.
 - fourth-slice user request constrained to the HARNESS folder only.
+- fourth-slice amendment for `.gitattributes`, `_build_backend\harness_backend.py`, editable install proof, generated artifact cleanup, and amendment git push.
 
 Denied by the current approval scope:
 

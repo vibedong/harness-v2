@@ -55,9 +55,17 @@ APPROVED_SOURCE_FILES = {
 ALLOWED_COMMANDS = {
     "python -m compileall harness_v2",
     "python -m unittest discover tests",
-    "python -m pip install --target <TEMP>\\harness-v2-smoke-target --no-deps --no-build-isolation .",
-    "python -m harness_v2 status --root .",
-    "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
+    "python -m venv <temporary smoke-test venv under TEMP>",
+    "<temporary venv>\\Scripts\\python -m pip install --no-deps -e .",
+    "<temporary venv>\\Scripts\\python -m harness_v2 status --root F:\\Folder\\harness-v2",
+    "<temporary venv>\\Scripts\\python -m harness_v2 verify tests\\fixtures\\valid-task.json",
+}
+ALLOWED_GIT_COMMANDS = {
+    "git init",
+    "git add <intended HARNESS V2 product files>",
+    "git commit",
+    "gh repo create vibedong/harness-v2 --public --source . --remote origin",
+    "git push -u origin <branch>",
 }
 FORBIDDEN_SOURCE_FRAGMENT = "source" + ".fragment.json"
 
@@ -96,6 +104,28 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         finally:
             sys.path.remove(str(ROOT / "_build_backend"))
 
+    def test_local_build_backend_builds_pep660_editable_wheel(self):
+        sys.path.insert(0, str(ROOT / "_build_backend"))
+        try:
+            import harness_backend
+
+            with tempfile.TemporaryDirectory() as wheel_dir:
+                wheel_name = harness_backend.build_editable(wheel_dir)
+                wheel_path = Path(wheel_dir) / wheel_name
+
+                self.assertTrue(wheel_path.exists())
+                self.assertIn("-0.editable-", wheel_name)
+                with zipfile.ZipFile(wheel_path) as wheel:
+                    names = set(wheel.namelist())
+                    pth = wheel.read("harness_v2_editable.pth").decode("utf-8").strip()
+
+            self.assertEqual(pth, str(ROOT))
+            self.assertNotIn("harness_v2/cli.py", names)
+            self.assertIn("harness_v2-0.1.0.dist-info/METADATA", names)
+            self.assertIn("harness_v2-0.1.0.dist-info/entry_points.txt", names)
+        finally:
+            sys.path.remove(str(ROOT / "_build_backend"))
+
     def test_task_schema_uses_only_approved_local_schema_files(self):
         task_schema = json.loads((ROOT / "contracts" / "task.schema.json").read_text())
         referenced_schema_names = {
@@ -119,18 +149,19 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertNotIn(FORBIDDEN_SOURCE_FRAGMENT, content)
 
     def test_command_authority_lists_only_approved_verification_commands(self):
-        command_sources = [
-            ROOT / "CURRENT.md",
-            ROOT / "control" / "permission.md",
-        ]
+        self.assertEqual(
+            commands_under_heading(ROOT / "CURRENT.md", "## Current Allowed Local Verification Commands"),
+            ALLOWED_COMMANDS,
+        )
+        self.assertEqual(
+            commands_under_heading(ROOT / "control" / "permission.md", "## Allowed Local Commands"),
+            ALLOWED_COMMANDS,
+        )
+        self.assertEqual(
+            commands_under_heading(ROOT / "control" / "permission.md", "## Allowed Git/GitHub Commands"),
+            ALLOWED_GIT_COMMANDS,
+        )
 
-        for command_source in command_sources:
-            listed_commands = {
-                line.strip()[3:-1]
-                for line in command_source.read_text().splitlines()
-                if line.strip().startswith("- `python ") and line.strip().endswith("`")
-            }
-            self.assertEqual(listed_commands, ALLOWED_COMMANDS)
 
     def test_valid_task_fixture_is_accepted_by_verifier(self):
         from harness_v2.core import validate_task_file
@@ -198,6 +229,19 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertEqual(accepted.returncode, 0, accepted.stderr)
         self.assertNotEqual(rejected.returncode, 0)
         self.assertIn("approval", rejected.stderr)
+
+
+def commands_under_heading(path: Path, heading: str) -> set[str]:
+    lines = path.read_text().splitlines()
+    inside = False
+    commands = set()
+    for line in lines:
+        if line.startswith("## "):
+            inside = line.strip() == heading
+            continue
+        if inside and line.strip().startswith("- `") and line.strip().endswith("`"):
+            commands.add(line.strip()[3:-1])
+    return commands
 
 
 if __name__ == "__main__":

@@ -10,8 +10,8 @@ This file separates approved intent from allowed side effects.
 | --- | --- |
 | local read | allowed for HARNESS V2 product files and planning context needed for this scope |
 | local file write | allowed only under `F:\Folder\harness-v2` |
-| local command execution | allowed for verification, package smoke, and git/GitHub publish commands below |
-| package metadata, package build, local smoke install | allowed only for this product |
+| local command execution | allowed for verification, editable package smoke, and git/GitHub publish commands below |
+| package metadata, package build, local editable smoke install | allowed only for this product |
 | GitHub repository creation and push | allowed only for this product folder |
 | PyPI publish, release execution, dependency install | denied |
 | secret access, unrelated external network mutation, destructive action | denied |
@@ -26,11 +26,12 @@ Any write outside that folder fails closed, except generated package smoke artif
 
 - `python -m compileall harness_v2`
 - `python -m unittest discover tests`
-- `python -m pip install --target <TEMP>\harness-v2-smoke-target --no-deps --no-build-isolation .`
-- `python -m harness_v2 status --root .`
-- `python -m harness_v2 verify tests\fixtures\valid-task.json`
+- `python -m venv <temporary smoke-test venv under TEMP>`
+- `<temporary venv>\Scripts\python -m pip install --no-deps -e .`
+- `<temporary venv>\Scripts\python -m harness_v2 status --root F:\Folder\harness-v2`
+- `<temporary venv>\Scripts\python -m harness_v2 verify tests\fixtures\valid-task.json`
 
-The package smoke target may be removed after verification because it is generated proof material, not product source.
+The temporary smoke-test venv, generated `harness_v2.egg-info`, and generated `__pycache__` directories under `F:\Folder\harness-v2` may be removed after verification because they are generated proof material, not product source.
 
 ## Allowed Git/GitHub Commands
 
