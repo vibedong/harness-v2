@@ -1,25 +1,55 @@
 # HARNESS V2
 
-HARNESS V2 is a local workflow harness for AI-assisted software work. It keeps source, approval, permission, proof, lifecycle, routing, artifact, regression, improvement, and release boundaries visible and checkable.
+HARNESS V2 is a local control tool for AI-assisted development work. It records the task scope, approval, permissions, proof obligations, and lifecycle state before an AI coding agent starts changing files.
+
+Use it with tools such as Codex, Claude Code, Cursor, or Copilot when you want the agent to stay inside an explicit task contract and report verifiable evidence before claiming completion.
 
 Korean documentation is available in [README.ko.md](README.ko.md).
 
-## Status
+## What It Is
 
-The current public release is `harness-v2@0.1.1` on npm.
+HARNESS V2 is not an AI model and it does not write code for you. It is a workflow harness that makes the working boundary visible and checkable.
 
-This repository provides:
+Before a task starts, you describe:
 
-- product-local markdown controls for workflow boundaries;
-- JSON contracts and reusable task templates;
-- a standard-library Python CLI;
-- dependency-free local package metadata and build backend;
-- a Windows/macOS npm CLI wrapper that delegates to the Python CLI;
-- fixture-backed unit tests for local task verification.
+- the current source and workflow pointer;
+- the user approval packet;
+- the paths approved for the task;
+- the side effects that are allowed or denied;
+- the proof obligations required before completion;
+- the lifecycle state the task is allowed to occupy.
+
+The CLI then checks whether a task contract is structurally valid and whether it conflicts with the current local HARNESS V2 state.
+
+## When To Use It
+
+HARNESS V2 is useful when:
+
+- an AI agent will edit more than one file;
+- the task has clear approval boundaries;
+- some side effects must stay denied;
+- completion must depend on test or verification output;
+- long-running agent work needs a current workflow pointer;
+- release, package, or repository operations must stay behind an explicit transaction boundary.
+
+For a tiny typo fix in one file, HARNESS V2 may be more ceremony than you need.
+
+## Problems It Reduces
+
+| problem | how HARNESS V2 helps |
+| --- | --- |
+| the agent forgets the current task | `CURRENT.md` keeps the visible workflow pointer |
+| scope and approval get mixed | `approval.approved_paths` records the approved path surface |
+| risky commands are treated as normal work | `permission.allowed_side_effects` and `permission.denied_side_effects` separate side effects |
+| completion is claimed without evidence | `proof.obligations` names the required checks |
+| progress notes become lifecycle state | `lifecycle.current_state` and `lifecycle.target_state` stay explicit |
+| package or release work expands accidentally | release and package actions require exact current scope |
+
+HARNESS V2 reduces these risks by making the contract explicit. It does not automatically stop every editor, shell, or external tool.
 
 ## Install
 
-Install from npm:
+Install the public npm package:
 
 ```powershell
 npm install -g harness-v2
@@ -31,13 +61,94 @@ Runtime prerequisites:
 - Python 3.11 or newer available on PATH.
 - Windows or macOS for the npm wrapper in this release.
 
-Confirm the installed CLI:
+The npm command delegates to the Python CLI. HARNESS V2 is not rewritten in JavaScript.
+
+## 5-Minute Quick Start
+
+The fastest first success is to run the CLI against this repository, which already contains HARNESS V2 control files and fixtures.
 
 ```powershell
+git clone https://github.com/vibedong/harness-v2.git
+cd harness-v2
+npm install -g harness-v2
 harness-v2 status --root .
+harness-v2 verify tests\fixtures\valid-task.json
 ```
 
-## CLI Usage
+Expected behavior:
+
+- `status` prints JSON from `CURRENT.md`.
+- `verify` accepts the valid fixture and prints `{"ok": true, ...}`.
+
+To start a new task contract, use `templates\task.json` as the shape reference and fill in values that match your current `CURRENT.md`.
+
+```json
+{
+  "task_id": "readme-docs-update",
+  "title": "Update public README",
+  "workflow": "package_publish_review",
+  "source": {
+    "basis": ["CURRENT.md", "control\\approval.md", "control\\permission.md"],
+    "current_pointer": "CURRENT.md"
+  },
+  "approval": {
+    "packet": "User approved README documentation update",
+    "approved_paths": ["README.md", "README.ko.md"],
+    "excluded_side_effects": ["package publish", "release execution"]
+  },
+  "permission": {
+    "allowed_side_effects": ["local file writes to README.md and README.ko.md"],
+    "denied_side_effects": ["package publish", "release execution", "dependency install from network"]
+  },
+  "proof": {
+    "obligations": ["python -m unittest discover tests"]
+  },
+  "lifecycle": {
+    "current_state": "package_publish_review",
+    "target_state": "package_publish_review"
+  }
+}
+```
+
+Then verify the task file:
+
+```powershell
+harness-v2 verify <task.json>
+```
+
+The task `workflow` and `lifecycle.current_state` must match the current pointer in `CURRENT.md`.
+
+## Basic Workflow
+
+1. Choose the task goal and current source basis.
+2. Record the exact user approval packet.
+3. Put approved paths in `approval.approved_paths`.
+4. Put allowed and denied side effects in `permission`.
+5. Put required checks in `proof.obligations`.
+6. Keep lifecycle movement separate from progress notes.
+7. Run `harness-v2 verify <task.json>`.
+8. Give the verified contract to your AI coding agent.
+9. Before completion, check that the proof obligations were actually run and reported.
+
+## Core Concepts
+
+| term | meaning |
+| --- | --- |
+| task contract | JSON object that binds one work unit |
+| `source.basis` | files or records the agent should treat as task basis |
+| `source.current_pointer` | pointer to the current workflow state, normally `CURRENT.md` |
+| `approval.packet` | exact approval text or approval reference |
+| `approval.approved_paths` | paths approved for this task |
+| `approval.excluded_side_effects` | actions excluded even if the task otherwise looks related |
+| `permission.allowed_side_effects` | commands or effects the task may perform |
+| `permission.denied_side_effects` | commands or effects the task must not perform |
+| `proof.obligations` | checks required before completion is claimed |
+| `lifecycle.current_state` | current lifecycle state expected by the task |
+| `lifecycle.target_state` | lifecycle state the task is allowed to target |
+
+The current executable contract vocabulary is defined by `contracts\*.schema.json` and `templates\task.json`.
+
+## Common Commands
 
 Show the current workflow pointer:
 
@@ -57,28 +168,106 @@ Inspect project shape without mutating files:
 python -m harness_v2 doctor --root .
 ```
 
-The npm command delegates to the Python CLI. It does not rewrite HARNESS V2 in JavaScript.
-
-## How To Use The Harness
-
-HARNESS V2 works best when each work unit has an explicit task contract:
-
-1. Choose the current source and workflow pointer.
-2. Record what the user approved.
-3. Separate allowed side effects from denied side effects.
-4. Name the proof obligations before claiming completion.
-5. Keep lifecycle movement separate from progress notes.
-6. Verify the task contract with `harness-v2 verify`.
-
-The default fixture is a compact example:
+Run the Node wrapper directly from a local checkout:
 
 ```powershell
-harness-v2 verify tests\fixtures\valid-task.json
+node bin\harness-v2.js status --root .
+node bin\harness-v2.js verify tests\fixtures\valid-task.json
 ```
 
-If approval, permission, proof, lifecycle state, or workflow pointer conflicts, the verifier fails closed.
+## Prompt For AI Coding Agents
 
-## Local Development Checks
+Use a prompt like this after you have a task contract:
+
+```text
+Work under HARNESS V2.
+
+First read:
+- CURRENT.md
+- AGENTS.md
+- RULES.md
+- <task.json>
+
+Rules:
+- Treat approval.approved_paths as the approved write surface.
+- Do not execute approval.excluded_side_effects.
+- Do not execute permission.denied_side_effects.
+- If the needed change is outside scope, stop and report it.
+- Before claiming completion, run or report every proof.obligations item.
+- In the final report, list changed files, verification commands, and pass/fail results.
+```
+
+This prompt is guidance for the agent. The current task contract and local control files remain the source for verification.
+
+## Troubleshooting
+
+### `harness-v2 status --root .` fails
+
+Check that the root contains `CURRENT.md`. The `status` command reads the current pointer from that file.
+
+### `harness-v2 verify <task.json>` fails
+
+Common causes:
+
+- a required object is missing: `source`, `approval`, `permission`, `proof`, or `lifecycle`;
+- `workflow` does not match the workflow in `CURRENT.md`;
+- `lifecycle.current_state` does not match the state in `CURRENT.md`;
+- an allowed side effect conflicts with a denied side effect;
+- a lifecycle state is not known in `control\lifecycle.md`;
+- a control surface still contains a stale status marker.
+
+### The agent needs a file outside `approval.approved_paths`
+
+Stop the work and ask for a new approval packet or a narrower follow-up task. Do not silently widen the contract.
+
+### A proof command fails
+
+Report the failing command and separate existing failures from failures introduced by the task. Do not claim completion from a failed proof obligation.
+
+## Repository Layout
+
+| path | role |
+| --- | --- |
+| `AGENTS.md` | product-local agent entry router |
+| `RULES.md` | product-local root rules |
+| `CURRENT.md` | visible current workflow pointer |
+| `README.ko.md` | Korean user manual |
+| `LICENSE` | MIT license |
+| `RELEASE_NOTES.md` | release notes |
+| `package.json` | npm wrapper package manifest |
+| `bin\harness-v2.js` | Windows/macOS Node CLI wrapper for the Python CLI |
+| `control\` | source, approval, permission, proof, and lifecycle boundaries |
+| `contracts\` | JSON schema contract files |
+| `templates\` | task, gate, approval, and proof templates |
+| `harness_v2\` | standard-library Python CLI and helpers |
+| `_build_backend\` | dependency-free local PEP 517 build backend |
+| `tests\` | unittest coverage and fixtures |
+| `records\`, `routing\`, `artifacts\`, `safety\`, `release\` | local boundary and observability surfaces |
+
+This repository ships schemas and templates. It does not currently reserve a `contracts\tasks\` folder for user task files.
+
+## What HARNESS V2 Does Not Do
+
+HARNESS V2 does not:
+
+- write code by itself;
+- decide requirements for the user;
+- automatically block every external tool;
+- run proof commands automatically;
+- fix failing tests automatically;
+- publish packages or create releases without an exact, separate transaction scope;
+- make README text into approval, permission, proof, lifecycle state, or release readiness.
+
+## Recommended Practice
+
+- Start with a small task contract.
+- Keep `approval.approved_paths` narrow.
+- Treat package metadata, dependency changes, secrets, deployment, and release actions as separate work.
+- Keep proof obligations short enough to run, but strong enough to prove the task.
+- Preserve failing proof output instead of rewriting it into a pass.
+- Split documentation, code, package, and release work into separate task contracts when the side effects differ.
+
+## Developer Verification
 
 From this repository:
 
@@ -102,26 +291,14 @@ python -m venv $venv
 Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 ```
 
-## Repository Layout
+## Status
 
-| path | role |
-| --- | --- |
-| `AGENTS.md` | product-local agent entry router |
-| `RULES.md` | product-local root rules |
-| `CURRENT.md` | visible current workflow pointer |
-| `README.ko.md` | Korean user manual |
-| `LICENSE` | MIT license |
-| `RELEASE_NOTES.md` | release notes |
-| `package.json` | npm wrapper package manifest |
-| `bin\harness-v2.js` | Windows/macOS Node CLI wrapper for the Python CLI |
-| `control\` | source, approval, permission, proof, and lifecycle boundaries |
-| `contracts\` | JSON contract files |
-| `templates\` | task, gate, approval, and proof templates |
-| `harness_v2\` | standard-library Python CLI and helpers |
-| `_build_backend\` | dependency-free local PEP 517 build backend |
-| `tests\` | unittest coverage and fixtures |
-| `records\`, `routing\`, `artifacts\`, `safety\`, `release\` | local boundary and observability surfaces |
+The current public release is `harness-v2@0.1.1` on npm.
 
 ## Boundary Rule
 
 README content is documentation only. It is not source authority, approval, permission, proof, lifecycle transition, route permission, regression pass, package readiness, release readiness, or product completion by itself.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
