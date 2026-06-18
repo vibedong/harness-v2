@@ -1,0 +1,45 @@
+# HARNESS V2 Artifact Registry
+
+status: executable_local_mvp_surface / third_slice / artifact_registry
+
+This file is the lightweight artifact registry for gate-relevant local markdown surfaces. It is an index, not source authority or proof.
+
+## Registry Rule
+
+Register only artifacts that can affect source/current truth, approval, permission, proof, lifecycle, route, safety, improvement, or release boundaries.
+
+Do not build a full transcript registry or register every temporary note.
+
+## Local MVP Rows
+
+| artifact id | path | role | authority limit |
+| --- | --- | --- | --- |
+| root-entry | `AGENTS.md` | product-local entry router | not detailed policy |
+| root-rules | `RULES.md` | common guard catalog | not workflow-specific override |
+| current-pointer | `CURRENT.md` | visible current state and active surface pointer | not proof or release state |
+| workflow-rules | `rules\workflows.md` | workflow-specific guard application | cannot weaken root rules |
+| source-control | `control\source.md` | source authority boundary | not approval or proof |
+| approval-control | `control\approval.md` | bound approval scope | not side-effect permission |
+| permission-control | `control\permission.md` | side-effect ceiling | not proof |
+| proof-control | `control\proof.md` | proof obligation and artifact check boundary | not approval or lifecycle |
+| lifecycle-control | `control\lifecycle.md` | lifecycle state movement boundary | not proof or permission |
+| records-index | `records\README.md` | workflow record lane index | not decision ledger |
+| routing-manifest | `routing\manifest.md` | route guidance | not tool permission |
+| artifact-registry | `artifacts\registry.md` | lightweight index | not source authority |
+| artifact-log | `artifacts\log.md` | concise provenance notes | not proof |
+| regression-safety | `safety\regression.md` | boundary-risk and regression map | not regression pass |
+| improvement-safety | `safety\improvement.md` | improvement candidate classifier | not product change |
+| release-transaction | `release\transaction.md` | release boundary and transaction gate | not release readiness |
+| root-readme | `README.md` | GitHub-facing overview | not source authority or proof |
+| contracts | `contracts\*.schema.json` | minimal local contract descriptions | not runtime proof |
+| templates | `templates\*` | reusable local templates | not task records |
+| executable-cli | `harness_v2\*.py` | stdlib local CLI, verifier, and doctor | not package/install surface |
+| executable-tests | `tests\*` | unittest and fixture proof material | not ProofReceipt by file existence |
+
+## Stale Triggers
+
+A registry row is stale when its path, role, authority limit, target surface, proof obligation, or owner boundary changes.
+
+## Non-Authority Boundary
+
+Registry rows do not grant approval, permission, proof, lifecycle transition, route permission, regression pass, improvement execution, package readiness, or release readiness.

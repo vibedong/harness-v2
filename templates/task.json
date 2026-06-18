@@ -1,0 +1,25 @@
+{
+  "task_id": "<task-id>",
+  "title": "<task title>",
+  "workflow": "<workflow>",
+  "source": {
+    "basis": ["<source path>"],
+    "current_pointer": "CURRENT.md"
+  },
+  "approval": {
+    "packet": "<exact approval packet>",
+    "approved_paths": ["<approved path>"],
+    "excluded_side_effects": ["<excluded side effect>"]
+  },
+  "permission": {
+    "allowed_side_effects": ["<allowed side effect>"],
+    "denied_side_effects": ["<denied side effect>"]
+  },
+  "proof": {
+    "obligations": ["<proof obligation>"]
+  },
+  "lifecycle": {
+    "current_state": "<current state>",
+    "target_state": "<target state>"
+  }
+}

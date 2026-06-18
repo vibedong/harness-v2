@@ -1,0 +1,100 @@
+# HARNESS V2 Approval Control
+
+status: package_github_surface / fourth_slice / approval_control
+
+This file separates approval request, user response, and bound approval scope.
+
+## Current Bound Scope
+
+Previous bound work unit:
+
+```text
+executable_mvp_code_test_schema_runner_slice
+```
+
+Current bound work unit:
+
+```text
+package_metadata_install_smoke_and_github_publish_slice
+```
+
+Previous bound user packet:
+
+```text
+Approve third HARNESS V2 executable local MVP slice:
+create or modify only these paths under F:\Folder\harness-v2:
+AGENTS.md, RULES.md, CURRENT.md,
+README.md,
+rules\workflows.md,
+control\source.md, control\approval.md, control\permission.md,
+control\proof.md, control\lifecycle.md,
+records\README.md, routing\manifest.md,
+artifacts\registry.md, artifacts\log.md,
+safety\regression.md, safety\improvement.md,
+release\transaction.md,
+contracts\task.schema.json,
+contracts\approval.schema.json,
+contracts\permission.schema.json,
+contracts\proof.schema.json,
+contracts\lifecycle.schema.json,
+contracts\artifact.schema.json,
+templates\task.json,
+templates\gate-manifest.md,
+templates\approval-request.md,
+templates\proof-report.md,
+harness_v2\__init__.py,
+harness_v2\__main__.py,
+harness_v2\cli.py,
+harness_v2\core.py,
+harness_v2\verify.py,
+harness_v2\doctor.py,
+tests\test_harness_v2.py,
+tests\fixtures\valid-task.json,
+tests\fixtures\invalid-missing-approval.json.
+Allowed local commands for verification only:
+python -m compileall harness_v2
+python -m unittest discover tests
+No package metadata, package build, install, publish, deploy, release, git, dependency install,
+secret access, external network mutation, or destructive operation.
+```
+
+Current bound user request:
+
+```text
+git hub 배포, 패키지 까지 하자
+그 하네스폴더만 해
+```
+
+Operation type:
+
+- local file creation or modification only under `F:\Folder\harness-v2`;
+- local package metadata and dependency-free build backend creation;
+- local package smoke verification with generated artifacts limited to temporary paths or ignored build metadata;
+- git initialization, commit, GitHub repository creation, and push for the `F:\Folder\harness-v2` folder only;
+- no PyPI publish, release execution, dependency install, secret access, or destructive operation outside generated local verification artifacts.
+
+Freshness anchors:
+
+- exact third-slice user packet;
+- `CURRENT.md` executable local MVP pointer;
+- `control\permission.md` exact write and command surface;
+- `control\proof.md` third-slice proof obligation;
+- `control\lifecycle.md` executable local MVP lifecycle entry.
+- fourth-slice user request constrained to the HARNESS folder only.
+
+Denied by the current approval scope:
+
+- paths outside `F:\Folder\harness-v2`;
+- PyPI publish, release execution;
+- dependency install outside already available local tooling;
+- secret access;
+- external network mutation outside GitHub repository creation and push;
+- destructive operation outside generated local verification artifacts.
+
+## Scope Fit
+
+An action is inside approval scope only when it matches the work unit, target surface, operation type, exclusions, freshness anchors, and proof obligation.
+
+If any part is wider, missing, or stale, approval does not fit and the workflow fails closed.
+
+This file does not grant permission, produce proof, move lifecycle state, grant route permission, create regression pass, execute improvement, or prepare release.

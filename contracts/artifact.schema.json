@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "harness-v2://contracts/artifact.schema.json",
+  "title": "HARNESS V2 Artifact Row",
+  "type": "object",
+  "required": ["artifact_id", "path", "role", "authority_limit"],
+  "properties": {
+    "artifact_id": { "type": "string", "minLength": 1 },
+    "path": { "type": "string", "minLength": 1 },
+    "role": { "type": "string", "minLength": 1 },
+    "authority_limit": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "harness-v2://contracts/lifecycle.schema.json",
+  "title": "HARNESS V2 Lifecycle Movement",
+  "type": "object",
+  "required": ["current_state", "target_state"],
+  "properties": {
+    "current_state": { "type": "string", "minLength": 1 },
+    "target_state": { "type": "string", "minLength": 1 },
+    "rollback_target": { "type": "string" },
+    "stale_triggers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,66 @@
+{
+  "task_id": "harness-v2-valid-task",
+  "title": "Validate HARNESS V2 local task contract",
+  "workflow": "product_markdown_mvp_review",
+  "source": {
+    "basis": [
+      "CURRENT.md",
+      "control\\approval.md",
+      "control\\permission.md"
+    ],
+    "current_pointer": "CURRENT.md"
+  },
+  "approval": {
+    "packet": "Approve third HARNESS V2 executable local MVP slice",
+    "approved_paths": [
+      "AGENTS.md",
+      "RULES.md",
+      "CURRENT.md",
+      "README.md",
+      "harness_v2\\core.py",
+      "tests\\test_harness_v2.py"
+    ],
+    "excluded_side_effects": [
+      "package metadata",
+      "package build",
+      "install",
+      "publish",
+      "deploy",
+      "release",
+      "git",
+      "dependency install",
+      "secret access",
+      "external network mutation",
+      "destructive operation"
+    ]
+  },
+  "permission": {
+    "allowed_side_effects": [
+      "local file writes inside approved paths",
+      "python -m compileall harness_v2",
+      "python -m unittest discover tests"
+    ],
+    "denied_side_effects": [
+      "package metadata",
+      "release",
+      "dependency install",
+      "git",
+      "secret access",
+      "external network mutation",
+      "destructive operation"
+    ]
+  },
+  "proof": {
+    "obligations": [
+      "compileall exits 0",
+      "unittest exits 0",
+      "valid fixture accepted",
+      "invalid fixture rejected",
+      "doctor reports without mutation"
+    ]
+  },
+  "lifecycle": {
+    "current_state": "product_markdown_mvp_review",
+    "target_state": "executable_mvp_review"
+  }
+}

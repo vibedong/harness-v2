@@ -1,0 +1,28 @@
+{
+  "task_id": "harness-v2-invalid-missing-approval",
+  "title": "Reject missing approval contract",
+  "workflow": "product_markdown_mvp_review",
+  "source": {
+    "basis": [
+      "CURRENT.md"
+    ],
+    "current_pointer": "CURRENT.md"
+  },
+  "permission": {
+    "allowed_side_effects": [
+      "local read"
+    ],
+    "denied_side_effects": [
+      "release"
+    ]
+  },
+  "proof": {
+    "obligations": [
+      "invalid fixture rejected"
+    ]
+  },
+  "lifecycle": {
+    "current_state": "product_markdown_mvp_review",
+    "target_state": "executable_mvp_review"
+  }
+}

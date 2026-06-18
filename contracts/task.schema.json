@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "harness-v2://contracts/task.schema.json",
+  "title": "HARNESS V2 Task",
+  "type": "object",
+  "required": ["task_id", "title", "workflow", "source", "approval", "permission", "proof", "lifecycle"],
+  "properties": {
+    "task_id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "workflow": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "required": ["basis", "current_pointer"],
+      "properties": {
+        "basis": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "current_pointer": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "approval": { "$ref": "harness-v2://contracts/approval.schema.json" },
+    "permission": { "$ref": "harness-v2://contracts/permission.schema.json" },
+    "proof": { "$ref": "harness-v2://contracts/proof.schema.json" },
+    "lifecycle": { "$ref": "harness-v2://contracts/lifecycle.schema.json" },
+    "artifacts": {
+      "type": "array",
+      "items": { "$ref": "harness-v2://contracts/artifact.schema.json" }
+    }
+  },
+  "additionalProperties": true
+}
