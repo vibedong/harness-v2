@@ -29,4 +29,4 @@ Until then, this README provides lane names and boundaries only.
 
 ## Non-Authority Boundary
 
-This file does not create active state, approval, permission, proof, lifecycle transition, route permission, regression pass, improvement execution, implementation completion, PyPI publish readiness, or release readiness.
+This file does not create active state, approval, permission, proof, lifecycle transition, route permission, regression pass, improvement execution, implementation completion, Python package registry publish readiness, or release readiness.

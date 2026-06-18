@@ -2,7 +2,7 @@
 
 status: package_github_surface / fourth_slice / release_transaction_boundary
 
-This file defines the local markdown boundary for install and release transactions. It records release readiness inputs but does not execute npm, PyPI, or product release work by itself.
+This file defines the local markdown boundary for install and release transactions. It records release readiness inputs but does not execute npm, Python package registry publish, or product release work by itself.
 
 ## Release Separation
 
@@ -63,7 +63,7 @@ Reason:
 The current package, GitHub publish, npm wrapper, and npm release scope allows local editable package smoke verification, local Node wrapper proof, npm dry-run pack proof, exact npm publish for `harness-v2@0.1.0`, exact Git tag `v0.1.0`, exact GitHub release `v0.1.0`, and GitHub repository push, but denies:
 
 - dependency changes;
-- PyPI publish or deploy work;
+- Python package registry publish or deploy work;
 - release execution outside `harness-v2@0.1.0` / `v0.1.0`;
 - unrelated external network mutation;
 - secret access;
@@ -72,4 +72,4 @@ The current package, GitHub publish, npm wrapper, and npm release scope allows l
 
 ## Non-Authority Boundary
 
-This file does not execute npm publish, PyPI publish, deploy, approval, permission, proof, lifecycle transition, or implementation completion by itself.
+This file does not execute npm publish, Python package registry publish, deploy, approval, permission, proof, lifecycle transition, or implementation completion by itself.

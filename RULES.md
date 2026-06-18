@@ -33,7 +33,7 @@ Local writing is allowed only when the requested work unit is inside the bound a
 
 Package metadata, local editable install verification, Windows/macOS npm wrapper metadata, npm dry-run pack verification, and GitHub repository push are allowed only when the current approval and permission surfaces explicitly name them.
 
-Do not perform PyPI publish, dependency installation from the network, secret access, unrelated external mutation, or destructive action outside generated verification artifacts. npm publish is allowed only for `harness-v2@0.1.0` when an active release transaction, approval surface, permission surface, and proof obligation all name that exact target and npm authentication is present.
+Do not perform Python package registry publish, dependency installation from the network, secret access, unrelated external mutation, or destructive action outside generated verification artifacts. npm publish is allowed only for `harness-v2@0.1.0` when an active release transaction, approval surface, permission surface, and proof obligation all name that exact target and npm authentication is present.
 
 ## Guard Catalog
 
@@ -48,7 +48,7 @@ Do not perform PyPI publish, dependency installation from the network, secret ac
 | artifact guard | registry rows and log entries are indexes, not source authority or proof |
 | regression guard | mappings and scenarios do not equal passing regression evidence |
 | improvement guard | improvement candidates do not directly change product rules |
-| release guard | install, package, npm publish, PyPI publish, deploy, and release readiness require a separate transaction |
+| release guard | install, package, npm publish, Python package registry publish, deploy, and release readiness require a separate transaction |
 
 ## Current State
 

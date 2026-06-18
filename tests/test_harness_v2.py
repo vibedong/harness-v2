@@ -17,6 +17,7 @@ APPROVED_SOURCE_FILES = {
     "RULES.md",
     "CURRENT.md",
     "README.md",
+    "README.ko.md",
     "LICENSE",
     "RELEASE_NOTES.md",
     "package.json",
@@ -93,6 +94,7 @@ ALLOWED_GIT_COMMANDS = {
     "gh release create v0.1.0 --title \"HARNESS V2 0.1.0\" --notes-file RELEASE_NOTES.md",
 }
 FORBIDDEN_SOURCE_FRAGMENT = "source" + ".fragment.json"
+REMOVED_PACKAGE_REGISTRY_ACRONYM = "Py" + "PI"
 
 
 class HarnessV2ExecutableMvpTests(unittest.TestCase):
@@ -200,6 +202,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                 "RULES.md",
                 "CURRENT.md",
                 "README.md",
+                "README.ko.md",
                 "LICENSE",
                 "RELEASE_NOTES.md",
                 "pyproject.toml",
@@ -228,14 +231,21 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         license_text = (ROOT / "LICENSE").read_text()
         release_notes = (ROOT / "RELEASE_NOTES.md").read_text()
         readme = (ROOT / "README.md").read_text()
+        korean_readme = (ROOT / "README.ko.md").read_text(encoding="utf-8")
 
         self.assertIn("MIT License", license_text)
         self.assertIn("Copyright (c) 2026 vibedong", license_text)
         self.assertIn("# HARNESS V2 0.1.0 Release Notes", release_notes)
         self.assertIn("npm install -g harness-v2", readme)
+        self.assertIn("README.ko.md", readme)
+        self.assertIn("# HARNESS V2 사용설명서", korean_readme)
+        self.assertIn("npm install -g harness-v2", korean_readme)
         self.assertIn("Python 3.11", readme)
         self.assertIn("Python 3.11", release_notes)
-        self.assertIn("npm publish", release_notes)
+        self.assertIn("Published npm package", release_notes)
+        self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, readme)
+        self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, korean_readme)
+        self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, release_notes)
 
     def test_release_version_policy_is_consistent(self):
         import harness_v2
@@ -356,7 +366,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("npm pack --dry-run", valid["permission"]["allowed_side_effects"])
         self.assertIn("npm publish", valid["permission"]["allowed_side_effects"])
         self.assertNotIn("npm publish", valid["permission"]["denied_side_effects"])
-        self.assertIn("PyPI publish", valid["permission"]["denied_side_effects"])
+        self.assertIn("Python package registry publish", valid["permission"]["denied_side_effects"])
 
     def test_artifact_surfaces_include_package_github_scope(self):
         registry = (ROOT / "artifacts" / "registry.md").read_text()
@@ -402,12 +412,15 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         from harness_v2.core import validate_task
 
         payload = valid_task_payload()
-        payload["permission"]["allowed_side_effects"].append("PyPI publish")
+        payload["permission"]["allowed_side_effects"].append("Python package registry publish")
 
         result = validate_task(payload, root=ROOT)
 
         self.assertFalse(result.ok)
-        self.assertIn("permission side effect conflicts with denied side effect: PyPI publish", "\n".join(result.errors))
+        self.assertIn(
+            "permission side effect conflicts with denied side effect: Python package registry publish",
+            "\n".join(result.errors),
+        )
 
     def test_verifier_rejects_approval_excluded_side_effect_conflict(self):
         from harness_v2.core import validate_task
@@ -480,7 +493,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(status["workflow"], "package_publish_review")
         self.assertEqual(status["state"], "package_publish_review")
-        self.assertIn("not_pypi", status["substate"])
+        self.assertIn("npm_only", status["substate"])
 
     def test_doctor_reports_next_action_without_mutation(self):
         from harness_v2.doctor import inspect_project

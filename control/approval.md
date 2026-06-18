@@ -90,7 +90,7 @@ __pycache__ directories generated under F:\Folder\harness-v2.
 
 Allow git add/commit/push only for this amendment to vibedong/harness-v2.
 
-No PyPI publish.
+No Python package registry publish.
 No secrets read.
 No dependency install from network.
 No destructive operation outside the named generated verification artifacts.
@@ -131,7 +131,7 @@ npm pack --dry-run
 npm publish --dry-run
 npm publish
 
-No PyPI publish.
+No Python package registry publish.
 No dependency install from network.
 No secret read.
 No destructive operation outside generated verification artifacts.
@@ -148,7 +148,7 @@ Operation type:
 - exact npm publish execution for `harness-v2@0.1.0` after npm authentication is present;
 - exact Git tag and GitHub release creation for `v0.1.0`;
 - git initialization, commit, GitHub repository creation, and push for the `F:\Folder\harness-v2` folder only;
-- no PyPI publish, dependency install, secret access, or destructive operation outside generated local verification artifacts.
+- no Python package registry publish, dependency install, secret access, or destructive operation outside generated local verification artifacts.
 
 Freshness anchors:
 
@@ -165,7 +165,7 @@ Freshness anchors:
 Denied by the current approval scope:
 
 - paths outside `F:\Folder\harness-v2`;
-- PyPI publish;
+- Python package registry publish;
 - dependency install outside already available local tooling;
 - secret access;
 - external network mutation outside GitHub repository creation and push;

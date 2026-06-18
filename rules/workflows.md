@@ -54,7 +54,7 @@ Improvement work may classify candidate changes and lessons. It does not directl
 
 Release work is boundary analysis only in this package and GitHub MVP surface.
 
-PyPI publish, deploy, release readiness, rollback execution, and unrelated external mutation require a later release transaction scope.
+Python package registry publish, deploy, release readiness, rollback execution, and unrelated external mutation require a later release transaction scope.
 
 ## Root Precedence
 

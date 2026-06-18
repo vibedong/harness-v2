@@ -1,6 +1,6 @@
 {
   "task_id": "harness-v2-valid-task",
-  "title": "Validate HARNESS V2 public npm release candidate task contract",
+  "title": "Validate HARNESS V2 public npm release task contract",
   "workflow": "package_publish_review",
   "source": {
     "basis": [
@@ -18,6 +18,7 @@
       "RULES.md",
       "CURRENT.md",
       "README.md",
+      "README.ko.md",
       "LICENSE",
       "RELEASE_NOTES.md",
       "package.json",
@@ -37,7 +38,7 @@
       "tests\\fixtures\\valid-task.json"
     ],
     "excluded_side_effects": [
-      "PyPI publish",
+      "Python package registry publish",
       "npm publish for any package other than harness-v2@0.1.0",
       "release execution for any tag other than v0.1.0",
       "dependency install from network",
@@ -68,7 +69,7 @@
       "gh release create v0.1.0 --title \"HARNESS V2 0.1.0\" --notes-file RELEASE_NOTES.md"
     ],
     "denied_side_effects": [
-      "PyPI publish",
+      "Python package registry publish",
       "npm publish for any package other than harness-v2@0.1.0",
       "release execution for any tag other than v0.1.0",
       "dependency install from network",
@@ -92,7 +93,7 @@
       "invalid fixture rejected",
       "doctor reports without mutation",
       "GitHub main contains pushed commit",
-      "no PyPI publish, dependency install, secret access, unrelated external mutation, or release outside harness-v2@0.1.0"
+      "no Python package registry publish, dependency install, secret access, unrelated external mutation, or release outside harness-v2@0.1.0"
     ]
   },
   "lifecycle": {

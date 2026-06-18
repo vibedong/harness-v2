@@ -30,7 +30,7 @@ For the fourth-slice package, GitHub publish, and npm wrapper surface, verify af
 20. the unittest suite proves the verifier accepts `tests\fixtures\valid-task.json`;
 21. the unittest suite proves doctor reports next action without mutating files;
 22. GitHub publish proof names repository URL, branch, and pushed commit;
-23. product-local markdown boundaries still deny PyPI publish, dependency install, secret access, unrelated external network mutation, and destructive operation outside generated verification artifacts.
+23. product-local markdown boundaries still deny Python package registry publish, dependency install, secret access, unrelated external network mutation, and destructive operation outside generated verification artifacts.
 
 ## Artifact Checks
 
@@ -42,4 +42,4 @@ Subagent reports and review findings can help find defects, but they are not pro
 
 Proof evidence becomes stale when target files, write surface, approval scope, permission scope, verifier command, package metadata, npm wrapper metadata, package backend, lifecycle state, route guidance, artifact registry/log contents, safety boundary, improvement classification, GitHub target, npm target, or release boundary changes.
 
-This file does not grant approval, permission, lifecycle state, route permission, regression pass, improvement execution, PyPI publish state, release state, or future-slice authority.
+This file does not grant approval, permission, lifecycle state, route permission, regression pass, improvement execution, Python package registry publish state, release state, or future-slice authority.

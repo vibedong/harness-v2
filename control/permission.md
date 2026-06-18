@@ -14,7 +14,7 @@ This file separates approved intent from allowed side effects.
 | package metadata, package build, local editable smoke install | allowed only for this product |
 | npm wrapper metadata, dry-run pack, and npm publish | allowed only for `harness-v2@0.1.0` release execution |
 | GitHub repository creation and push | allowed only for this product folder |
-| PyPI publish, dependency install | denied |
+| Python package registry publish, dependency install | denied |
 | secret access, unrelated external network mutation, destructive action | denied |
 
 ## Exact Write Surface
@@ -52,6 +52,6 @@ The temporary smoke-test venv, generated `harness_v2.egg-info`, generated `__pyc
 
 ## Permission Boundaries
 
-Permission cannot widen approval scope and cannot produce proof, lifecycle state, route permission, regression pass, improvement execution, or PyPI publish readiness.
+Permission cannot widen approval scope and cannot produce proof, lifecycle state, route permission, regression pass, improvement execution, or Python package registry publish readiness.
 
-The release transaction file may describe release boundaries, but this permission surface still denies PyPI publish, dependency install, secret access, unrelated external network mutation, and destructive actions outside generated verification artifacts.
+The release transaction file may describe release boundaries, but this permission surface still denies Python package registry publish, dependency install, secret access, unrelated external network mutation, and destructive actions outside generated verification artifacts.

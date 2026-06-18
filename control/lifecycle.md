@@ -36,9 +36,9 @@ Scope:
 - `F:\Folder\harness-v2` folder only;
 - local verification commands named in `control\permission.md`;
 - package metadata, local editable package smoke verification, Windows/macOS npm wrapper metadata, local Node wrapper proof, npm dry-run pack proof, npm publish dry-run proof, git initialization, GitHub repository creation, push, exact npm publish for `harness-v2@0.1.0` after npm authentication, exact Git tag `v0.1.0`, and exact GitHub release `v0.1.0`;
-- no PyPI publish, dependency install, secret access, unrelated external network mutation, or destructive operation outside generated verification artifacts.
+- no Python package registry publish, dependency install, secret access, unrelated external network mutation, or destructive operation outside generated verification artifacts.
 
-This entry records that the local package, GitHub publication, npm wrapper surface, and public npm release candidate remain in review until proof is complete. It is not PyPI publish, product completion, or future-slice transition.
+This entry records that the local package, GitHub publication, npm wrapper surface, and public npm release surface remain in review until proof is complete. It is not Python package registry publish, product completion, or future-slice transition.
 
 ## Transition Requirements
 
@@ -57,4 +57,4 @@ A later state movement must name:
 
 Backtrack to `package_publish_review`, `package_publish_authoring`, `npm_wrapper_authoring`, or `public_release_candidate` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, npm wrapper surface, GitHub target, npm target, or target surface becomes stale or conflicting.
 
-This file does not produce proof, approval, npm publish state, PyPI publish state, release state, route permission, regression pass, improvement execution, or permission for future slices.
+This file does not produce proof, approval, npm publish state, Python package registry publish state, release state, route permission, regression pass, improvement execution, or permission for future slices.

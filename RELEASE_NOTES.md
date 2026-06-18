@@ -1,6 +1,6 @@
 # HARNESS V2 0.1.0 Release Notes
 
-Initial public npm release candidate for HARNESS V2.
+Initial public npm release for HARNESS V2.
 
 ## Included
 
@@ -10,6 +10,7 @@ Initial public npm release candidate for HARNESS V2.
 - Dependency-free Python editable install support through the local build backend included in the source and npm tarball.
 - Dependency-free Windows/macOS npm CLI wrapper that delegates to the Python CLI.
 - Unit tests and fixtures for the local verifier and npm wrapper, included in the source and npm tarball.
+- Korean user manual in `README.ko.md`.
 
 ## Runtime Requirements
 
@@ -19,7 +20,7 @@ Initial public npm release candidate for HARNESS V2.
 
 ## Verification
 
-The release candidate is expected to pass:
+The release was verified with:
 
 ```text
 python -m compileall harness_v2
@@ -29,14 +30,18 @@ node bin\harness-v2.js verify tests\fixtures\valid-task.json
 npm pack --dry-run
 ```
 
+Post-publish installation from npm was also verified with a temporary npm prefix.
+
 ## Publish Scope
 
-The intended npm publish target is:
+Published npm package:
 
 ```text
 harness-v2@0.1.0
 ```
 
-PyPI publish is not included in this release.
+GitHub release:
 
-Release execution requires npm authentication, a git tag, a GitHub release, and post-publish fresh install verification.
+```text
+https://github.com/vibedong/harness-v2/releases/tag/v0.1.0
+```
