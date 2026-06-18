@@ -43,15 +43,14 @@ harness-v2@0.1.0
 Status:
 
 ```text
-RELEASE_PREPARED_NPM_AUTH_OR_ACCESS_REQUIRED
+RELEASE_READY_NPM_AUTH_PRESENT
 ```
 
 Reason:
 
 - npm package name `harness-v2` returned registry 404 during readiness check, so the name appears available.
 - GitHub CLI is authenticated for `vibedong/harness-v2`.
-- npm CLI returned `E401 Unauthorized` for `npm whoami`, so npm authentication is not present.
-- `npm publish` for `harness-v2@0.1.0` returned `E404 Not Found` with the npm message that the package could not be found or the current client has no permission to access it.
+- npm CLI now authenticates successfully with `npm.cmd whoami`.
 - Git tag `v0.1.0` and GitHub release `v0.1.0` must not be created until npm publish succeeds.
 - Local verification, Node wrapper verification, and npm pack dry-run are the required pre-publish proof commands.
 - Exact release execution commands are permitted only for `harness-v2@0.1.0`, `v0.1.0`, and the GitHub repository `vibedong/harness-v2`.

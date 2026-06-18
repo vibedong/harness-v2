@@ -10,7 +10,7 @@ workflow: `package_publish_review`
 
 state: `package_publish_review`
 
-substate: `fourth_slice_package_github_surface_authored / npm_wrapper_authored / public_release_candidate / npm_auth_required / not_pypi`
+substate: `fourth_slice_package_github_surface_authored / npm_wrapper_authored / public_release_candidate / npm_auth_present / npm_publish_ready / not_pypi`
 
 source basis:
 
