@@ -2,6 +2,7 @@
   "task_id": "<task-id>",
   "title": "<task title>",
   "workflow": "<workflow>",
+  "workflow_stage": "<planning|approval|development|development_review|artifact_observation|routing|safety_improvement|release_boundary>",
   "source": {
     "basis": ["<source path>"],
     "current_pointer": "CURRENT.md"

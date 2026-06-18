@@ -20,6 +20,7 @@ Do not use this file as a transcript, scratchpad, or complete audit database.
 | fourth-slice package and GitHub MVP | `pyproject.toml`, `_build_backend`, editable install proof path, git repo, and GitHub `main` branch | current package and GitHub MVP publication scope |
 | docs/control sync | root rules, route, artifact, safety, README, CURRENT, and tests | current stale-surface reconciliation scope |
 | generated scaffold hardening | `harness_v2\core.py`, generated project-root scaffold, fixtures, tests, and current control surfaces | active remaining completion program slice |
+| executable 8-stage workflow enforcement | `workflow_stage`, verifier stage predicates, schema/template updates, fixtures, tests, and workflow rules | active remaining completion program slice |
 
 ## Freshness
 

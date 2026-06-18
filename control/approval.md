@@ -21,7 +21,7 @@ remaining_completion_program
 Current active slice:
 
 ```text
-generated_scaffold_hardening
+executable_8_stage_workflow_engine_enforcement
 ```
 
 Current bound user packet:

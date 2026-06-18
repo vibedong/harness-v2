@@ -10,7 +10,7 @@ workflow: `remaining_completion_program`
 
 state: `package_publish_review`
 
-substate: `generated_scaffold_hardening / not_final_completion`
+substate: `executable_8_stage_workflow_engine_enforcement / not_final_completion`
 
 source basis:
 
@@ -25,13 +25,16 @@ source basis:
 
 The remaining completion program is active but not complete.
 
-Current active slice:
+Completed slices:
 
 - generated scaffold hardening
 
-Future slices in this program:
+Current active slice:
 
 - executable 8-stage workflow engine enforcement
+
+Future slices in this program:
+
 - side-effect preflight adapter design and implementation if locally feasible
 - MCP feasibility/design only unless separately approved for implementation
 - final quality audit, documentation sync, and GitHub push

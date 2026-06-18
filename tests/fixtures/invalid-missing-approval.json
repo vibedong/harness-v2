@@ -2,6 +2,7 @@
   "task_id": "harness-v2-invalid-missing-approval",
   "title": "Reject missing remaining completion approval contract",
   "workflow": "remaining_completion_program",
+  "workflow_stage": "development",
   "source": {
     "basis": [
       "CURRENT.md"

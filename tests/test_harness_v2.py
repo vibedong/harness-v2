@@ -130,6 +130,26 @@ INITIAL_PROOF_OBLIGATIONS = {
     "harness-v2 status --root .",
     "harness-v2 verify contracts\\harness-task.json",
 }
+WORKFLOW_STAGES = {
+    "planning",
+    "approval",
+    "development",
+    "development_review",
+    "artifact_observation",
+    "routing",
+    "safety_improvement",
+    "release_boundary",
+}
+COMMON_DENIED_SIDE_EFFECTS = [
+    "npm publish",
+    "Python package registry publish",
+    "GitHub release creation",
+    "release tag creation",
+    "dependency install from network",
+    "secret access",
+    "external network mutation outside allowed git push",
+    "destructive operation outside generated verification artifacts",
+]
 FORBIDDEN_SOURCE_FRAGMENT = "source" + ".fragment.json"
 REMOVED_PACKAGE_REGISTRY_ACRONYM = "Py" + "PI"
 
@@ -160,6 +180,32 @@ def assert_fresh_scaffold_shape(
     case.assertEqual({path.name for path in root.iterdir() if path.is_dir()}, {"control", "contracts", "templates"})
     for forbidden in ("harness-v2", "harness_v2", "bin", "package.json"):
         case.assertFalse((root / forbidden).exists(), forbidden)
+
+
+def stage_payload(
+    stage: str,
+    approved_paths: list[str],
+    *,
+    allowed_side_effects: list[str] | None = None,
+    denied_side_effects: list[str] | None = None,
+    source_basis: list[str] | None = None,
+    proof_obligations: list[str] | None = None,
+    excluded_side_effects: list[str] | None = None,
+    target_state: str = "package_publish_review",
+) -> dict:
+    payload = valid_task_payload()
+    payload["task_id"] = f"harness-v2-{stage}-task"
+    payload["title"] = f"Validate {stage} workflow stage"
+    payload["workflow_stage"] = stage
+    payload["source"]["basis"] = source_basis or ["CURRENT.md"]
+    payload["approval"]["packet"] = f"Approve exact {stage} workflow stage task"
+    payload["approval"]["approved_paths"] = approved_paths
+    payload["approval"]["excluded_side_effects"] = excluded_side_effects or list(COMMON_DENIED_SIDE_EFFECTS)
+    payload["permission"]["allowed_side_effects"] = allowed_side_effects or ["local readback/search only"]
+    payload["permission"]["denied_side_effects"] = denied_side_effects or list(COMMON_DENIED_SIDE_EFFECTS)
+    payload["proof"]["obligations"] = proof_obligations or [f"{stage} workflow stage verified"]
+    payload["lifecycle"]["target_state"] = target_state
+    return payload
 
 
 class HarnessV2ExecutableMvpTests(unittest.TestCase):
@@ -236,9 +282,30 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                 "artifact.schema.json",
             },
         )
+        self.assertIn("workflow_stage", task_schema["required"])
+        self.assertEqual(set(task_schema["properties"]["workflow_stage"]["enum"]), WORKFLOW_STAGES)
         for source_file in APPROVED_SOURCE_FILES:
             content = (ROOT / source_file).read_text()
             self.assertNotIn(FORBIDDEN_SOURCE_FRAGMENT, content)
+
+    def test_workflow_stage_registry_is_exact_eight_stage_contract(self):
+        task_schema = json.loads((ROOT / "contracts" / "task.schema.json").read_text())
+        workflow_rules = (ROOT / "rules" / "workflows.md").read_text()
+        template = (ROOT / "templates" / "task.json").read_text()
+
+        self.assertEqual(set(task_schema["properties"]["workflow_stage"]["enum"]), WORKFLOW_STAGES)
+        self.assertIn("<planning|approval|development|development_review|artifact_observation|routing|safety_improvement|release_boundary>", template)
+        for heading in (
+            "## Planning Workflow",
+            "## Approval Workflow",
+            "## Development Workflow",
+            "## Development Review Workflow",
+            "## Artifact Observation Workflow",
+            "## Routing Workflow",
+            "## Safety And Improvement Workflow",
+            "## Release Boundary Workflow",
+        ):
+            self.assertIn(heading, workflow_rules)
 
     def test_npm_wrapper_package_metadata_is_dependency_free(self):
         package_json = json.loads((ROOT / "package.json").read_text())
@@ -464,9 +531,11 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         invalid = json.loads(INVALID_TASK.read_text())
 
         self.assertEqual(valid["workflow"], "remaining_completion_program")
+        self.assertEqual(valid["workflow_stage"], "development")
         self.assertEqual(valid["lifecycle"]["current_state"], "package_publish_review")
         self.assertEqual(valid["lifecycle"]["target_state"], "package_publish_review")
         self.assertEqual(invalid["workflow"], "remaining_completion_program")
+        self.assertEqual(invalid["workflow_stage"], "development")
         self.assertEqual(invalid["lifecycle"]["current_state"], "package_publish_review")
         self.assertEqual(invalid["lifecycle"]["target_state"], "package_publish_review")
         self.assertIn("pyproject.toml", valid["approval"]["approved_paths"])
@@ -518,6 +587,226 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertFalse(result.ok)
         self.assertIn("workflow must match CURRENT.md workflow remaining_completion_program", "\n".join(result.errors))
+
+    def test_verifier_rejects_bad_source_pointer_or_missing_current_basis(self):
+        from harness_v2.core import validate_task
+
+        bad_pointer = valid_task_payload()
+        bad_pointer["source"]["current_pointer"] = "README.md"
+        missing_current = valid_task_payload()
+        missing_current["source"]["basis"] = ["control\\approval.md"]
+
+        bad_pointer_result = validate_task(bad_pointer, root=ROOT)
+        missing_current_result = validate_task(missing_current, root=ROOT)
+
+        self.assertFalse(bad_pointer_result.ok)
+        self.assertIn("source.current_pointer must be CURRENT.md", "\n".join(bad_pointer_result.errors))
+        self.assertFalse(missing_current_result.ok)
+        self.assertIn("source.basis must include CURRENT.md", "\n".join(missing_current_result.errors))
+
+    def test_verifier_rejects_missing_core_denied_side_effects(self):
+        from harness_v2.core import validate_task
+
+        payload = valid_task_payload()
+        payload["permission"]["denied_side_effects"] = ["npm publish"]
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertFalse(result.ok)
+        self.assertIn("permission.denied_side_effects must include denial for: dependency install", "\n".join(result.errors))
+
+    def test_verifier_rejects_missing_or_unknown_workflow_stage(self):
+        from harness_v2.core import validate_task
+
+        missing = valid_task_payload()
+        del missing["workflow_stage"]
+        unknown = valid_task_payload()
+        unknown["workflow_stage"] = "unknown_stage"
+
+        missing_result = validate_task(missing, root=ROOT)
+        unknown_result = validate_task(unknown, root=ROOT)
+
+        self.assertFalse(missing_result.ok)
+        self.assertIn("workflow_stage must be a non-empty string", "\n".join(missing_result.errors))
+        self.assertFalse(unknown_result.ok)
+        self.assertIn("workflow_stage is not a known stage: unknown_stage", "\n".join(unknown_result.errors))
+
+    def test_verifier_accepts_all_known_workflow_stages(self):
+        from harness_v2.core import validate_task
+
+        examples = {
+            "planning": stage_payload("planning", ["stage-plans\\candidate.md"]),
+            "approval": stage_payload("approval", ["control\\approval.md"]),
+            "development": stage_payload(
+                "development",
+                ["AGENTS.md"],
+                allowed_side_effects=["local file writes under F:\\Folder\\harness-v2"],
+            ),
+            "development_review": stage_payload("development_review", ["records\\README.md"]),
+            "artifact_observation": stage_payload(
+                "artifact_observation",
+                ["artifacts\\registry.md", "artifacts\\log.md"],
+            ),
+            "routing": stage_payload("routing", ["routing\\manifest.md"]),
+            "safety_improvement": stage_payload(
+                "safety_improvement",
+                ["safety\\regression.md", "safety\\improvement.md"],
+            ),
+            "release_boundary": stage_payload("release_boundary", ["release\\transaction.md"]),
+        }
+
+        for stage, payload in examples.items():
+            with self.subTest(stage=stage):
+                result = validate_task(payload, root=ROOT)
+                self.assertTrue(result.ok, result.errors)
+
+    def test_workflow_stage_engine_rejects_stage_rule_violations(self):
+        from harness_v2.core import validate_task
+
+        cases = [
+            (
+                "planning_product_path",
+                stage_payload("planning", ["harness_v2\\core.py"]),
+                "planning stage approved path is outside allowed prefixes: harness_v2\\core.py",
+            ),
+            (
+                "planning_mutation",
+                stage_payload("planning", ["stage-plans\\candidate.md"], allowed_side_effects=["local file writes"]),
+                "planning stage cannot allow mutating side effect: local file writes",
+            ),
+            (
+                "approval_broad_packet",
+                {**stage_payload("approval", ["control\\approval.md"]), "approval": {
+                    **stage_payload("approval", ["control\\approval.md"])["approval"],
+                    "packet": "go ahead",
+                    "excluded_side_effects": []
+                }},
+                "approval stage requires an exact approval packet, not a broad approval phrase",
+            ),
+            (
+                "development_broad_path",
+                stage_payload(
+                    "development",
+                    ["*"],
+                    allowed_side_effects=["local file writes under F:\\Folder\\harness-v2"],
+                ),
+                "approval.approved_paths contains broad path: *",
+            ),
+            (
+                "development_release_execution",
+                stage_payload(
+                    "development",
+                    ["AGENTS.md"],
+                    allowed_side_effects=["local file writes under F:\\Folder\\harness-v2", "npm publish"],
+                ),
+                "development stage cannot allow release execution side effect: npm publish",
+            ),
+            (
+                "development_missing_write",
+                stage_payload("development", ["AGENTS.md"], allowed_side_effects=["local readback/search only"]),
+                "development stage requires an explicit local write side effect",
+            ),
+            (
+                "development_review_mutation",
+                stage_payload("development_review", ["records\\README.md"], allowed_side_effects=["local file writes"]),
+                "development_review stage cannot allow mutating side effect: local file writes",
+            ),
+            (
+                "development_review_lifecycle",
+                stage_payload("development_review", ["records\\README.md"], target_state="public_release_candidate"),
+                "development_review stage cannot move lifecycle state",
+            ),
+            (
+                "development_review_authority_claim",
+                stage_payload(
+                    "development_review",
+                    ["records\\README.md"],
+                    proof_obligations=["review findings produce proof result"],
+                ),
+                "development_review stage cannot claim authority from review/route/artifact material: review findings produce proof result",
+            ),
+            (
+                "artifact_non_artifact_path",
+                stage_payload("artifact_observation", ["CURRENT.md"]),
+                "artifact_observation stage approved path is outside allowed surface: CURRENT.md",
+            ),
+            (
+                "artifact_source_authority",
+                stage_payload(
+                    "artifact_observation",
+                    ["artifacts\\registry.md"],
+                    source_basis=["artifacts\\registry.md"],
+                ),
+                "artifact_observation stage cannot use artifact registry/log as source authority",
+            ),
+            (
+                "artifact_proof_claim",
+                stage_payload(
+                    "artifact_observation",
+                    ["artifacts\\registry.md"],
+                    proof_obligations=["artifact is proof"],
+                ),
+                "artifact_observation stage cannot claim authority from review/route/artifact material: artifact is proof",
+            ),
+            (
+                "routing_non_routing_path",
+                stage_payload("routing", ["CURRENT.md"]),
+                "routing stage approved path is outside allowed surface: CURRENT.md",
+            ),
+            (
+                "routing_side_effect",
+                stage_payload("routing", ["routing\\manifest.md"], allowed_side_effects=["git push"]),
+                "routing stage cannot allow mutating side effect: git push",
+            ),
+            (
+                "routing_permission_claim",
+                stage_payload(
+                    "routing",
+                    ["routing\\manifest.md"],
+                    proof_obligations=["route permission granted"],
+                ),
+                "routing stage cannot claim authority from review/route/artifact material: route permission granted",
+            ),
+            (
+                "safety_product_path",
+                stage_payload("safety_improvement", ["harness_v2\\core.py"]),
+                "safety_improvement stage approved path is outside allowed surface: harness_v2\\core.py",
+            ),
+            (
+                "safety_mutation",
+                stage_payload(
+                    "safety_improvement",
+                    ["safety\\regression.md"],
+                    allowed_side_effects=["local file writes"],
+                ),
+                "safety_improvement stage cannot allow mutating side effect: local file writes",
+            ),
+            (
+                "release_non_release_path",
+                stage_payload("release_boundary", ["CURRENT.md"]),
+                "release_boundary stage approved path is outside allowed surface: CURRENT.md",
+            ),
+            (
+                "release_execution",
+                stage_payload("release_boundary", ["release\\transaction.md"], allowed_side_effects=["npm publish"]),
+                "release_boundary stage cannot allow release execution side effect: npm publish",
+            ),
+            (
+                "release_missing_denial",
+                stage_payload(
+                    "release_boundary",
+                    ["release\\transaction.md"],
+                    denied_side_effects=["dependency install from network"],
+                ),
+                "release_boundary stage requires denied side effect: npm publish",
+            ),
+        ]
+
+        for name, payload, expected_error in cases:
+            with self.subTest(name=name):
+                result = validate_task(payload, root=ROOT)
+                self.assertFalse(result.ok)
+                self.assertIn(expected_error, "\n".join(result.errors))
 
     def test_verifier_rejects_allowed_and_denied_side_effect_conflict(self):
         from harness_v2.core import validate_task
@@ -604,7 +893,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(status["workflow"], "remaining_completion_program")
         self.assertEqual(status["state"], "package_publish_review")
-        self.assertIn("generated_scaffold_hardening", status["substate"])
+        self.assertIn("executable_8_stage_workflow_engine_enforcement", status["substate"])
 
     def test_doctor_reports_next_action_without_mutation(self):
         from harness_v2.doctor import inspect_project
@@ -721,6 +1010,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertEqual(set(initial_task["permission"]["allowed_side_effects"]), INITIAL_ALLOWED_SIDE_EFFECTS)
             self.assertEqual(set(initial_task["permission"]["denied_side_effects"]), INITIAL_DENIED_SIDE_EFFECTS)
             self.assertEqual(set(initial_task["proof"]["obligations"]), INITIAL_PROOF_OBLIGATIONS)
+            self.assertEqual(initial_task["workflow_stage"], "development")
             self.assertEqual(initial_task["lifecycle"], {"current_state": "ready", "target_state": "ready"})
 
             from harness_v2.core import validate_task

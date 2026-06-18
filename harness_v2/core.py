@@ -46,6 +46,81 @@ REQUIRED_TASK_OBJECTS = (
     "proof",
     "lifecycle",
 )
+WORKFLOW_STAGES = frozenset(
+    {
+        "planning",
+        "approval",
+        "development",
+        "development_review",
+        "artifact_observation",
+        "routing",
+        "safety_improvement",
+        "release_boundary",
+    }
+)
+PLANNING_PATH_PREFIXES = ("stage-plans\\", "plans\\", "records\\", "docs\\planning\\")
+ARTIFACT_PATHS = {"artifacts\\registry.md", "artifacts\\log.md"}
+ROUTING_PATHS = {"routing\\manifest.md"}
+SAFETY_PATHS = {"safety\\regression.md", "safety\\improvement.md"}
+RELEASE_PATHS = {"release\\transaction.md"}
+PRODUCT_IMPLEMENTATION_PREFIXES = (
+    "harness_v2\\",
+    "contracts\\",
+    "tests\\",
+    "bin\\",
+    "_build_backend\\",
+)
+PRODUCT_IMPLEMENTATION_FILES = {
+    "package.json",
+    "pyproject.toml",
+    "license",
+    "release_notes.md",
+    ".gitignore",
+    ".gitattributes",
+}
+MUTATING_SIDE_EFFECT_FRAGMENTS = (
+    "write",
+    "modify",
+    "create",
+    "delete",
+    "remove",
+    "move",
+    "rename",
+    "commit",
+    "push",
+    "publish",
+    "release",
+    "tag",
+    "deploy",
+    "install",
+    "secret",
+    "external network mutation",
+    "destructive",
+    "npm pack",
+)
+RELEASE_EXECUTION_FRAGMENTS = (
+    "npm publish",
+    "python package registry publish",
+    "github release",
+    "release tag",
+    "release execution",
+    "deploy",
+)
+REQUIRED_RELEASE_DENIALS = (
+    "npm publish",
+    "Python package registry publish",
+    "GitHub release creation",
+    "release tag creation",
+)
+CORE_DENIED_FRAGMENTS = (
+    "publish",
+    "release",
+    "dependency install",
+    "secret",
+    "external network mutation",
+    "destructive",
+)
+BROAD_APPROVAL_PACKETS = {"go ahead", "ok", "okay", "approved", "do it", "all approved"}
 INITIAL_TASK_PATH = "contracts\\harness-task.json"
 
 
@@ -161,6 +236,8 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None) -> Valid
     for key in ("task_id", "title", "workflow"):
         if not _non_empty_string(data.get(key)):
             errors.append(f"{key} must be a non-empty string")
+    if not _non_empty_string(data.get("workflow_stage")):
+        errors.append("workflow_stage must be a non-empty string")
 
     for key in REQUIRED_TASK_OBJECTS:
         if not isinstance(data.get(key), dict):
@@ -171,6 +248,10 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None) -> Valid
         errors.append("source.basis must be a non-empty list")
     if not _non_empty_string(source.get("current_pointer")):
         errors.append("source.current_pointer must be a non-empty string")
+    elif source.get("current_pointer") != "CURRENT.md":
+        errors.append("source.current_pointer must be CURRENT.md")
+    if _non_empty_list(source.get("basis")) and not _contains_normalized(_string_list(source.get("basis")), "CURRENT.md"):
+        errors.append("source.basis must include CURRENT.md")
 
     approval = data.get("approval") if isinstance(data.get("approval"), dict) else {}
     if not _non_empty_string(approval.get("packet")):
@@ -195,6 +276,7 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None) -> Valid
         errors.append("lifecycle.target_state must be a non-empty string")
 
     _validate_current_context(data, root_path, errors)
+    _validate_workflow_stage(data, errors)
 
     return ValidationResult(
         ok=not errors,
@@ -306,6 +388,129 @@ def _validate_current_context(data: dict[str, Any], root: Path | None, errors: l
     errors.extend(_stale_status_errors(root))
 
 
+def _validate_workflow_stage(data: dict[str, Any], errors: list[str]) -> None:
+    stage = data.get("workflow_stage")
+    if not isinstance(stage, str) or not stage.strip():
+        return
+    if stage not in WORKFLOW_STAGES:
+        errors.append(f"workflow_stage is not a known stage: {stage}")
+        return
+
+    source = data.get("source") if isinstance(data.get("source"), dict) else {}
+    approval = data.get("approval") if isinstance(data.get("approval"), dict) else {}
+    permission = data.get("permission") if isinstance(data.get("permission"), dict) else {}
+    proof = data.get("proof") if isinstance(data.get("proof"), dict) else {}
+    lifecycle = data.get("lifecycle") if isinstance(data.get("lifecycle"), dict) else {}
+
+    approved_paths = _string_list(approval.get("approved_paths"))
+    source_basis = _string_list(source.get("basis"))
+    allowed_side_effects = _string_list(permission.get("allowed_side_effects"))
+    denied_side_effects = _string_list(permission.get("denied_side_effects"))
+    proof_obligations = _string_list(proof.get("obligations"))
+
+    _reject_broad_approved_paths(approved_paths, errors)
+    _reject_missing_core_denials(denied_side_effects, errors)
+
+    if stage == "planning":
+        _reject_paths_outside("planning", approved_paths, PLANNING_PATH_PREFIXES, errors)
+        _reject_mutating_stage_side_effects(stage, allowed_side_effects, errors)
+    elif stage == "approval":
+        packet = approval.get("packet")
+        if isinstance(packet, str) and _normalize_side_effect(packet) in BROAD_APPROVAL_PACKETS:
+            errors.append("approval stage requires an exact approval packet, not a broad approval phrase")
+        if not _non_empty_list(approval.get("excluded_side_effects")):
+            errors.append("approval stage requires approval.excluded_side_effects")
+    elif stage == "development":
+        if not any(_contains_fragment(value, ("write", "modify", "create")) for value in allowed_side_effects):
+            errors.append("development stage requires an explicit local write side effect")
+        _reject_release_execution_side_effects(stage, allowed_side_effects, errors)
+    elif stage == "development_review":
+        _reject_mutating_stage_side_effects(stage, allowed_side_effects, errors)
+        if lifecycle.get("current_state") != lifecycle.get("target_state"):
+            errors.append("development_review stage cannot move lifecycle state")
+        _reject_claimed_authority(stage, proof_obligations, ("proof result", "lifecycle transition", "release readiness"), errors)
+    elif stage == "artifact_observation":
+        _reject_path_set_outside("artifact_observation", approved_paths, ARTIFACT_PATHS, errors)
+        for basis in source_basis:
+            if _normalize_path(basis).startswith("artifacts\\"):
+                errors.append("artifact_observation stage cannot use artifact registry/log as source authority")
+        _reject_claimed_authority(stage, proof_obligations, ("artifact is proof", "registry is proof", "log is proof"), errors)
+    elif stage == "routing":
+        _reject_path_set_outside("routing", approved_paths, ROUTING_PATHS, errors)
+        _reject_mutating_stage_side_effects(stage, allowed_side_effects, errors)
+        _reject_claimed_authority(stage, proof_obligations, ("route permission", "tool permission"), errors)
+    elif stage == "safety_improvement":
+        _reject_path_set_outside("safety_improvement", approved_paths, SAFETY_PATHS, errors)
+        _reject_product_implementation_paths(stage, approved_paths, errors)
+        _reject_mutating_stage_side_effects(stage, allowed_side_effects, errors)
+    elif stage == "release_boundary":
+        _reject_path_set_outside("release_boundary", approved_paths, RELEASE_PATHS, errors)
+        _reject_release_execution_side_effects(stage, allowed_side_effects, errors)
+        for required in REQUIRED_RELEASE_DENIALS:
+            if not _contains_normalized(denied_side_effects, required):
+                errors.append(f"release_boundary stage requires denied side effect: {required}")
+
+
+def _reject_broad_approved_paths(paths: list[str], errors: list[str]) -> None:
+    for value in paths:
+        normalized = _normalize_path(value)
+        if (
+            not normalized
+            or normalized in {".", "\\", "/", "<repo root>"}
+            or "*" in normalized
+            or normalized.endswith(":\\")
+            or normalized.casefold() == "f:\\folder\\harness-v2"
+        ):
+            errors.append(f"approval.approved_paths contains broad path: {value}")
+
+
+def _reject_missing_core_denials(denied_side_effects: list[str], errors: list[str]) -> None:
+    for fragment in CORE_DENIED_FRAGMENTS:
+        if not any(_contains_fragment(value, (fragment,)) for value in denied_side_effects):
+            errors.append(f"permission.denied_side_effects must include denial for: {fragment}")
+
+
+def _reject_paths_outside(stage: str, paths: list[str], prefixes: tuple[str, ...], errors: list[str]) -> None:
+    for value in paths:
+        normalized = _normalize_path(value)
+        if not any(normalized.startswith(prefix) for prefix in prefixes):
+            errors.append(f"{stage} stage approved path is outside allowed prefixes: {value}")
+
+
+def _reject_path_set_outside(stage: str, paths: list[str], allowed_paths: set[str], errors: list[str]) -> None:
+    for value in paths:
+        normalized = _normalize_path(value)
+        if normalized not in allowed_paths:
+            errors.append(f"{stage} stage approved path is outside allowed surface: {value}")
+
+
+def _reject_product_implementation_paths(stage: str, paths: list[str], errors: list[str]) -> None:
+    for value in paths:
+        normalized = _normalize_path(value)
+        if normalized in PRODUCT_IMPLEMENTATION_FILES or any(
+            normalized.startswith(prefix) for prefix in PRODUCT_IMPLEMENTATION_PREFIXES
+        ):
+            errors.append(f"{stage} stage cannot approve product implementation path: {value}")
+
+
+def _reject_mutating_stage_side_effects(stage: str, side_effects: list[str], errors: list[str]) -> None:
+    for value in side_effects:
+        if _contains_fragment(value, MUTATING_SIDE_EFFECT_FRAGMENTS):
+            errors.append(f"{stage} stage cannot allow mutating side effect: {value}")
+
+
+def _reject_release_execution_side_effects(stage: str, side_effects: list[str], errors: list[str]) -> None:
+    for value in side_effects:
+        if _contains_fragment(value, RELEASE_EXECUTION_FRAGMENTS):
+            errors.append(f"{stage} stage cannot allow release execution side effect: {value}")
+
+
+def _reject_claimed_authority(stage: str, values: list[str], fragments: tuple[str, ...], errors: list[str]) -> None:
+    for value in values:
+        if _contains_fragment(value, fragments):
+            errors.append(f"{stage} stage cannot claim authority from review/route/artifact material: {value}")
+
+
 def _reject_side_effect_conflicts(
     allowed: list[str],
     denied: list[str],
@@ -368,6 +573,23 @@ def _string_list(value: Any) -> list[str]:
 
 def _normalize_side_effect(value: str) -> str:
     return " ".join(value.casefold().split())
+
+
+def _normalize_path(value: str) -> str:
+    normalized = value.strip().replace("/", "\\")
+    while normalized.startswith(".\\"):
+        normalized = normalized[2:]
+    return normalized.casefold()
+
+
+def _contains_fragment(value: str, fragments: tuple[str, ...]) -> bool:
+    normalized = _normalize_side_effect(value)
+    return any(fragment.casefold() in normalized for fragment in fragments)
+
+
+def _contains_normalized(values: list[str], expected: str) -> bool:
+    expected_normalized = _normalize_side_effect(expected)
+    return any(_normalize_side_effect(value) == expected_normalized for value in values)
 
 
 def _looks_like_harness_package_root(path: Path) -> bool:
@@ -575,8 +797,9 @@ Do not mark work done, release-ready, published, migrated, or automatically enfo
 def _initial_task_json() -> str:
     return """{
   "task_id": "harness-v2-initial-task",
-    "title": "Scaffold-only initial HARNESS V2 project binding",
+  "title": "Scaffold-only initial HARNESS V2 project binding",
   "workflow": "default",
+  "workflow_stage": "development",
   "source": {
     "basis": [
       "AGENTS.md",
@@ -644,6 +867,7 @@ def _task_template_json() -> str:
   "task_id": "<task-id>",
   "title": "<task title>",
   "workflow": "default",
+  "workflow_stage": "<planning|approval|development|development_review|artifact_observation|routing|safety_improvement|release_boundary>",
   "source": {
     "basis": ["CURRENT.md"],
     "current_pointer": "CURRENT.md"

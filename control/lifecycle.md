@@ -36,14 +36,15 @@ package_publish_review -> package_publish_review
 Active slice:
 
 ```text
-generated_scaffold_hardening
+executable_8_stage_workflow_engine_enforcement
 ```
 
 Scope:
 
 - product writes only under `F:\Folder\harness-v2`;
-- generated scaffold hardening first;
-- later slices may cover executable 8-stage workflow enforcement, side-effect preflight adapter work if locally feasible, MCP feasibility/design only unless separately approved, final quality audit, documentation sync, and GitHub push;
+- generated scaffold hardening is complete;
+- current work covers executable 8-stage workflow enforcement;
+- later slices may cover side-effect preflight adapter work if locally feasible, MCP feasibility/design only unless separately approved, final quality audit, documentation sync, and GitHub push;
 - local verification commands named in `control\permission.md`;
 - read-only subagent review with `vowline`;
 - git add, commit, and push after completed slices pass verification and review;

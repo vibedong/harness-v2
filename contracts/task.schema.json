@@ -3,11 +3,24 @@
   "$id": "harness-v2://contracts/task.schema.json",
   "title": "HARNESS V2 Task",
   "type": "object",
-  "required": ["task_id", "title", "workflow", "source", "approval", "permission", "proof", "lifecycle"],
+  "required": ["task_id", "title", "workflow", "workflow_stage", "source", "approval", "permission", "proof", "lifecycle"],
   "properties": {
     "task_id": { "type": "string", "minLength": 1 },
     "title": { "type": "string", "minLength": 1 },
     "workflow": { "type": "string", "minLength": 1 },
+    "workflow_stage": {
+      "type": "string",
+      "enum": [
+        "planning",
+        "approval",
+        "development",
+        "development_review",
+        "artifact_observation",
+        "routing",
+        "safety_improvement",
+        "release_boundary"
+      ]
+    },
     "source": {
       "type": "object",
       "required": ["basis", "current_pointer"],

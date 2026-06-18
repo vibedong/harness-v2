@@ -2,6 +2,7 @@
   "task_id": "harness-v2-valid-task",
   "title": "Validate HARNESS V2 remaining completion program task contract",
   "workflow": "remaining_completion_program",
+  "workflow_stage": "development",
   "source": {
     "basis": [
       "CURRENT.md",
