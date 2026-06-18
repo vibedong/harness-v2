@@ -70,7 +70,7 @@ ALLOWED_COMMANDS = {
     "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
     "node bin\\harness-v2.js init --root <temporary project>",
     "npm pack --dry-run",
-    "npm publish --dry-run",
+    "npm view harness-v2@0.1.5 version dist.tarball",
 }
 PERMISSION_COMMANDS = {
     "python -m compileall harness_v2",
@@ -85,7 +85,7 @@ PERMISSION_COMMANDS = {
     "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
     "node bin\\harness-v2.js init --root <temporary project>",
     "npm pack --dry-run",
-    "npm publish --dry-run",
+    "npm view harness-v2@0.1.5 version dist.tarball",
 }
 ALLOWED_GIT_COMMANDS = {
     "git init",
@@ -236,7 +236,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertIn("MIT License", license_text)
         self.assertIn("Copyright (c) 2026 vibedong", license_text)
-        self.assertIn("# HARNESS V2 0.1.5 Draft Release Notes", release_notes)
+        self.assertIn("# HARNESS V2 0.1.5 Release Notes", release_notes)
         self.assertIn("npm install -g harness-v2", readme)
         self.assertIn("harness-v2 init --root .", readme)
         self.assertIn("harness-v2 apply --root .", readme)
@@ -246,7 +246,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("harness-v2 init --root .", korean_readme)
         self.assertIn("Python 3.11", readme)
         self.assertIn("Python 3.11", release_notes)
-        self.assertIn("NOT_PUBLISHED", release_notes)
+        self.assertIn("NPM_PUBLISHED", release_notes)
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, readme)
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, korean_readme)
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, release_notes)
@@ -391,7 +391,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("bin\\harness-v2.js", valid["approval"]["approved_paths"])
         self.assertIn("node bin\\harness-v2.js status --root .", valid["permission"]["allowed_side_effects"])
         self.assertIn("npm pack --dry-run", valid["permission"]["allowed_side_effects"])
-        self.assertIn("npm publish --dry-run", valid["permission"]["allowed_side_effects"])
+        self.assertIn("npm view harness-v2@0.1.5 version dist.tarball", valid["permission"]["allowed_side_effects"])
         self.assertNotIn("npm publish", valid["permission"]["allowed_side_effects"])
         self.assertIn("npm publish", valid["permission"]["denied_side_effects"])
         self.assertIn("Python package registry publish", valid["permission"]["denied_side_effects"])

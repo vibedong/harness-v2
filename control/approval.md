@@ -68,6 +68,7 @@ git hub 배포, 패키지 까지 하자
 그래 고고
 README는 사용자문서고, AI가 보는게 아님.
 그래 그것도 손봐라. goal npm패키지 전까지 다해놔
+npm 이거하자
 ```
 
 Current bound amendment:
@@ -101,7 +102,7 @@ No dependency install from network.
 No destructive operation outside the named generated verification artifacts.
 ```
 
-Current bound npm wrapper packet:
+Previous bound npm wrapper packet:
 
 ```text
 Approve HARNESS V2 npm wrapper package slice:
@@ -151,10 +152,12 @@ Operation type:
 - dependency-free npm wrapper metadata and Windows/macOS Node CLI wrapper creation;
 - local Node wrapper smoke verification and `npm pack --dry-run`;
 - npm publish dry-run verification for the `harness-v2@0.1.5` package candidate;
-- no npm publish, release tag creation, or GitHub release execution in the current package-candidate slice;
+- exact npm publish execution completed for `harness-v2@0.1.5`;
+- npm registry readback for `harness-v2@0.1.5`;
+- no release tag creation or GitHub release execution in the current npm publish slice;
 - project application release that adds `harness-v2 init --root .` and `harness-v2 apply --root .`;
 - git initialization, commit, GitHub repository creation, and push for the `F:\Folder\harness-v2` folder only;
-- no npm publish, Python package registry publish, dependency install, secret access, release tag creation, GitHub release execution, or destructive operation outside generated local verification artifacts.
+- no repeat npm publish, Python package registry publish, dependency install, secret access, release tag creation, GitHub release execution, or destructive operation outside generated local verification artifacts.
 
 Freshness anchors:
 
@@ -169,11 +172,12 @@ Freshness anchors:
 - historical public release preparation approval for `LICENSE`, `RELEASE_NOTES.md`, npm public package metadata, npm publish dry-run, tag/release planning, and npm publish execution.
 - historical npm init/apply release request for `harness-v2@0.1.4`, superseded by the current `0.1.5` package-candidate slice.
 - user request to strengthen generated agent-facing scaffold and prepare the next npm package candidate before any npm publish.
+- user request to proceed with npm publish for the current `harness-v2@0.1.5` candidate.
 
 Denied by the current approval scope:
 
 - paths outside `F:\Folder\harness-v2`;
-- npm publish;
+- repeat npm publish;
 - Python package registry publish;
 - dependency install outside already available local tooling;
 - secret access;

@@ -21,6 +21,7 @@ Known local states:
 - `public_release_candidate`
 - `public_release_published`
 - `package_candidate_ready`
+- `npm_published`
 - `blocked`
 - `deferred`
 
@@ -36,10 +37,10 @@ Scope:
 
 - `F:\Folder\harness-v2` folder only;
 - local verification commands named in `control\permission.md`;
-- package metadata, local editable package smoke verification, Windows/macOS npm wrapper metadata, local Node wrapper proof, npm dry-run pack proof, npm publish dry-run proof, git initialization, GitHub repository push, and `0.1.5` package-candidate preparation;
-- no npm publish, Python package registry publish, dependency install, secret access, release tag creation, GitHub release execution, unrelated external network mutation, or destructive operation outside generated verification artifacts.
+- package metadata, local editable package smoke verification, Windows/macOS npm wrapper metadata, local Node wrapper proof, npm dry-run pack proof, npm publish dry-run proof, npm registry readback for `harness-v2@0.1.5`, git initialization, and GitHub repository push;
+- no repeat npm publish, Python package registry publish, dependency install, secret access, release tag creation, GitHub release execution, unrelated external network mutation, or destructive operation outside generated verification artifacts.
 
-This entry records that the local package, GitHub publication, npm wrapper surface, and next npm package candidate remain in review until proof is complete. It is not npm publish, Python package registry publish, product completion, or future-slice transition.
+This entry records that the local package, GitHub publication, npm wrapper surface, and npm published surface remain in review until proof is complete. It is not repeat npm publish, Python package registry publish, product completion, or future-slice transition.
 
 ## Transition Requirements
 

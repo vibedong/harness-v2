@@ -1,6 +1,6 @@
-# HARNESS V2 0.1.5 Draft Release Notes
+# HARNESS V2 0.1.5 Release Notes
 
-Pre-publish package candidate for stronger generated AI-facing project bindings.
+Generated AI-facing project binding release for HARNESS V2.
 
 ## Changed
 
@@ -29,11 +29,13 @@ python -m harness_v2 init --root <temporary project>
 python -m harness_v2 verify <temporary project>\contracts\harness-task.json
 npm pack --dry-run
 npm publish --dry-run
+npm publish
+npm view harness-v2@0.1.5 version dist.tarball
 ```
 
 ## Publish Scope
 
-Current source package candidate:
+Published npm package:
 
 ```text
 harness-v2@0.1.5
@@ -42,7 +44,7 @@ harness-v2@0.1.5
 Release status:
 
 ```text
-NOT_PUBLISHED
+NPM_PUBLISHED
 ```
 
-`npm publish`, release tag creation, and GitHub release execution are intentionally outside this draft package-preparation slice.
+Git tag creation and GitHub release execution are intentionally outside this npm publish slice.

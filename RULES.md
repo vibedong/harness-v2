@@ -31,7 +31,7 @@ The current package, GitHub, and npm wrapper MVP surface contains the files name
 
 Local writing is allowed only when the requested work unit is inside the bound approval scope, inside the permission side-effect ceiling, and tied to a current proof obligation and lifecycle entry.
 
-Package metadata, local editable install verification, Windows/macOS npm wrapper metadata, npm dry-run pack verification, npm publish dry-run verification, and GitHub repository push are allowed only when the current approval and permission surfaces explicitly name them.
+Package metadata, local editable install verification, Windows/macOS npm wrapper metadata, npm dry-run pack verification, npm publish dry-run verification, npm registry readback, and GitHub repository push are allowed only when the current approval and permission surfaces explicitly name them.
 
 Do not perform npm publish, Python package registry publish, dependency installation from the network, secret access, release tag creation, GitHub release execution, unrelated external mutation, or destructive action outside generated verification artifacts unless a separate active release transaction, approval surface, permission surface, and proof obligation all name that exact target.
 
