@@ -1,8 +1,8 @@
 # HARNESS V2 Root Rules
 
-status: executable_local_mvp_surface / third_slice / root_rules
+status: package_github_surface / fourth_slice / root_rules
 
-These are the product-local root rules for the HARNESS V2 local markdown MVP surface. Workflow rules in `rules\workflows.md` may specialize these rules but cannot weaken them.
+These are the product-local root rules for the HARNESS V2 package and GitHub MVP surface. Workflow rules in `rules\workflows.md` may specialize these rules but cannot weaken them.
 
 ## Authority Separation
 
@@ -27,11 +27,13 @@ Fail closed when a task asks for paths, commands, package metadata, release arti
 
 ## Product Write Boundary
 
-The current executable local MVP surface contains the files named in `CURRENT.md` and `control\permission.md`.
+The current package and GitHub MVP surface contains the files named in `CURRENT.md` and `control\permission.md`.
 
 Local writing is allowed only when the requested work unit is inside the bound approval scope, inside the permission side-effect ceiling, and tied to a current proof obligation and lifecycle entry.
 
-Do not create package metadata, release artifacts, dependencies, git operations, secrets, external mutations, or destructive actions.
+Package metadata, local editable install verification, and GitHub repository push are allowed only when the current approval and permission surfaces explicitly name them.
+
+Do not perform PyPI publish, release execution, dependency installation from the network, secret access, unrelated external mutation, or destructive action outside generated verification artifacts.
 
 ## Guard Catalog
 

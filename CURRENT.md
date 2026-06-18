@@ -71,7 +71,7 @@ Active executable local MVP files include:
 - `python -m unittest discover tests`
 - `python -m venv <temporary smoke-test venv under TEMP>`
 - `<temporary venv>\Scripts\python -m pip install --no-deps -e .`
-- `<temporary venv>\Scripts\python -m harness_v2 status --root F:\Folder\harness-v2`
+- `<temporary venv>\Scripts\python -m harness_v2 status --root <repo root>`
 - `<temporary venv>\Scripts\python -m harness_v2 verify tests\fixtures\valid-task.json`
 
 These commands are local proof material only. The temporary smoke-test venv is a generated verification artifact and is not part of the product source surface. These checks do not create PyPI publish readiness or release execution.

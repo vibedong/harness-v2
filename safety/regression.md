@@ -1,6 +1,6 @@
 # HARNESS V2 Regression Safety
 
-status: executable_local_mvp_surface / third_slice / regression_safety
+status: package_github_surface / fourth_slice / regression_safety
 
 This file maps HARNESS V2 boundary risks to regression guard candidates. It does not define executable tests or passing evidence.
 
@@ -17,12 +17,16 @@ This file maps HARNESS V2 boundary risks to regression guard candidates. It does
 | improvement candidate applied directly | route through `safety\improvement.md` and a new scoped workflow |
 | release boundary treated as release readiness | require a separate release transaction scope |
 | legacy V1 or `F:\Folder\harnessresearch\` reused as source | fail closed unless a later explicit source policy changes this |
+| package/GitHub MVP mistaken for PyPI release | require separate PyPI or release transaction approval |
+| author-local paths copied into GitHub-facing commands | require `<repo root>` or current-directory examples for portable docs |
 
 ## Guard Evidence
 
-Valid evidence for this markdown MVP is readback, search, listing, and surface-specific review against current local markdown files.
+Valid evidence for this package and GitHub MVP is readback, search, listing, unittest output, editable install smoke output, fresh-client clone verification, and surface-specific review against current local files.
 
-Executable tests and fixtures inside `tests\` are part of the current proof material. Packages, dependency changes, git, external mutation, destructive operations, and release checks remain outside the current permission ceiling.
+Executable tests and fixtures inside `tests\` are part of the current proof material. Package metadata, editable install smoke verification, git initialization, GitHub repository creation, and push are allowed only inside the current fourth-slice scope.
+
+PyPI publish, release execution, dependency installation from the network, secret access, unrelated external mutation, destructive operations outside generated verification artifacts, and release checks remain outside the current permission ceiling.
 
 ## Non-Authority Boundary
 

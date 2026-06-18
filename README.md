@@ -34,7 +34,7 @@ $venv = Join-Path $env:TEMP "harness-v2-smoke-venv"
 Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 python -m venv $venv
 & (Join-Path $venv "Scripts\python.exe") -m pip install --no-deps -e .
-& (Join-Path $venv "Scripts\python.exe") -m harness_v2 status --root F:\Folder\harness-v2
+& (Join-Path $venv "Scripts\python.exe") -m harness_v2 status --root .
 & (Join-Path $venv "Scripts\python.exe") -m harness_v2 verify tests\fixtures\valid-task.json
 Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 ```

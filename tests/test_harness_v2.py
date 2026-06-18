@@ -57,6 +57,14 @@ ALLOWED_COMMANDS = {
     "python -m unittest discover tests",
     "python -m venv <temporary smoke-test venv under TEMP>",
     "<temporary venv>\\Scripts\\python -m pip install --no-deps -e .",
+    "<temporary venv>\\Scripts\\python -m harness_v2 status --root <repo root>",
+    "<temporary venv>\\Scripts\\python -m harness_v2 verify tests\\fixtures\\valid-task.json",
+}
+PERMISSION_COMMANDS = {
+    "python -m compileall harness_v2",
+    "python -m unittest discover tests",
+    "python -m venv <temporary smoke-test venv under TEMP>",
+    "<temporary venv>\\Scripts\\python -m pip install --no-deps -e .",
     "<temporary venv>\\Scripts\\python -m harness_v2 status --root F:\\Folder\\harness-v2",
     "<temporary venv>\\Scripts\\python -m harness_v2 verify tests\\fixtures\\valid-task.json",
 }
@@ -155,12 +163,53 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         )
         self.assertEqual(
             commands_under_heading(ROOT / "control" / "permission.md", "## Allowed Local Commands"),
-            ALLOWED_COMMANDS,
+            PERMISSION_COMMANDS,
         )
         self.assertEqual(
             commands_under_heading(ROOT / "control" / "permission.md", "## Allowed Git/GitHub Commands"),
             ALLOWED_GIT_COMMANDS,
         )
+
+    def test_github_facing_commands_are_portable(self):
+        readme = (ROOT / "README.md").read_text()
+        current_commands = commands_under_heading(
+            ROOT / "CURRENT.md",
+            "## Current Allowed Local Verification Commands",
+        )
+
+        self.assertIn("--root .", readme)
+        self.assertNotIn("--root F:\\Folder\\harness-v2", readme)
+        self.assertIn("<temporary venv>\\Scripts\\python -m harness_v2 status --root <repo root>", current_commands)
+
+    def test_docs_control_sync_surfaces_are_fourth_slice(self):
+        synced_files = [
+            ROOT / "AGENTS.md",
+            ROOT / "RULES.md",
+            ROOT / "routing" / "manifest.md",
+            ROOT / "artifacts" / "registry.md",
+            ROOT / "artifacts" / "log.md",
+            ROOT / "safety" / "regression.md",
+        ]
+
+        for path in synced_files:
+            content = path.read_text()
+            self.assertIn("status: package_github_surface / fourth_slice", content)
+            self.assertNotIn("status: executable_local_mvp_surface / third_slice", content)
+
+        root_rules = (ROOT / "RULES.md").read_text()
+        self.assertNotIn("Do not create package metadata", root_rules)
+        self.assertIn("Package metadata, local editable install verification, and GitHub repository push", root_rules)
+
+    def test_artifact_surfaces_include_package_github_scope(self):
+        registry = (ROOT / "artifacts" / "registry.md").read_text()
+        log = (ROOT / "artifacts" / "log.md").read_text()
+        regression = (ROOT / "safety" / "regression.md").read_text()
+
+        self.assertIn("package-metadata", registry)
+        self.assertIn("package-backend", registry)
+        self.assertIn("fourth-slice package and GitHub MVP", log)
+        self.assertIn("docs/control sync", log)
+        self.assertIn("author-local paths copied into GitHub-facing commands", regression)
 
 
     def test_valid_task_fixture_is_accepted_by_verifier(self):

@@ -1,6 +1,6 @@
 # HARNESS V2 Product Entry
 
-status: executable_local_mvp_surface / third_slice / entry_router
+status: package_github_surface / fourth_slice / entry_router
 
 This file is the product-local entry router for HARNESS V2. Keep it short and use it only to find the current authority surface.
 
@@ -11,7 +11,7 @@ This file is the product-local entry router for HARNESS V2. Keep it short and us
 3. `rules\workflows.md` when the requested action names a workflow.
 4. The relevant file under `control\`, `records\`, `routing\`, `artifacts\`, `safety\`, or `release\`.
 
-Do not expand beyond the current executable local MVP surface unless a later exact approval packet, permission preflight, proof obligation, and lifecycle entry name that wider work.
+Do not expand beyond the current package and GitHub MVP surface unless a later exact approval packet, permission preflight, proof obligation, and lifecycle entry name that wider work.
 
 ## Recovery Rule
 

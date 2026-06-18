@@ -1,6 +1,6 @@
 # HARNESS V2 Artifact Log
 
-status: executable_local_mvp_surface / third_slice / artifact_log
+status: package_github_surface / fourth_slice / artifact_log
 
 This file keeps concise provenance notes for gate-relevant local markdown events. It is not a full history and not proof.
 
@@ -15,8 +15,10 @@ Do not use this file as a transcript, scratchpad, or complete audit database.
 | event | scope | note |
 | --- | --- | --- |
 | first-slice local markdown spine | 9 entry/control files | historical local control surface activation |
-| second-slice local markdown MVP | 16 existing markdown files under `F:\Folder\harness-v2` | current local markdown MVP surface activation scope |
-| third-slice executable local MVP | approved contracts, templates, `harness_v2`, tests, fixtures, README, and updated markdown controls | current executable local MVP implementation scope |
+| second-slice local markdown MVP | 16 existing markdown files under `F:\Folder\harness-v2` | historical local markdown MVP surface activation scope |
+| third-slice executable local MVP | approved contracts, templates, `harness_v2`, tests, fixtures, README, and updated markdown controls | historical executable local MVP implementation scope |
+| fourth-slice package and GitHub MVP | `pyproject.toml`, `_build_backend`, editable install proof path, git repo, and GitHub `main` branch | current package and GitHub MVP publication scope |
+| docs/control sync | root rules, route, artifact, safety, README, CURRENT, and tests | current stale-surface reconciliation scope |
 
 ## Freshness
 
