@@ -1,6 +1,6 @@
 {
   "task_id": "harness-v2-valid-task",
-  "title": "Validate HARNESS V2 public npm release task contract",
+  "title": "Validate HARNESS V2 pre-publish package candidate task contract",
   "workflow": "package_publish_review",
   "source": {
     "basis": [
@@ -39,8 +39,9 @@
     ],
     "excluded_side_effects": [
       "Python package registry publish",
-      "npm publish for any package other than harness-v2@0.1.4",
-      "release execution for any tag other than v0.1.4",
+      "npm publish",
+      "release tag creation",
+      "GitHub release execution",
       "dependency install from network",
       "secret access",
       "unrelated external network mutation",
@@ -63,18 +64,15 @@
       "node bin\\harness-v2.js init --root <temporary project>",
       "npm pack --dry-run",
       "npm publish --dry-run",
-      "npm publish",
       "git add <intended HARNESS V2 product files>",
       "git commit",
-      "git push -u origin <branch>",
-      "git tag v0.1.4",
-      "git push origin v0.1.4",
-      "gh release create v0.1.4 --title \"HARNESS V2 0.1.4\" --notes-file RELEASE_NOTES.md"
+      "git push -u origin <branch>"
     ],
     "denied_side_effects": [
       "Python package registry publish",
-      "npm publish for any package other than harness-v2@0.1.4",
-      "release execution for any tag other than v0.1.4",
+      "npm publish",
+      "release tag creation",
+      "GitHub release execution",
       "dependency install from network",
       "secret access",
       "unrelated external network mutation",
@@ -92,13 +90,12 @@
       "node wrapper init creates a valid temporary project harness",
       "npm pack dry-run exits 0 without publishing or generated pycache files",
       "npm publish dry-run exits 0",
-      "npm publish exits 0 for harness-v2@0.1.4 after npm authentication is present",
-      "git tag v0.1.4 and GitHub release creation succeed after npm publish succeeds",
+      "generated AGENTS/RULES/CURRENT bind AI agents without relying on README authority",
       "valid fixture accepted",
       "invalid fixture rejected",
       "doctor reports without mutation",
       "GitHub main contains pushed commit",
-      "no Python package registry publish, dependency install, secret access, unrelated external mutation, or release outside harness-v2@0.1.4"
+      "no npm publish, Python package registry publish, dependency install, secret access, unrelated external mutation, release tag creation, or GitHub release execution"
     ]
   },
   "lifecycle": {

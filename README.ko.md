@@ -329,7 +329,7 @@ Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 
 ## 현재 상태
 
-현재 공개 릴리스는 npm의 `harness-v2@0.1.4`입니다.
+현재 공개 패키지는 `npm install -g harness-v2`로 설치합니다. npm에 공개된 최신 버전을 직접 확인해야 한다면 `npm view harness-v2 version`을 사용하세요.
 
 ## 경계 규칙
 

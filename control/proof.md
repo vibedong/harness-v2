@@ -6,7 +6,7 @@ This file separates proof obligation, artifact check, and proof result.
 
 ## Current Proof Obligation
 
-For the fourth-slice package, GitHub publish, and npm wrapper surface, verify after authoring:
+For the fourth-slice package, GitHub publish, npm wrapper surface, and current `0.1.5` package candidate, verify after authoring:
 
 1. all product source changes are under `F:\Folder\harness-v2`;
 2. package metadata and build backend install in editable mode without dependency installation;
@@ -24,16 +24,13 @@ For the fourth-slice package, GitHub publish, and npm wrapper surface, verify af
 14. `npm pack --dry-run` exits 0 without publishing;
 15. `npm publish --dry-run` exits 0;
 16. `LICENSE`, `RELEASE_NOTES.md`, and public npm metadata are present;
-17. `npm publish` exits 0 for `harness-v2@0.1.4`;
-18. `git tag v0.1.4` and `git push origin v0.1.4` succeed;
-19. `gh release create v0.1.4 --title "HARNESS V2 0.1.4" --notes-file RELEASE_NOTES.md` succeeds;
-20. post-publish fresh install verification succeeds from npm;
-21. the unittest suite proves CLI status can run without external dependency;
-22. the unittest suite proves the verifier rejects `tests\fixtures\invalid-missing-approval.json`;
-23. the unittest suite proves the verifier accepts `tests\fixtures\valid-task.json`;
-24. the unittest suite proves doctor reports next action without mutating files;
-25. GitHub publish proof names repository URL, branch, and pushed commit;
-26. product-local markdown boundaries still deny Python package registry publish, dependency install, secret access, unrelated external network mutation, and destructive operation outside generated verification artifacts.
+17. the unittest suite proves init-generated AI-facing scaffold text separates README documentation from AI authority;
+18. the unittest suite proves CLI status can run without external dependency;
+19. the unittest suite proves the verifier rejects `tests\fixtures\invalid-missing-approval.json`;
+20. the unittest suite proves the verifier accepts `tests\fixtures\valid-task.json`;
+21. the unittest suite proves doctor reports next action without mutating files;
+22. GitHub publish proof names repository URL, branch, and pushed commit;
+23. product-local markdown boundaries still deny npm publish, Python package registry publish, dependency install, secret access, release tag creation, GitHub release execution, unrelated external network mutation, and destructive operation outside generated verification artifacts.
 
 ## Artifact Checks
 

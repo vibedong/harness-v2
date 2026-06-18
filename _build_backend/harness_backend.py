@@ -148,7 +148,7 @@ def _wheel() -> str:
     return "\n".join(
         [
             "Wheel-Version: 1.0",
-            "Generator: harness-v2-backend 0.1.4",
+            f"Generator: harness-v2-backend {_project()['project']['version']}",
             "Root-Is-Purelib: true",
             "Tag: py3-none-any",
         ]

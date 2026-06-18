@@ -10,7 +10,7 @@ workflow: `package_publish_review`
 
 state: `package_publish_review`
 
-substate: `fourth_slice_package_github_surface_authored / npm_wrapper_authored / public_patch_release_published / npm_published / github_release_created / npm_only`
+substate: `fourth_slice_package_github_surface_authored / npm_wrapper_authored / public_patch_release_published / npm_published / github_release_created / npm_only / next_package_candidate`
 
 source basis:
 
@@ -21,8 +21,9 @@ source basis:
 - Exact third-slice approval packet for the paths listed in `control\approval.md`.
 - User request to package and publish to GitHub, constrained to `F:\Folder\harness-v2` only.
 - Exact npm wrapper package slice approval for Windows/macOS Node wrapper packaging without npm publish.
-- User approval for the public npm release workflow, with Python package registry publish still outside scope and exact npm publish limited to `harness-v2@0.1.4` after npm authentication is present.
+- Historical public npm release workflow for `harness-v2@0.1.4`, now superseded for the current `0.1.5` package-candidate slice.
 - User request that installing HARNESS V2 should lead directly to project application through `harness-v2 init --root .` / `harness-v2 apply --root .`.
+- User request to strengthen the init-generated AI-facing scaffold and prepare everything up to, but not including, the next npm package publish.
 
 ## Current Surface
 
@@ -88,9 +89,8 @@ Active package, GitHub, and npm wrapper MVP files include:
 - `node bin\harness-v2.js init --root <temporary project>`
 - `npm pack --dry-run`
 - `npm publish --dry-run`
-- `npm publish`
 
-These commands are proof material and exact release execution material only. The temporary smoke-test venv is a generated verification artifact and is not part of the product source surface. The npm publish command is allowed only for `harness-v2@0.1.4` after npm authentication is present. These checks do not create Python package registry publish readiness.
+These commands are proof material only for the current `0.1.5` package candidate. The temporary smoke-test venv is a generated verification artifact and is not part of the product source surface. `npm publish`, tag creation, and GitHub release execution require a separate release transaction. These checks do not create Python package registry publish readiness.
 
 ## Stop Conditions
 
@@ -98,6 +98,6 @@ Stop if the requested action needs a file outside the active executable local MV
 
 Stop if a pointer, source, approval, permission, proof obligation, lifecycle requirement, route, registry/log row, safety boundary, improvement classification, or release boundary is missing, stale, or conflicting.
 
-Stop if the task asks for Python package registry publish, dependency installation, secret access, external network mutation outside the exact GitHub/npm release commands, or destructive operation outside generated local verification artifacts.
+Stop if the task asks for npm publish, Python package registry publish, dependency installation, secret access, external network mutation outside the exact GitHub push command, release tag creation, GitHub release execution, or destructive operation outside generated local verification artifacts.
 
 This file is a current pointer. The current pointer does not claim Python package registry publish, dogfood proof, or final product completion.

@@ -329,7 +329,7 @@ Remove-Item -Recurse -Force $venv -ErrorAction SilentlyContinue
 
 ## Status
 
-The current public release is `harness-v2@0.1.4` on npm.
+Install the current public package with `npm install -g harness-v2`. Use `npm view harness-v2 version` if you need to inspect the latest published npm version.
 
 ## Boundary Rule
 

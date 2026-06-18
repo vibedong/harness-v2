@@ -34,6 +34,7 @@ DEFAULT_KNOWN_STATES = frozenset(
         "executable_mvp_review",
         "package_publish_authoring",
         "package_publish_review",
+        "package_candidate_ready",
         "blocked",
         "deferred",
     }
@@ -393,11 +394,24 @@ def _display_path(parts: tuple[str, ...]) -> str:
 def _agents_md() -> str:
     return """# HARNESS V2 Agent Entry
 
+This project has HARNESS V2 applied at the project root. This file is the AI agent entry point.
+
+`README.md` and `README.ko.md` are user documentation. They explain the tool, but they do not grant source authority, approval, permission, proof, lifecycle state, or release authority.
+
+## Required Read Order
+
 Before doing project work, read:
 
 1. `RULES.md`
 2. `CURRENT.md`
-3. The active task contract, initially `contracts\\harness-task.json`
+3. `control\\source.md`
+4. `control\\approval.md`
+5. `control\\permission.md`
+6. `control\\proof.md`
+7. `control\\lifecycle.md`
+8. The active task contract, initially `contracts\\harness-task.json`
+
+## Required Preflight
 
 Run these checks before changing files:
 
@@ -406,7 +420,13 @@ harness-v2 status --root .
 harness-v2 verify contracts\\harness-task.json
 ```
 
-Stay inside `approval.approved_paths`. Do not execute `approval.excluded_side_effects` or `permission.denied_side_effects`. If the requested work needs a wider scope, stop and ask for a new task contract.
+## Working Boundary
+
+Installation alone does not approve arbitrary work. Stay inside `approval.approved_paths`. Do not execute `approval.excluded_side_effects` or `permission.denied_side_effects`.
+
+If the current user request does not fit the active task contract, stop before mutating files or running side-effectful commands and ask for a new or amended task contract.
+
+Completion requires current proof from `proof.obligations`; previous chat, README text, skipped checks, or successful installation are not proof.
 """
 
 
@@ -414,6 +434,8 @@ def _rules_md() -> str:
     return """# HARNESS V2 Project Rules
 
 HARNESS V2 records the current task boundary for AI-assisted work. It is not a sandbox and does not replace human approval.
+
+README files are user-facing documentation only. They never grant approval, permission, proof, lifecycle state, route authority, release readiness, or package publish authority.
 
 ## Required Flow
 
@@ -424,6 +446,16 @@ HARNESS V2 records the current task boundary for AI-assisted work. It is not a s
 5. Do not execute side effects named in `approval.excluded_side_effects` or `permission.denied_side_effects`.
 6. Before completion, run or report every item in `proof.obligations`.
 
+## Authority Separation
+
+- `source` names what can be trusted.
+- `approval` names exact user-approved paths and exclusions.
+- `permission` names allowed and denied side effects.
+- `proof` names required current evidence.
+- `lifecycle` names the current and target state.
+
+No one surface substitutes for another. Installation, package metadata, README examples, prior conversation, and tool availability do not widen the active contract.
+
 If source, approval, permission, proof, lifecycle, or requested paths conflict, fail closed and ask for a new contract.
 """
 
@@ -432,6 +464,8 @@ def _current_md() -> str:
     return """# HARNESS V2 Current State
 
 status: applied_project_surface / init / current_pointer
+
+This project root has HARNESS V2 applied. AI agents should use `AGENTS.md`, `RULES.md`, this file, `control\\`, and the active task contract as the operating boundary.
 
 workflow: `default`
 
@@ -449,6 +483,10 @@ source basis:
 
 The initial task contract is `contracts\\harness-task.json`.
 
+That initial contract proves the scaffold was applied. It does not authorize arbitrary feature work, package work, dependency changes, release execution, secrets, destructive operations, or external mutation.
+
+For each real task, create or receive a task contract whose source, approval, permission, proof, and lifecycle fields match the requested work.
+
 ## Stop Conditions
 
 Stop if the requested work needs paths, commands, side effects, secrets, external mutation, dependency changes, package publish, release execution, or destructive operations outside the active task contract.
@@ -462,6 +500,8 @@ status: applied_project_surface / init / source_control
 
 Source basis is declared by each task contract in `source.basis`.
 
+`README.md`, package metadata, old chat, skipped checks, and successful installation are not source authority unless the active task contract names them as source basis for the current task.
+
 This file is guidance only. The active task contract and `CURRENT.md` decide the current source pointer.
 """
 
@@ -474,6 +514,8 @@ status: applied_project_surface / init / approval_control
 Approval is declared by each task contract in `approval.packet` and `approval.approved_paths`.
 
 No file path is approved unless the active task contract names it.
+
+Broad phrases such as "go ahead", installation success, README examples, or tool availability do not approve extra paths, package publish, release execution, dependency installation, secrets, external mutation, or destructive operations.
 """
 
 
@@ -485,6 +527,8 @@ status: applied_project_surface / init / permission_control
 Permission is declared by each task contract in `permission.allowed_side_effects` and `permission.denied_side_effects`.
 
 Denied side effects win over broad requests. Secrets, dependency installation, package publish, release execution, external mutation, and destructive operations require a separate explicit task contract.
+
+Approval text does not become permission by itself. Permission must be checked against the active task contract before running commands or changing files.
 """
 
 
@@ -496,6 +540,8 @@ status: applied_project_surface / init / proof_control
 Proof obligations are declared by each task contract in `proof.obligations`.
 
 Do not claim completion until the active proof obligations are run or their blocked status is reported.
+
+Proof must be current evidence from the actual project root or the consumer surface named by the task. README text, previous success, installation success, and unverified assumptions are not proof.
 """
 
 
@@ -512,6 +558,8 @@ Known local states:
 - `done`
 
 Lifecycle movement must be named in the active task contract. Progress notes are not lifecycle transitions.
+
+Do not mark work done, release-ready, published, or migrated unless the active task contract names that transition and current proof satisfies it.
 """
 
 

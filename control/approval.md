@@ -15,7 +15,7 @@ package_metadata_install_smoke_and_github_publish_slice
 Current bound work unit:
 
 ```text
-npm_init_apply_release_slice
+generated_agent_binding_package_candidate_slice
 ```
 
 Previous bound user packet:
@@ -66,6 +66,8 @@ git hub 배포, 패키지 까지 하자
 그것도하자
 설치하면 바로 하네스 적용되는걸로가야대
 그래 고고
+README는 사용자문서고, AI가 보는게 아님.
+그래 그것도 손봐라. goal npm패키지 전까지 다해놔
 ```
 
 Current bound amendment:
@@ -132,9 +134,9 @@ node bin\harness-v2.js status --root .
 node bin\harness-v2.js verify tests\fixtures\valid-task.json
 npm pack --dry-run
 npm publish --dry-run
-npm publish
 
 No Python package registry publish.
+No npm publish.
 No dependency install from network.
 No secret read.
 No destructive operation outside generated verification artifacts.
@@ -148,11 +150,11 @@ Operation type:
 - local editable package smoke verification with generated artifacts limited to temporary paths or ignored build metadata;
 - dependency-free npm wrapper metadata and Windows/macOS Node CLI wrapper creation;
 - local Node wrapper smoke verification and `npm pack --dry-run`;
-- exact npm publish execution for `harness-v2@0.1.4` after npm authentication is present;
-- exact Git tag and GitHub release creation for `v0.1.4`;
+- npm publish dry-run verification for the `harness-v2@0.1.5` package candidate;
+- no npm publish, release tag creation, or GitHub release execution in the current package-candidate slice;
 - project application release that adds `harness-v2 init --root .` and `harness-v2 apply --root .`;
 - git initialization, commit, GitHub repository creation, and push for the `F:\Folder\harness-v2` folder only;
-- no Python package registry publish, dependency install, secret access, or destructive operation outside generated local verification artifacts.
+- no npm publish, Python package registry publish, dependency install, secret access, release tag creation, GitHub release execution, or destructive operation outside generated local verification artifacts.
 
 Freshness anchors:
 
@@ -163,17 +165,20 @@ Freshness anchors:
 - `control\lifecycle.md` package, GitHub, and npm wrapper lifecycle entry.
 - fourth-slice user request constrained to the HARNESS folder only.
 - fourth-slice amendment for `.gitattributes`, `_build_backend\harness_backend.py`, editable install proof, generated artifact cleanup, and amendment git push.
-- npm wrapper package slice approval for `package.json`, `bin\harness-v2.js`, local Node wrapper proof, npm dry-run proof, and npm publish execution after authentication.
-- public release preparation approval for `LICENSE`, `RELEASE_NOTES.md`, npm public package metadata, npm publish dry-run, tag/release planning, and npm publish execution once npm authentication is present.
-- npm init/apply release request for `harness-v2@0.1.4`, with no Python package registry publish, dependency installation, secret access, or unrelated mutation.
+- historical npm wrapper package slice approval for `package.json`, `bin\harness-v2.js`, local Node wrapper proof, and npm dry-run proof.
+- historical public release preparation approval for `LICENSE`, `RELEASE_NOTES.md`, npm public package metadata, npm publish dry-run, tag/release planning, and npm publish execution.
+- historical npm init/apply release request for `harness-v2@0.1.4`, superseded by the current `0.1.5` package-candidate slice.
+- user request to strengthen generated agent-facing scaffold and prepare the next npm package candidate before any npm publish.
 
 Denied by the current approval scope:
 
 - paths outside `F:\Folder\harness-v2`;
+- npm publish;
 - Python package registry publish;
 - dependency install outside already available local tooling;
 - secret access;
-- external network mutation outside GitHub repository creation and push;
+- external network mutation outside GitHub repository push;
+- release tag creation or GitHub release execution;
 - destructive operation outside generated local verification artifacts.
 
 ## Scope Fit

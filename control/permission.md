@@ -10,11 +10,11 @@ This file separates approved intent from allowed side effects.
 | --- | --- |
 | local read | allowed for HARNESS V2 product files and planning context needed for this scope |
 | local file write | allowed only under `F:\Folder\harness-v2` |
-| local command execution | allowed for verification, editable package smoke, Node wrapper smoke, npm dry-run pack, npm publish, and git/GitHub release commands below |
+| local command execution | allowed for verification, editable package smoke, Node wrapper smoke, npm dry-run pack, npm publish dry-run, and git push commands below |
 | package metadata, package build, local editable smoke install | allowed only for this product |
-| npm wrapper metadata, dry-run pack, and npm publish | allowed only for `harness-v2@0.1.4` release execution |
+| npm wrapper metadata, dry-run pack, and npm publish dry-run | allowed only for the `harness-v2@0.1.5` package candidate |
 | GitHub repository creation and push | allowed only for this product folder |
-| Python package registry publish, dependency install | denied |
+| npm publish, Python package registry publish, dependency install | denied |
 | secret access, unrelated external network mutation, destructive action | denied |
 
 ## Exact Write Surface
@@ -38,7 +38,6 @@ Any write outside that folder fails closed, except generated package smoke artif
 - `node bin\harness-v2.js init --root <temporary project>`
 - `npm pack --dry-run`
 - `npm publish --dry-run`
-- `npm publish`
 
 The temporary smoke-test venv, generated `harness_v2.egg-info`, generated `__pycache__` directories under `F:\Folder\harness-v2`, and npm dry-run generated output may be removed after verification because they are generated proof material, not product source.
 
@@ -49,12 +48,9 @@ The temporary smoke-test venv, generated `harness_v2.egg-info`, generated `__pyc
 - `git commit`
 - `gh repo create vibedong/harness-v2 --public --source . --remote origin`
 - `git push -u origin <branch>`
-- `git tag v0.1.4`
-- `git push origin v0.1.4`
-- `gh release create v0.1.4 --title "HARNESS V2 0.1.4" --notes-file RELEASE_NOTES.md`
 
 ## Permission Boundaries
 
 Permission cannot widen approval scope and cannot produce proof, lifecycle state, route permission, regression pass, improvement execution, or Python package registry publish readiness.
 
-The release transaction file may describe release boundaries, but this permission surface still denies Python package registry publish, dependency install, secret access, unrelated external network mutation, and destructive actions outside generated verification artifacts.
+The release transaction file may describe release boundaries, but this permission surface still denies npm publish, Python package registry publish, dependency install, secret access, release tag creation, GitHub release execution, unrelated external network mutation, and destructive actions outside generated verification artifacts.
