@@ -8,6 +8,8 @@ Current HARNESS V2 is a project scaffold, task-contract validator, and CLI helpe
 
 Goal H adds an explicit hook-equivalent gate command. Use `harness-v2 gate <task.json> --root .` to combine status, verify, and optional preflight checks before work, but do not treat it as a real shell/editor blocker or Codex app hook installation.
 
+Goal I adds read-only integration hardening through `harness-v2 doctor --root .`. Treat its output as a local integration report, not release readiness, proof by itself, or lifecycle movement.
+
 ## Read Order
 
 1. `RULES.md`

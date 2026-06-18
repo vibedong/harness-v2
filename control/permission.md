@@ -14,6 +14,7 @@ This file separates approved intent from allowed side effects.
 | local command execution | allowed only for the commands listed below |
 | local MCP stdio adapter | allowed only as a dependency-free stdio JSON-RPC adapter over existing HARNESS V2 core functions |
 | hook-equivalent gate | allowed only as an explicit local command that combines `status`, `verify`, and optional `preflight`; it is not a real shell/editor hook |
+| integration doctor | allowed only as a read-only local report over current status, project shape, integrated surfaces, and closed release boundary |
 | temporary verification folders | allowed under TEMP |
 | cleanup | allowed only for generated TEMP folders, `__pycache__`, `*.egg-info`, and npm pack dry-run output |
 | read-only subagent review | allowed with `vowline`; subagents may not edit, mutate git/network, grant approval, produce proof, or declare lifecycle transition |
@@ -68,12 +69,14 @@ Any mutation outside `F:\Folder\harness-v2` fails closed except generated TEMP v
 - `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
 - `node bin\harness-v2.js preflight tests\fixtures\valid-task.json --side-effect "python -m compileall harness_v2"`
 - `node bin\harness-v2.js gate tests\fixtures\valid-task.json --root . --side-effect "python -m compileall harness_v2"`
+- `node bin\harness-v2.js doctor --root .`
 - `node bin\harness-v2.js mcp < JSON-RPC smoke input`
 - `node bin\harness-v2.js init --root <temporary project>`
 - `python -m harness_v2 status --root <repo root>`
 - `python -m harness_v2 verify tests\fixtures\valid-task.json`
 - `python -m harness_v2 preflight tests\fixtures\valid-task.json --side-effect "python -m unittest discover tests"`
 - `python -m harness_v2 gate tests\fixtures\valid-task.json --root . --side-effect "python -m unittest discover tests"`
+- `python -m harness_v2 doctor --root <repo root>`
 - `python -m harness_v2 mcp < JSON-RPC smoke input`
 - `python -m harness_v2 init --root <temporary project>`
 - `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`

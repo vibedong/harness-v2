@@ -33,6 +33,7 @@ The executable surface currently covers:
 - stage-specific workflow checks through `workflow_stage`;
 - side-effect and write-path preflight checks with `preflight`;
 - hook-equivalent gate checks with `gate`;
+- read-only integration reports with `doctor`;
 - local MCP stdio tool access with `mcp`.
 
 HARNESS V2 ships a hook-equivalent gate command: `harness-v2 gate <task.json> --root .`. It combines `status`, `verify`, and optional `preflight` checks into one explicit boundary check. From local evidence for this repo, no direct Codex app hook surface was found, so the gate does not install a real Codex app hook and does not automatically block your shell or editor.
@@ -90,6 +91,7 @@ The npm command delegates to the Python CLI. HARNESS V2 is not rewritten in Java
 - Generated `RULES.md`, `CURRENT.md`, and `control\` make source, approval, permission, proof, and lifecycle separation more explicit.
 - Installed project files should appear directly in the target project root, not inside a nested `harness-v2` folder.
 - Current GitHub source adds a hook-equivalent gate command for Codex-app-focused use without claiming real shell/editor blocking.
+- Current GitHub source also hardens `doctor` as a read-only integration report. It shows the local surface sequence and closed release boundary, but it does not make a public stable release.
 
 ## Updating HARNESS V2
 
@@ -273,6 +275,8 @@ Inspect project shape without mutating files:
 ```powershell
 python -m harness_v2 doctor --root .
 ```
+
+`doctor` reports the integrated local surfaces, the recommended `status` / `verify` / `gate` sequence, and the currently closed release boundary. It is a read-only integration check, not release readiness.
 
 For package verification, run the Node wrapper directly from the package source directory:
 

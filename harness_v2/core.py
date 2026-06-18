@@ -171,6 +171,7 @@ class InitResult:
                 "harness-v2 status --root .",
                 f"harness-v2 verify {self.initial_task}",
                 f"harness-v2 gate {self.initial_task} --root .",
+                "harness-v2 doctor --root .",
             ],
         }
 
@@ -306,8 +307,8 @@ def read_current_status(root: str | Path) -> dict[str, str]:
 
 def project_shape(root: str | Path) -> dict[str, Any]:
     root_path = Path(root)
-    files = [path for path in root_path.rglob("*") if path.is_file()]
-    dirs = [path for path in root_path.iterdir() if path.is_dir()]
+    files = [path for path in root_path.rglob("*") if path.is_file() and not _is_generated_or_vcs_path(path)]
+    dirs = [path for path in root_path.iterdir() if path.is_dir() and not _is_generated_or_vcs_path(path)]
     forbidden = [
         name
         for name in ("skills",)
@@ -320,6 +321,18 @@ def project_shape(root: str | Path) -> dict[str, Any]:
         "first_level_dirs": sorted(path.name for path in dirs),
         "forbidden_dirs": forbidden,
     }
+
+
+def _is_generated_or_vcs_path(path: Path) -> bool:
+    parts = set(path.parts)
+    name = path.name
+    return (
+        ".git" in parts
+        or "__pycache__" in parts
+        or any(part.endswith(".egg-info") for part in parts)
+        or name.endswith(".pyc")
+        or name.endswith(".tgz")
+    )
 
 
 def _backtick_value(line: str) -> str:
@@ -643,6 +656,7 @@ Run these checks before changing files or side-effectful commands:
 harness-v2 status --root .
 harness-v2 verify contracts\\harness-task.json
 harness-v2 gate contracts\\harness-task.json --root .
+harness-v2 doctor --root .
 ```
 
 ## Working Boundary
@@ -670,9 +684,10 @@ README files are user-facing documentation only. They never grant approval, perm
 2. Read the active task contract.
 3. Verify the task contract with `harness-v2 verify <task.json>`.
 4. Run `harness-v2 gate <task.json> --root .` before file changes or side-effectful commands.
-5. Modify only paths named in `approval.approved_paths`.
-6. Do not execute side effects named in `approval.excluded_side_effects` or `permission.denied_side_effects`.
-7. Before completion, run or report every item in `proof.obligations`.
+5. Run `harness-v2 doctor --root .` when checking local integration and release boundary status.
+6. Modify only paths named in `approval.approved_paths`.
+7. Do not execute side effects named in `approval.excluded_side_effects` or `permission.denied_side_effects`.
+8. Before completion, run or report every item in `proof.obligations`.
 
 ## Evidence-Scaled Readback
 
@@ -704,6 +719,8 @@ This project root has HARNESS V2 applied. AI agents should use `AGENTS.md`, `RUL
 The applied surface is a scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, or lifecycle transition engine, and it does not approve future work by installation, `init`, `apply`, or CLI availability.
 
 Use `harness-v2 gate contracts\\harness-task.json --root .` as the local hook-equivalent gate before work. The gate is explicit and checkable, but it does not automatically block shell or editor actions.
+
+Use `harness-v2 doctor --root .` as a read-only integration report. It does not create release readiness, proof by itself, or lifecycle movement.
 
 workflow: `default`
 
@@ -846,7 +863,8 @@ def _initial_task_json() -> str:
       "local readback of generated HARNESS V2 scaffold files",
       "harness-v2 status --root .",
       "harness-v2 verify contracts\\\\harness-task.json",
-      "harness-v2 gate contracts\\\\harness-task.json --root ."
+      "harness-v2 gate contracts\\\\harness-task.json --root .",
+      "harness-v2 doctor --root ."
     ],
     "denied_side_effects": [
       "dependency install from network",
@@ -862,7 +880,8 @@ def _initial_task_json() -> str:
       "generated AGENTS/RULES/CURRENT bind AI agents without relying on README authority",
       "harness-v2 status --root .",
       "harness-v2 verify contracts\\\\harness-task.json",
-      "harness-v2 gate contracts\\\\harness-task.json --root ."
+      "harness-v2 gate contracts\\\\harness-task.json --root .",
+      "harness-v2 doctor --root ."
     ]
   },
   "lifecycle": {

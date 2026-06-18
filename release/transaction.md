@@ -52,6 +52,7 @@ Reason:
 - The current remaining completion program may verify package shape with `npm pack --dry-run`, but does not authorize repeat npm publish.
 - Generated scaffold hardening improves the files created by `harness-v2 init --root .` and `harness-v2 apply --root .` for future package updates.
 - Hook-equivalent gate hardening adds local `gate` checks to the source surface, but it does not execute a release, create a tag, or republish the package.
+- Integration hardening and release preparation add a read-only `doctor` report for local surface composition and closed release boundary, but this does not create public stable release readiness.
 - Git tag creation and GitHub release execution are not permitted by the current transaction.
 - Python package registry publish is not permitted by the current transaction.
 

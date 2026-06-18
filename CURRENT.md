@@ -10,7 +10,7 @@ workflow: `remaining_completion_program`
 
 state: `package_publish_review`
 
-substate: `hook_equivalent_gate_hardening / goal_h_complete`
+substate: `integration_hardening_release_preparation / goal_i_complete`
 
 source basis:
 
@@ -24,10 +24,11 @@ source basis:
 - Goal G approval supersedes the prior MCP design-only boundary only for local stdio MCP adapter implementation; hook work, integration hardening, package registry publish, release, dependency, secret, external mutation, and destructive work remain outside this slice.
 - User approval to proceed with Goal H hook / hook-equivalent hardening under the remaining completion program.
 - Local evidence did not expose a direct Codex app pre-command or pre-write hook surface for this repo, so Goal H implements an executable hook-equivalent gate instead of mutating Codex app configuration.
+- User request to proceed with Goal I after Goal H, bound to integration hardening and release preparation without npm publish, Python registry publish, GitHub release, or release tag execution.
 
 ## Current Program
 
-The remaining completion program is active but not complete.
+The remaining completion program is complete for the current non-release, Codex-app-focused local package surface.
 
 Completed slices:
 
@@ -37,15 +38,16 @@ Completed slices:
 - MCP feasibility/design and final quality audit/docs-control sync
 - MCP stdio adapter implementation
 - hook-equivalent gate hardening
+- integration hardening and release preparation
 
 Current active slice:
 
-- no active implementation slice; Goal H hook-equivalent gate hardening is complete
+- no active implementation slice; Goal I integration hardening and release preparation is complete
 
 Future slices in this program:
 
-- integration hardening and release preparation
-- package registry publish, GitHub release, release tag, dependency installation, secret access, or destructive work require a later exact approval packet
+- none inside the current non-release remaining completion program
+- package registry publish, GitHub release, release tag, dependency installation, secret access, or destructive work require a later exact approval packet and release transaction
 
 ## Current Surface
 
@@ -94,12 +96,14 @@ New files are allowed only when directly required for workflow engine enforcemen
 - `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
 - `node bin\harness-v2.js preflight tests\fixtures\valid-task.json --side-effect "python -m compileall harness_v2"`
 - `node bin\harness-v2.js gate tests\fixtures\valid-task.json --root . --side-effect "python -m compileall harness_v2"`
+- `node bin\harness-v2.js doctor --root .`
 - `node bin\harness-v2.js mcp < JSON-RPC smoke input`
 - `node bin\harness-v2.js init --root <temporary project>`
 - `python -m harness_v2 status --root <repo root>`
 - `python -m harness_v2 verify tests\fixtures\valid-task.json`
 - `python -m harness_v2 preflight tests\fixtures\valid-task.json --side-effect "python -m unittest discover tests"`
 - `python -m harness_v2 gate tests\fixtures\valid-task.json --root . --side-effect "python -m unittest discover tests"`
+- `python -m harness_v2 doctor --root <repo root>`
 - `python -m harness_v2 mcp < JSON-RPC smoke input`
 - `python -m harness_v2 init --root <temporary project>`
 - `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`

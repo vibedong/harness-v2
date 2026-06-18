@@ -40,6 +40,7 @@ Do not build a full transcript registry or register every temporary note.
 | side-effect-preflight | `harness_v2\preflight.py` | local pre-execution side-effect and path check against a task contract | not shell-level blocking |
 | mcp-stdio-adapter | `harness_v2\mcp.py`, `harness_v2\cli.py`, `tests\test_harness_v2.py` | local stdio JSON-RPC adapter exposing status, verify, preflight, init, and apply | not source authority, shell-level blocking, or remote MCP hosting |
 | hook-equivalent-gate | `harness_v2\gate.py`, `harness_v2\cli.py`, `harness_v2\mcp.py`, `tests\test_harness_v2.py` | explicit local gate over status, verify, and optional preflight exposed through CLI and MCP `harness_gate` | not a real Codex app hook, shell blocker, editor blocker, or proof receipt |
+| integration-doctor | `harness_v2\doctor.py`, `harness_v2\cli.py`, `tests\test_harness_v2.py` | read-only integration report for local surfaces and closed release boundary | not release readiness, proof receipt, or lifecycle transition |
 
 ## Stale Triggers
 
