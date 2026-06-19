@@ -1210,7 +1210,7 @@ source basis:
 - `CURRENT.md`
 - `contracts\\harness-task.json`
 
-## Current Task
+## 현재 작업
 
 title: {title}
 
@@ -1228,7 +1228,7 @@ harness-v2 gate contracts\\harness-task.json --root .
 
 등록된 계약은 `spec` 단계에서 시작하며 범위는 `scope_pending` 상태로 둡니다. 구현, package 작업, release, external mutation, dependency 설치, secret 접근, destructive action, 넓은 파일 쓰기 전에 정확한 approval, permission, proof, lifecycle 필드를 가진 amended task contract를 만들거나 받아야 합니다.
 
-## Stop Conditions
+## 중지 조건
 
 요청된 작업이 active task contract 밖의 경로, 명령, side effect, secret, external mutation, dependency 변경, package publish, release execution, destructive operation을 필요로 하면 멈춥니다.
 """
@@ -1376,7 +1376,7 @@ source basis:
 - `RULES.md`
 - `contracts\\harness-task.json`
 
-## Current Task
+## 현재 작업
 
 초기 task contract는 `contracts\\harness-task.json`입니다.
 
@@ -1390,7 +1390,7 @@ source basis:
 harness-v2 task start --root . --title "<짧은 작업명>" --summary "<사용자 요청 요약>"
 ```
 
-## Stop Conditions
+## 중지 조건
 
 요청된 작업이 active task contract 밖의 경로, 명령, side effect, secret, external mutation, dependency 변경, package publish, release execution, destructive operation을 필요로 하면 멈춥니다.
 """

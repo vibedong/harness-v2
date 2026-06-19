@@ -319,6 +319,12 @@ AI 코딩 도구에 맡길 때는 짧게 말해도 됩니다.
 
 단, README 자체는 AI 지시문이 아닙니다. 실제 작업 규칙은 프로젝트-local HARNESS 파일이 담당합니다.
 
+## 0.1.11 업데이트 내용
+
+- `harness-v2@0.1.11` npm package로 generated `CURRENT.md`의 남은 영어 heading을 한국어로 정리합니다.
+- 새로 적용되는 `CURRENT.md`는 `## 현재 작업`, `## 중지 조건` heading을 사용합니다.
+- `0.1.10`의 한국어 scaffold 설명문과 `task start` 흐름은 그대로 유지합니다.
+
 ## 0.1.10 업데이트 내용
 
 - `harness-v2@0.1.10` npm package로 한국어 scaffold 설명문과 `task start` 흐름을 배포합니다.

@@ -1,5 +1,43 @@
 # HARNESS V2 릴리스 노트
 
+## HARNESS V2 0.1.11 릴리스 노트
+
+generated `CURRENT.md`의 남은 영어 heading을 한국어로 정리하는 npm patch release입니다.
+
+## 변경 사항
+
+- current source package metadata를 `0.1.11`로 publish합니다.
+- generated initial `CURRENT.md`와 `task start` 후 갱신되는 `CURRENT.md`에서 `Current Task`, `Stop Conditions` heading을 `현재 작업`, `중지 조건`으로 바꿉니다.
+- `0.1.10`의 한국어 scaffold 설명문, `task start` 흐름, install/apply confusion guard는 유지합니다.
+
+## Runtime 요구사항
+
+- Node.js 18 이상
+- PATH에 등록된 Python 3.11 이상
+- 이번 release의 npm wrapper 지원 platform: Windows, macOS
+
+## 검증
+
+release는 아래 명령으로 검증했습니다.
+
+```text
+python -m compileall harness_v2
+python -m unittest discover tests
+node bin\harness-v2.js verify tests\fixtures\valid-task.json
+npm pack --dry-run
+npm publish
+```
+
+## Publish 범위
+
+release target:
+
+```text
+harness-v2@0.1.11
+```
+
+이 version에 대한 repeat npm publish는 불가능합니다. 이후 package update에는 새 version이 필요합니다.
+
 ## HARNESS V2 0.1.10 릴리스 노트
 
 한국어 scaffold 설명문과 실제 작업 등록 흐름을 포함한 npm release note입니다.
