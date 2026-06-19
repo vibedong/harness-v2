@@ -30,7 +30,6 @@ This file separates approved intent from allowed side effects.
 Allowed write paths are product files under `F:\Folder\harness-v2` needed for Goal 6:
 
 - `README.md`
-- `README.ko.md`
 - `CURRENT.md`
 - `RELEASE_NOTES.md`
 - `tests\test_harness_v2.py`

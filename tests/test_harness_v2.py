@@ -24,7 +24,6 @@ APPROVED_SOURCE_FILES = {
     "RULES.md",
     "CURRENT.md",
     "README.md",
-    "README.ko.md",
     "LICENSE",
     "RELEASE_NOTES.md",
     "package.json",
@@ -415,7 +414,6 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                 "RULES.md",
                 "CURRENT.md",
                 "README.md",
-                "README.ko.md",
                 "LICENSE",
                 "RELEASE_NOTES.md",
                 "pyproject.toml",
@@ -443,61 +441,45 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
     def test_public_release_docs_are_present(self):
         license_text = (ROOT / "LICENSE").read_text()
         release_notes = (ROOT / "RELEASE_NOTES.md").read_text()
-        readme = (ROOT / "README.md").read_text()
-        korean_readme = (ROOT / "README.ko.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
         self.assertIn("MIT License", license_text)
         self.assertIn("Copyright (c) 2026 vibedong", license_text)
         self.assertIn("# HARNESS V2 0.1.7 Release Notes", release_notes)
+        self.assertIn("이 README는 사람을 위한 제품 설명서입니다", readme)
         self.assertIn("npm install -g harness-v2", readme)
         self.assertIn("npm install -g harness-v2@latest", readme)
         self.assertIn("harness-v2 init --root .", readme)
         self.assertIn("harness-v2 apply --root .", readme)
-        self.assertIn("What's New In 0.1.7", readme)
+        self.assertIn("0.1.7 업데이트 내용", readme)
         self.assertIn("하네스 업데이트해줘.", readme)
         self.assertIn("Do not create or leave a nested `harness-v2` folder", readme)
-        self.assertIn("ships a local stdio MCP adapter", readme)
+        self.assertIn("local stdio MCP adapter", readme)
         self.assertIn("harness-v2 mcp", readme)
         self.assertIn("harness-v2 gate", readme)
         self.assertIn("hook-equivalent gate", readme)
         self.assertIn("does not automatically block your shell or editor", readme)
-        self.assertIn("README.ko.md", readme)
-        self.assertIn("# HARNESS V2 사용설명서", korean_readme)
-        self.assertIn("npm install -g harness-v2", korean_readme)
-        self.assertIn("npm install -g harness-v2@latest", korean_readme)
-        self.assertIn("harness-v2 init --root .", korean_readme)
-        self.assertIn("0.1.7 업데이트 내용", korean_readme)
-        self.assertIn("하네스 업데이트해줘.", korean_readme)
-        self.assertIn("프로젝트 안에 `harness-v2` 하위 폴더를 만들거나 남기지 않습니다", korean_readme)
-        self.assertIn("local stdio MCP adapter", korean_readme)
-        self.assertIn("harness-v2 mcp", korean_readme)
-        self.assertIn("harness-v2 gate", korean_readme)
-        self.assertIn("hook-equivalent gate", korean_readme)
-        self.assertIn("shell이나 editor를 자동으로 차단하지 않습니다", korean_readme)
+        self.assertIn("shell이나 editor를 자동으로 차단하지 않습니다", readme)
         self.assertIn("Python 3.11", readme)
         self.assertIn("Python 3.11", release_notes)
         self.assertIn("NPM_PUBLISHED", release_notes)
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, readme)
-        self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, korean_readme)
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, release_notes)
 
     def test_readme_task_contract_examples_match_goal0_contract(self):
         from harness_v2.core import validate_task
 
-        readme = (ROOT / "README.md").read_text()
-        korean_readme = (ROOT / "README.ko.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
-        for label, content in (("README.md", readme), ("README.ko.md", korean_readme)):
-            with self.subTest(label=label):
-                self.assertNotIn('"workflow": "package_publish_review"', content)
-                example = _json_block_after(content, '"task_id": "readme-docs-update"')
-                result = validate_task(json.loads(example), root=ROOT)
+        self.assertNotIn('"workflow": "package_publish_review"', readme)
+        example = _json_block_after(readme, '"task_id": "readme-docs-update"')
+        result = validate_task(json.loads(example), root=ROOT)
 
-                self.assertTrue(result.ok, result.errors)
-                self.assertEqual(result.current_gate, "development")
-                self.assertFalse(result.compatibility_mode)
-                self.assertEqual(result.record_strength, "light")
-                self.assertEqual(result.effective_record_strength, "strict")
+        self.assertTrue(result.ok, result.errors)
+        self.assertEqual(result.current_gate, "development")
+        self.assertFalse(result.compatibility_mode)
+        self.assertEqual(result.record_strength, "light")
+        self.assertEqual(result.effective_record_strength, "strict")
 
     def test_release_version_policy_is_consistent(self):
         import harness_v2
@@ -1034,19 +1016,17 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("hook-equivalent gate mistaken for a real shell/editor blocker", regression)
 
     def test_goal6_classification_and_release_boundary_are_honest(self):
-        readme = (ROOT / "README.md").read_text()
-        korean_readme = (ROOT / "README.ko.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
         release = (ROOT / "release" / "transaction.md").read_text()
         release_notes = (ROOT / "RELEASE_NOTES.md").read_text()
         lifecycle = (ROOT / "control" / "lifecycle.md").read_text()
 
-        for content in (readme, korean_readme, lifecycle):
+        for content in (readme, lifecycle):
             self.assertIn("workflow_binding_engine", content)
         self.assertIn("shell/editor", readme)
         self.assertIn("shell/editor", lifecycle)
-        self.assertIn("shell, editor", korean_readme)
         self.assertIn("explicit CLI/MCP/task-contract surface", readme)
-        self.assertIn("명시적 local surface", korean_readme)
+        self.assertIn("사람을 위한 제품 설명서", readme)
         self.assertIn("Closed release target", release)
         self.assertIn("closed release history", release.casefold())
         self.assertNotIn("current release transaction allows", release.casefold())
@@ -1074,8 +1054,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("MCP adapter around `status`, `verify`, `preflight`, `gate`, `decision`, and `init/apply`", improvement)
 
     def test_hook_equivalent_gate_is_not_claimed_as_real_shell_or_editor_hook(self):
-        readme = (ROOT / "README.md").read_text()
-        korean_readme = (ROOT / "README.ko.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
         routing = (ROOT / "routing" / "manifest.md").read_text()
         proof = (ROOT / "control" / "proof.md").read_text()
         lifecycle = (ROOT / "control" / "lifecycle.md").read_text()
@@ -1086,8 +1065,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("harness_gate", routing)
         self.assertIn("no direct Codex app hook surface was found", readme)
         self.assertIn("does not automatically block your shell or editor", readme)
-        self.assertIn("직접 Codex app hook surface는 확인되지 않았습니다", korean_readme)
-        self.assertIn("shell이나 editor를 자동으로 차단하지 않습니다", korean_readme)
+        self.assertIn("shell이나 editor를 자동으로 차단하지 않습니다", readme)
 
 
     def test_valid_task_fixture_is_accepted_by_verifier(self):
@@ -2655,7 +2633,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             initial_task = json.loads((root / "contracts" / "harness-task.json").read_text(encoding="utf-8"))
 
             self.assertIn("AI agent entry point", agents)
-            self.assertIn("README.md` and `README.ko.md` are user documentation", agents)
+            self.assertIn("README.md` is user documentation", agents)
             self.assertIn("task-contract validator", agents)
             self.assertIn("CLI helper", agents)
             self.assertIn("not an automatic enforcement sandbox", agents)

@@ -42,7 +42,6 @@
       "tests\\fixtures\\valid-task.json",
       "tests\\fixtures\\invalid-record-strength.json",
       "README.md",
-      "README.ko.md",
       "rules\\workflows.md",
       "safety\\improvement.md"
     ],

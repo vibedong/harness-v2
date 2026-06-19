@@ -68,7 +68,6 @@ Active package, npm wrapper, scaffold, workflow, preflight, local MCP stdio adap
 - `RULES.md`
 - `CURRENT.md`
 - `README.md`
-- `README.ko.md`
 - `LICENSE`
 - `RELEASE_NOTES.md`
 - `package.json`

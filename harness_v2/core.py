@@ -882,7 +882,7 @@ The applied surface is a scaffold, task-contract validator, and CLI helper. It i
 
 HARNESS V2 provides a hook-equivalent gate command for Codex-app-focused work. `harness-v2 gate <task.json> --root .` combines `status`, `verify`, and optional `preflight` checks into one executable boundary check. It does not automatically block shell or editor actions.
 
-`README.md` and `README.ko.md` are user documentation. They explain the tool, but they do not grant source authority, approval, permission, proof, lifecycle state, or release authority.
+`README.md` is user documentation. It explains the tool for people, but it does not grant source authority, approval, permission, proof, lifecycle state, or release authority.
 
 ## Evidence-Scaled Read Order
 

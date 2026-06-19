@@ -40,7 +40,6 @@ Purpose:
 Allowed product write surface:
 
 - `README.md`
-- `README.ko.md`
 - `CURRENT.md`
 - `RELEASE_NOTES.md`
 - `tests\test_harness_v2.py`

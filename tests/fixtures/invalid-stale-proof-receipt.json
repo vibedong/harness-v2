@@ -29,14 +29,14 @@
     },
     {
       "path": "tests\\test_harness_v2.py",
-      "sha256": "a9704ccec7035f135df8927c4a3b7fdb0043eb9cedad4c5d77fafd8451ac5e39",
+      "sha256": "c66bbc89791c3cc3386c7a91b4c4095db0c2bb231f023160474e5bc3f1770fa6",
       "affects": [
         "tests"
       ]
     },
     {
       "path": "tests\\fixtures\\valid-task.json",
-      "sha256": "5176223fc643b6f768bb84e1ac699822227505fe2f0d1f5ebda0903a39272d22",
+      "sha256": "249e2d3c235163b2a8176e436cb06cbcb21a3ee6b606b28b4f27be670412bfb1",
       "affects": [
         "proof command"
       ]
