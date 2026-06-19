@@ -1,6 +1,6 @@
 {
   "task_id": "harness-v2-valid-task",
-  "title": "Validate HARNESS V2 0.1.6 local release-candidate verification fixture",
+  "title": "Validate HARNESS V2 0.1.7 local release verification fixture",
   "workflow": "remaining_completion_program",
   "workflow_stage": "development",
   "source": {
@@ -14,7 +14,7 @@
     "current_pointer": "CURRENT.md"
   },
   "approval": {
-    "packet": "Approve HARNESS V2 remaining completion program local verification fixture; release execution is authorized only by the separate 0.1.6 release transaction",
+    "packet": "Approve HARNESS V2 remaining completion program local verification fixture; release execution is authorized only by the separate 0.1.7 release transaction",
     "approved_paths": [
       "AGENTS.md",
       "RULES.md",

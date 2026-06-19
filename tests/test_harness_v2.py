@@ -105,7 +105,7 @@ ALLOWED_GIT_COMMANDS = {
     "git commit",
     "git push",
     "git push --tags",
-    "gh release create v0.1.6 --repo vibedong/harness-v2 --title \"HARNESS V2 0.1.6\" --notes-file RELEASE_NOTES.md",
+    "gh release create v0.1.7 --repo vibedong/harness-v2 --title \"HARNESS V2 0.1.7\" --notes-file RELEASE_NOTES.md",
 }
 EXPECTED_SCAFFOLD_CREATED = {
     "AGENTS.md",
@@ -264,8 +264,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
             self.assertIn("harness_v2/cli.py", names)
             self.assertIn("harness_v2/core.py", names)
-            self.assertIn("harness_v2-0.1.6.dist-info/METADATA", names)
-            self.assertIn("harness_v2-0.1.6.dist-info/entry_points.txt", names)
+            self.assertIn("harness_v2-0.1.7.dist-info/METADATA", names)
+            self.assertIn("harness_v2-0.1.7.dist-info/entry_points.txt", names)
         finally:
             sys.path.remove(str(ROOT / "_build_backend"))
 
@@ -286,8 +286,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
             self.assertEqual(pth, str(ROOT))
             self.assertNotIn("harness_v2/cli.py", names)
-            self.assertIn("harness_v2-0.1.6.dist-info/METADATA", names)
-            self.assertIn("harness_v2-0.1.6.dist-info/entry_points.txt", names)
+            self.assertIn("harness_v2-0.1.7.dist-info/METADATA", names)
+            self.assertIn("harness_v2-0.1.7.dist-info/entry_points.txt", names)
         finally:
             sys.path.remove(str(ROOT / "_build_backend"))
 
@@ -338,7 +338,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         package_json = json.loads((ROOT / "package.json").read_text())
 
         self.assertEqual(package_json["name"], "harness-v2")
-        self.assertEqual(package_json["version"], "0.1.6")
+        self.assertEqual(package_json["version"], "0.1.7")
         self.assertEqual(package_json["license"], "MIT")
         self.assertEqual(package_json["bin"], {"harness-v2": "bin/harness-v2.js"})
         self.assertEqual(package_json["os"], ["win32", "darwin"])
@@ -394,12 +394,12 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertIn("MIT License", license_text)
         self.assertIn("Copyright (c) 2026 vibedong", license_text)
-        self.assertIn("# HARNESS V2 0.1.6 Release Notes", release_notes)
+        self.assertIn("# HARNESS V2 0.1.7 Release Notes", release_notes)
         self.assertIn("npm install -g harness-v2", readme)
         self.assertIn("npm install -g harness-v2@latest", readme)
         self.assertIn("harness-v2 init --root .", readme)
         self.assertIn("harness-v2 apply --root .", readme)
-        self.assertIn("What's New In 0.1.6", readme)
+        self.assertIn("What's New In 0.1.7", readme)
         self.assertIn("하네스 업데이트해줘.", readme)
         self.assertIn("Do not create or leave a nested `harness-v2` folder", readme)
         self.assertIn("ships a local stdio MCP adapter", readme)
@@ -412,7 +412,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("npm install -g harness-v2", korean_readme)
         self.assertIn("npm install -g harness-v2@latest", korean_readme)
         self.assertIn("harness-v2 init --root .", korean_readme)
-        self.assertIn("0.1.6 업데이트 내용", korean_readme)
+        self.assertIn("0.1.7 업데이트 내용", korean_readme)
         self.assertIn("하네스 업데이트해줘.", korean_readme)
         self.assertIn("프로젝트 안에 `harness-v2` 하위 폴더를 만들거나 남기지 않습니다", korean_readme)
         self.assertIn("local stdio MCP adapter", korean_readme)
@@ -422,7 +422,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("shell이나 editor를 자동으로 차단하지 않습니다", korean_readme)
         self.assertIn("Python 3.11", readme)
         self.assertIn("Python 3.11", release_notes)
-        self.assertIn("GITHUB_SOURCE_RELEASE_PUBLISHED", release_notes)
+        self.assertIn("NPM_PUBLISHED", release_notes)
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, readme)
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, korean_readme)
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, release_notes)
@@ -434,10 +434,10 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         pyproject = (ROOT / "pyproject.toml").read_text()
 
-        self.assertEqual(harness_v2.__version__, "0.1.6")
-        self.assertEqual(package_json["version"], "0.1.6")
-        self.assertIn('version = "0.1.6"', pyproject)
-        self.assertIn("0.1.6", (ROOT / "RELEASE_NOTES.md").read_text())
+        self.assertEqual(harness_v2.__version__, "0.1.7")
+        self.assertEqual(package_json["version"], "0.1.7")
+        self.assertIn('version = "0.1.7"', pyproject)
+        self.assertIn("0.1.7", (ROOT / "RELEASE_NOTES.md").read_text())
 
     def test_node_wrapper_delegates_status_and_verify_to_python_cli(self):
         status = subprocess.run(
@@ -800,7 +800,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         )
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
-        self.assertIn("harness-v2-0.1.6.tgz", completed.stdout)
+        self.assertIn("harness-v2-0.1.7.tgz", completed.stdout)
         self.assertNotIn("__pycache__", completed.stdout)
         self.assertNotIn(".pyc", completed.stdout)
 
@@ -1290,8 +1290,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(status["workflow"], "remaining_completion_program")
         self.assertEqual(status["state"], "public_release_published")
-        self.assertIn("github_source_release_v0.1.6", status["substate"])
-        self.assertIn("npm_publish_deferred", status["substate"])
+        self.assertIn("npm_release_v0.1.7", status["substate"])
         self.assertIn("release_closed", status["substate"])
 
     def test_doctor_reports_integration_hardening_without_mutation_or_release_claim(self):

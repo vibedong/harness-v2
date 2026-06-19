@@ -21,7 +21,7 @@ remaining_completion_program
 Current active slice:
 
 ```text
-github_source_release_v0.1.6 / npm_publish_deferred
+npm_release_v0.1.7 / release_closed
 ```
 
 Remaining completion program base packet:
@@ -100,7 +100,7 @@ User approved Goal I after Goal H.
 Goal I is bound to integration hardening and release preparation under the remaining completion program.
 It may harden read-only integration reporting and synchronize docs/control surfaces, but it does not authorize npm publish, Python registry publish, GitHub release, release tag creation, dependency installation, secret access, Codex app configuration mutation, real hook installation, or destructive work outside generated verification artifacts.
 
-This Goal I boundary is superseded only by the later exact public release approval for `harness-v2@0.1.6`.
+This Goal I boundary is superseded only by the later exact public release approval for `harness-v2@0.1.7`.
 ```
 
 Current public release approval:
@@ -111,7 +111,7 @@ work only under F:\Folder\harness-v2.
 
 Purpose:
 publish the current Goal H/I GitHub source state as a new public npm release,
-including release readiness audit, version bump from 0.1.5 to 0.1.6 if needed,
+including release readiness audit, version bump to 0.1.7,
 release notes/update docs/control/release transaction sync, Git commit, Git tag,
 GitHub release, and npm publish.
 
@@ -142,10 +142,10 @@ npm publish
 
 Allow git/GitHub release operations:
 git add/commit
-git tag for v0.1.6
+git tag for v0.1.7
 git push
 git push --tags
-GitHub release creation for vibedong/harness-v2 v0.1.6.
+GitHub release creation for vibedong/harness-v2 v0.1.7.
 ```
 
 Current release amendment:
@@ -153,15 +153,14 @@ Current release amendment:
 ```text
 Approve release slice amendment:
 also allow modifying pyproject.toml under F:\Folder\harness-v2
-for version consistency with package.json and harness_v2\__init__.py during the 0.1.6 npm/GitHub release.
+for version consistency with package.json and harness_v2\__init__.py during the 0.1.7 npm/GitHub release.
 ```
 
-Current npm publish cancellation:
+Current npm publish resumption:
 
 ```text
-User cancelled npm publish for the current release path.
-The active transaction keeps Git tag `v0.1.6`, GitHub release creation, release docs/control sync, and GitHub push.
-`npm publish` is deferred and requires a later exact approval packet.
+User resumed npm publish after authenticating as donghyeonlee.
+The active transaction is `harness-v2@0.1.7` npm publish plus Git tag and GitHub release `v0.1.7`.
 ```
 
 ## Bound Local Verification Commands
@@ -191,9 +190,8 @@ Operation type:
 
 - local product implementation, documentation, control-plane, test, scaffold, and verification work under `F:\Folder\harness-v2`;
 - completed targets are generated scaffold hardening, executable 8-stage workflow engine enforcement, and side-effect preflight adapter work;
-- current target is the 0.1.6 GitHub source release transaction;
-- Git tag `v0.1.6`, GitHub release creation, and git push are allowed only for this exact transaction;
-- npm publish is deferred;
+- current target is the 0.1.7 npm/GitHub release transaction;
+- npm publish for `harness-v2@0.1.7`, Git tag `v0.1.7`, GitHub release creation, and git push are allowed only for this exact transaction;
 - no Python package registry publish, dependency install, secret access, or destructive operation outside generated temporary verification artifacts.
 
 Freshness anchors:
@@ -208,10 +206,10 @@ Denied by the current approval scope:
 
 - mutation outside `F:\Folder\harness-v2`;
 - files or new surfaces not directly required by the remaining completion program;
-- npm publish;
+- repeat npm publish after `harness-v2@0.1.7` is published;
 - Python package registry publish;
-- additional GitHub release mutation after `v0.1.6` is created;
-- additional release tag mutation after `v0.1.6` is created;
+- additional GitHub release mutation after `v0.1.7` is created;
+- additional release tag mutation after `v0.1.7` is created;
 - dependency install from network;
 - secret access;
 - external network mutation outside allowed git push;

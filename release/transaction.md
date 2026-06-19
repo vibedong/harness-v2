@@ -37,32 +37,32 @@ A future release transaction must name:
 Target:
 
 ```text
-GitHub source release v0.1.6
+harness-v2@0.1.7
 ```
 
 Status:
 
 ```text
-GITHUB_SOURCE_RELEASE_PUBLISHED / NPM_PUBLISH_DEFERRED / RELEASE_EXECUTION_CLOSED
+NPM_PUBLISHED / GITHUB_RELEASE_PUBLISHED / RELEASE_EXECUTION_CLOSED
 ```
 
 Reason:
 
-- GitHub source release `v0.1.6` is the current release target.
-- npm publish is deferred by the latest user instruction and is not part of the active transaction.
+- npm package `harness-v2@0.1.7` is the current release target.
+- The current release slice authorizes exactly one npm publish for `harness-v2@0.1.7`.
 - Generated scaffold hardening improves the files created by `harness-v2 init --root .` and `harness-v2 apply --root .` for future package updates.
 - Hook-equivalent gate hardening adds local `gate` checks to the source surface, but it does not execute a release, create a tag, or republish the package.
 - Integration hardening and release preparation add a read-only `doctor` report for local surface composition.
-- Git tag `v0.1.6` and GitHub release creation for `vibedong/harness-v2` are permitted only for this exact transaction.
+- Git tag `v0.1.7` and GitHub release creation for `vibedong/harness-v2` are permitted only for this exact transaction.
 - Python package registry publish is not permitted by the current transaction.
 
 ## Current Permission Ceiling
 
-The current release transaction allows local verification, generated TEMP project verification, read-only subagent review, Git tag `v0.1.6`, GitHub release creation for `vibedong/harness-v2`, and git push after verification and review pass.
+The current release transaction allows local verification, generated TEMP project verification, read-only subagent review, npm publish for `harness-v2@0.1.7`, Git tag `v0.1.7`, GitHub release creation for `vibedong/harness-v2`, and git push after verification and review pass.
 
 After this transaction completes, the permission ceiling denies:
 
-- npm publish;
+- repeat npm publish;
 - Python package registry publish or deploy work;
 - additional GitHub release mutation;
 - additional release tag mutation;

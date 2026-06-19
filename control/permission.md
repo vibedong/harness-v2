@@ -19,8 +19,8 @@ This file separates approved intent from allowed side effects.
 | cleanup | allowed only for generated TEMP folders, `__pycache__`, `*.egg-info`, and npm pack dry-run output |
 | read-only subagent review | allowed with `vowline`; subagents may not edit, mutate git/network, grant approval, produce proof, or declare lifecycle transition |
 | GitHub repository push | allowed after a completed slice passes verification and review |
-| npm publish | denied; deferred to a later exact approval packet |
-| GitHub release and release tag | allowed only for `vibedong/harness-v2` `v0.1.6` after release verification passes |
+| npm publish | allowed only for the exact `harness-v2@0.1.7` npm release transaction |
+| GitHub release and release tag | allowed only for `vibedong/harness-v2` `v0.1.7` after release verification passes |
 | Python package registry publish | denied |
 | dependency install from network, secret read, destructive action outside generated verification artifacts | denied |
 
@@ -90,10 +90,10 @@ Any mutation outside `F:\Folder\harness-v2` fails closed except generated TEMP v
 - `git commit`
 - `git push`
 - `git push --tags`
-- `gh release create v0.1.6 --repo vibedong/harness-v2 --title "HARNESS V2 0.1.6" --notes-file RELEASE_NOTES.md`
+- `gh release create v0.1.7 --repo vibedong/harness-v2 --title "HARNESS V2 0.1.7" --notes-file RELEASE_NOTES.md`
 
 ## Permission Boundaries
 
 Permission cannot widen approval scope and cannot produce proof, lifecycle state, route permission, regression pass, improvement execution, package registry publish readiness, release readiness, real hook installation, or automatic enforcement completion.
 
-This permission surface allows Git tag creation, GitHub release creation, and external network mutation only for the exact approved `vibedong/harness-v2` `v0.1.6` GitHub source release transaction. It denies npm publish, Python package registry publish, additional GitHub release mutation, additional release tag mutation, dependency installation from network, secret access, external network mutation outside allowed git/GitHub release operations, remote MCP hosting, MCP client configuration mutation, Codex app configuration mutation, real shell/editor hook installation, and destructive action outside generated verification artifacts.
+This permission surface allows npm publish, Git tag creation, GitHub release creation, and external network mutation only for the exact approved `harness-v2@0.1.7` and `vibedong/harness-v2` `v0.1.7` release transaction. It denies repeat npm publish, Python package registry publish, additional GitHub release mutation, additional release tag mutation, dependency installation from network, secret access, external network mutation outside allowed git/GitHub release operations, remote MCP hosting, MCP client configuration mutation, Codex app configuration mutation, real shell/editor hook installation, and destructive action outside generated verification artifacts.

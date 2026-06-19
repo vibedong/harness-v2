@@ -84,9 +84,10 @@ npm install -g harness-v2
 
 npm 명령은 내부적으로 Python CLI에 위임합니다. HARNESS V2를 JavaScript로 다시 구현한 것이 아닙니다.
 
-## 0.1.6 업데이트 내용
+## 0.1.7 업데이트 내용
 
-- 현재 Codex-app-focused HARNESS V2 source를 GitHub `v0.1.6` source release 후보로 준비합니다. npm publish는 보류합니다.
+- 현재 Codex-app-focused HARNESS V2 source를 npm의 `harness-v2@0.1.7`로 배포합니다.
+- GitHub source release 경로도 `v0.1.7` tag 기준으로 맞춥니다.
 - 적용된 project file은 대상 프로젝트 루트에 바로 있어야 하며, 프로젝트 안에 `harness-v2` 하위 폴더가 남는 구조가 정상 흐름이 아닙니다.
 - 생성되는 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\` scaffold가 더 강해졌습니다.
 - `status`, `verify`, 선택적 `preflight`를 한 번에 확인하는 hook-equivalent `gate` 명령을 포함합니다.

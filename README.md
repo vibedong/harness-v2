@@ -84,9 +84,10 @@ Runtime prerequisites:
 
 The npm command delegates to the Python CLI. HARNESS V2 is not rewritten in JavaScript.
 
-## What's New In 0.1.6
+## What's New In 0.1.7
 
-- Prepares the current Codex-app-focused HARNESS V2 source for the GitHub `v0.1.6` source release; npm publish is deferred.
+- Publishes the current Codex-app-focused HARNESS V2 source as `harness-v2@0.1.7` on npm.
+- Keeps the GitHub source release path aligned with tag `v0.1.7`.
 - Keeps installed project files directly in the target project root, not inside a nested `harness-v2` folder.
 - Includes stronger generated `AGENTS.md`, `RULES.md`, `CURRENT.md`, and `control\` scaffold files.
 - Adds the hook-equivalent `gate` command for explicit status, verify, and optional preflight checks.
