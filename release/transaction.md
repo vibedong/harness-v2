@@ -1,6 +1,6 @@
 # HARNESS V2 Release Transaction
 
-status: package_github_surface / whole_plan_conformance_audit / release_transaction_boundary
+status: package_github_surface / npm_0.1.8_release / release_transaction_boundary
 
 This file defines the local markdown boundary for install and release transactions. It records release readiness inputs but does not execute npm, Python package registry publish, GitHub release, release tag, deploy, or product release work by itself.
 
@@ -20,6 +20,41 @@ Release work is separate from:
 - binding-surface classification.
 
 No one of these surfaces can create release readiness by itself.
+
+## Current Release Transaction
+
+Release target:
+
+```text
+harness-v2@0.1.8
+```
+
+Release scope:
+
+- publish the current GitHub source state as npm package `harness-v2@0.1.8`;
+- include the single Korean public `README.md`;
+- exclude the removed `README.ko.md` package surface;
+- keep Python package registry publish denied;
+- keep GitHub release/tag creation out of this npm-only transaction unless separately approved.
+
+Required verification:
+
+```text
+python -m compileall harness_v2
+python -m unittest discover tests
+python -m harness_v2 status --root .
+python -m harness_v2 verify tests\fixtures\valid-task.json
+python -m harness_v2 gate tests\fixtures\valid-task.json --root .
+python -m harness_v2 doctor --root .
+node bin\harness-v2.js status --root .
+node bin\harness-v2.js verify tests\fixtures\valid-task.json
+node bin\harness-v2.js gate tests\fixtures\valid-task.json --root .
+node bin\harness-v2.js doctor --root .
+npm pack --dry-run
+npm publish
+```
+
+After successful publish, this transaction is closed for `harness-v2@0.1.8`.
 
 ## Closed Release History
 
@@ -56,19 +91,18 @@ A future release transaction must name:
 
 ## Current Permission Ceiling
 
-The current Goal 6 audit slice allows local verification, generated TEMP project verification through tests, read-only subagent review, and git add/commit/push only for the verified Goal 6 commit.
+The current npm 0.1.8 release transaction allows local verification, git add/commit/push for the verified release commit, and one npm publish for `harness-v2@0.1.8`.
 
-The current Goal 6 audit slice denies:
+The current npm 0.1.8 release transaction denies:
 
-- npm publish;
 - Python package registry publish or deploy work;
 - GitHub release creation or mutation;
 - release tag creation or mutation;
 - dependency installation from network;
 - secret access;
-- external network mutation outside the approved Goal 6 git push;
+- external network mutation outside the approved git push and npm publish;
 - destructive action outside generated temporary verification artifacts;
-- release readiness claims.
+- release readiness claims outside the named npm package target.
 
 ## Non-Authority Boundary
 

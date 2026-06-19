@@ -1,25 +1,19 @@
 # HARNESS V2 Release Notes
 
-## Unreleased
+## HARNESS V2 0.1.8 Release Notes
 
-- Realigns `workflow_stage` to the canonical HARNESS V2 task flow: `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`.
-- Removes `artifact_observation`, `routing`, `safety_improvement`, and `release_boundary` from `workflow_stage`; those remain control or observability surfaces.
-- Adds generated task-local stage records under `records\` when applying `harness-v2 init` or `harness-v2 apply`.
-- Classifies the local explicit CLI/MCP/task-contract surface as `workflow_binding_engine` after the Goal 6 whole-plan conformance audit.
-- This unreleased local source state is not an npm publish, GitHub release, or release tag.
-
-## HARNESS V2 0.1.7 Release Notes
-
-npm and GitHub release notes for the current Codex-app-focused HARNESS V2 source.
+npm release notes for the Korean public README release.
 
 ## Changed
 
-- Publishes the current source package metadata as `0.1.7`.
-- Includes generated scaffold hardening for `AGENTS.md`, `RULES.md`, `CURRENT.md`, and `control\`.
+- Publishes the current source package metadata as `0.1.8`.
+- Uses a single Korean `README.md` for GitHub and npm users.
+- Removes the separate `README.ko.md` package surface.
+- Keeps README as user-facing product documentation, not AI operating authority.
+- Preserves the `workflow_binding_engine` classification and explicit CLI/MCP/task-contract boundary wording.
+- Preserves the canonical workflow stages: `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`.
 - Keeps `harness-v2 init --root .` and `harness-v2 apply --root .` focused on project-root files, not a nested `harness-v2` folder.
-- Includes executable 8-stage workflow checks, side-effect preflight checks, and the hook-equivalent `gate` command.
-- Includes the local stdio MCP adapter for `status`, `verify`, `preflight`, `gate`, `init`, and `apply`.
-- Keeps `doctor` as a read-only integration report that does not mutate project files.
+- Keeps the hook-equivalent `gate` command, local stdio MCP adapter, `harness_decision`, and read-only `doctor` report.
 
 ## Runtime Requirements
 
@@ -34,36 +28,43 @@ The release was verified with:
 ```text
 python -m compileall harness_v2
 python -m unittest discover tests
+python -m harness_v2 status --root .
+python -m harness_v2 verify tests\fixtures\valid-task.json
+python -m harness_v2 gate tests\fixtures\valid-task.json --root .
+python -m harness_v2 doctor --root .
 node bin\harness-v2.js status --root .
 node bin\harness-v2.js verify tests\fixtures\valid-task.json
 node bin\harness-v2.js gate tests\fixtures\valid-task.json --root .
 node bin\harness-v2.js doctor --root .
-python -m harness_v2 init --root <temporary project>
-python -m harness_v2 verify <temporary project>\contracts\harness-task.json
 npm pack --dry-run
 npm publish
 ```
-
-`npm publish`, Git tag push, and GitHub release output close this release transaction.
 
 ## Publish Scope
 
 Release target:
 
 ```text
-harness-v2@0.1.7
+harness-v2@0.1.8
 ```
 
-Release transaction state:
+Release transaction state after publish:
 
 ```text
-NPM_PUBLISHED / GITHUB_RELEASE_PUBLISHED / RELEASE_EXECUTION_CLOSED
+NPM_PUBLISHED / GITHUB_SOURCE_PUSHED / RELEASE_EXECUTION_CLOSED
 ```
 
-Git tag and GitHub release target:
+Repeat npm publish for this version is not possible. A later package update requires a new version.
 
-```text
-v0.1.7
-```
+## HARNESS V2 0.1.7 Release Notes
 
-Repeat npm publish, release tag creation, or GitHub release mutation requires a later exact transaction after this release is closed.
+npm and GitHub release notes for the previous Codex-app-focused HARNESS V2 source.
+
+## Changed In 0.1.7
+
+- Publishes the source package metadata as `0.1.7`.
+- Includes generated scaffold hardening for `AGENTS.md`, `RULES.md`, `CURRENT.md`, and `control\`.
+- Keeps `harness-v2 init --root .` and `harness-v2 apply --root .` focused on project-root files, not a nested `harness-v2` folder.
+- Includes executable 8-stage workflow checks, side-effect preflight checks, and the hook-equivalent `gate` command.
+- Includes the local stdio MCP adapter for `status`, `verify`, `preflight`, `gate`, `init`, and `apply`.
+- Keeps `doctor` as a read-only integration report that does not mutate project files.

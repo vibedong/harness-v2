@@ -29,7 +29,7 @@
     },
     {
       "path": "tests\\test_harness_v2.py",
-      "sha256": "c66bbc89791c3cc3386c7a91b4c4095db0c2bb231f023160474e5bc3f1770fa6",
+      "sha256": "908022d232be496e34a08fcff916300e1439b2e2c7407ca991ac0421ccf00c9c",
       "affects": [
         "tests"
       ]

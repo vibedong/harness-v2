@@ -317,8 +317,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
             self.assertIn("harness_v2/cli.py", names)
             self.assertIn("harness_v2/core.py", names)
-            self.assertIn("harness_v2-0.1.7.dist-info/METADATA", names)
-            self.assertIn("harness_v2-0.1.7.dist-info/entry_points.txt", names)
+            self.assertIn("harness_v2-0.1.8.dist-info/METADATA", names)
+            self.assertIn("harness_v2-0.1.8.dist-info/entry_points.txt", names)
         finally:
             sys.path.remove(str(ROOT / "_build_backend"))
 
@@ -339,8 +339,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
             self.assertEqual(pth, str(ROOT))
             self.assertNotIn("harness_v2/cli.py", names)
-            self.assertIn("harness_v2-0.1.7.dist-info/METADATA", names)
-            self.assertIn("harness_v2-0.1.7.dist-info/entry_points.txt", names)
+            self.assertIn("harness_v2-0.1.8.dist-info/METADATA", names)
+            self.assertIn("harness_v2-0.1.8.dist-info/entry_points.txt", names)
         finally:
             sys.path.remove(str(ROOT / "_build_backend"))
 
@@ -391,7 +391,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         package_json = json.loads((ROOT / "package.json").read_text())
 
         self.assertEqual(package_json["name"], "harness-v2")
-        self.assertEqual(package_json["version"], "0.1.7")
+        self.assertEqual(package_json["version"], "0.1.8")
         self.assertEqual(package_json["license"], "MIT")
         self.assertEqual(package_json["bin"], {"harness-v2": "bin/harness-v2.js"})
         self.assertEqual(package_json["os"], ["win32", "darwin"])
@@ -445,13 +445,13 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertIn("MIT License", license_text)
         self.assertIn("Copyright (c) 2026 vibedong", license_text)
-        self.assertIn("# HARNESS V2 0.1.7 Release Notes", release_notes)
+        self.assertIn("## HARNESS V2 0.1.8 Release Notes", release_notes)
         self.assertIn("이 README는 사람을 위한 제품 설명서입니다", readme)
         self.assertIn("npm install -g harness-v2", readme)
         self.assertIn("npm install -g harness-v2@latest", readme)
         self.assertIn("harness-v2 init --root .", readme)
         self.assertIn("harness-v2 apply --root .", readme)
-        self.assertIn("0.1.7 업데이트 내용", readme)
+        self.assertIn("0.1.8 업데이트 내용", readme)
         self.assertIn("하네스 업데이트해줘.", readme)
         self.assertIn("Do not create or leave a nested `harness-v2` folder", readme)
         self.assertIn("local stdio MCP adapter", readme)
@@ -488,10 +488,10 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         pyproject = (ROOT / "pyproject.toml").read_text()
 
-        self.assertEqual(harness_v2.__version__, "0.1.7")
-        self.assertEqual(package_json["version"], "0.1.7")
-        self.assertIn('version = "0.1.7"', pyproject)
-        self.assertIn("0.1.7", (ROOT / "RELEASE_NOTES.md").read_text())
+        self.assertEqual(harness_v2.__version__, "0.1.8")
+        self.assertEqual(package_json["version"], "0.1.8")
+        self.assertIn('version = "0.1.8"', pyproject)
+        self.assertIn("0.1.8", (ROOT / "RELEASE_NOTES.md").read_text())
 
     def test_node_wrapper_delegates_status_and_verify_to_python_cli(self):
         status = subprocess.run(
@@ -877,7 +877,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         )
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
-        self.assertIn("harness-v2-0.1.7.tgz", completed.stdout)
+        self.assertIn("harness-v2-0.1.8.tgz", completed.stdout)
         self.assertNotIn("__pycache__", completed.stdout)
         self.assertNotIn(".pyc", completed.stdout)
 

@@ -260,9 +260,11 @@ AI 코딩 도구에 맡길 때는 짧게 말해도 됩니다.
 
 단, README 자체는 AI 지시문이 아닙니다. 실제 작업 규칙은 프로젝트-local HARNESS 파일이 담당합니다.
 
-## 0.1.7 업데이트 내용
+## 0.1.8 업데이트 내용
 
-- `harness-v2@0.1.7` npm package와 `v0.1.7` GitHub tag를 닫힌 release history로 취급합니다.
+- `harness-v2@0.1.8` npm package로 한국어 단일 README를 배포합니다.
+- GitHub/npm 메인 문서는 `README.md` 하나만 사용하고, 별도 `README.ko.md`는 제거했습니다.
+- README를 사람을 위한 초보자용 제품 설명서로 정리했습니다.
 - 적용 파일이 대상 프로젝트 루트에 바로 생성되도록 정리했습니다.
 - `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\` scaffold를 강화했습니다.
 - `status`, `verify`, 선택적 `preflight`를 묶는 hook-equivalent gate를 추가했습니다.
