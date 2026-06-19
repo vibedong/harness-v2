@@ -21,6 +21,31 @@ Task contracts use `workflow_stage` for stage-specific verifier rules. The allow
 
 Artifact observation, routing, safety/regression, and release boundaries are control surfaces. They are not `workflow_stage` values.
 
+## Lifecycle Transition Edges
+
+Lifecycle movement is an evaluated operation, not a log line.
+
+The transition evaluator accepts only these same-task route edges:
+
+- `spec -> spec_review`
+- `spec_review -> spec`
+- `spec_review -> plan`
+- `plan -> plan_review`
+- `plan_review -> plan`
+- `plan_review -> plan_approval`
+- `plan_approval -> plan`
+- `plan_approval -> development`
+- `development -> development_review`
+- `development_review -> development`
+- `development_review -> improvement`
+- `improvement -> completed`
+
+`completed` is the terminal route result after improvement. It is not an ordinary editable `workflow_stage`.
+
+Transition records are evidence. They become lifecycle movement only when the evaluator accepts the route edge, task source gate, project-relative source refs, freshness refs, stale check, and required approval, permission, or proof references. When a previous ledger hash is supplied for append, earlier transition block edits or deletions fail before appending.
+
+Same-task `improvement -> spec` is denied. A new spec requires a separate task.
+
 ## Spec Workflow
 
 Spec work captures the task goal, scope, current truth, unknowns, and completion criteria.

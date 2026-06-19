@@ -40,6 +40,7 @@ APPROVED_SOURCE_FILES = {
     "safety/improvement.md",
     "release/transaction.md",
     "contracts/gate-state.schema.json",
+    "contracts/transition.schema.json",
     "contracts/task.schema.json",
     "contracts/approval.schema.json",
     "contracts/permission.schema.json",
@@ -48,6 +49,7 @@ APPROVED_SOURCE_FILES = {
     "contracts/artifact.schema.json",
     "templates/task.json",
     "templates/gate-state.json",
+    "templates/transition-log.md",
     "templates/gate-manifest.md",
     "templates/approval-request.md",
     "templates/proof-report.md",
@@ -59,11 +61,14 @@ APPROVED_SOURCE_FILES = {
     "harness_v2/doctor.py",
     "harness_v2/preflight.py",
     "harness_v2/gate.py",
+    "harness_v2/lifecycle.py",
     "harness_v2/mcp.py",
     "tests/test_harness_v2.py",
     "tests/fixtures/valid-task.json",
     "tests/fixtures/invalid-missing-approval.json",
     "tests/fixtures/invalid-gate-mismatch.json",
+    "tests/fixtures/valid-transition-log.md",
+    "tests/fixtures/invalid-transition-stale-approval.md",
 }
 ALLOWED_COMMANDS = {
     "python -m compileall harness_v2",
@@ -85,27 +90,18 @@ ALLOWED_COMMANDS = {
     "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
     "npm pack --dry-run",
 }
-PERMISSION_COMMANDS = {
+GOAL2_COMMANDS = {
     "python -m compileall harness_v2",
     "python -m unittest discover tests",
-    "node bin\\harness-v2.js status --root .",
-    "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
-    "node bin\\harness-v2.js preflight tests\\fixtures\\valid-task.json --side-effect \"python -m compileall harness_v2\"",
-    "node bin\\harness-v2.js gate tests\\fixtures\\valid-task.json --root . --side-effect \"python -m compileall harness_v2\"",
-    "node bin\\harness-v2.js doctor --root .",
-    "node bin\\harness-v2.js mcp < JSON-RPC smoke input",
-    "node bin\\harness-v2.js init --root <temporary project>",
-    "python -m harness_v2 status --root <repo root>",
-    "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
-    "python -m harness_v2 preflight tests\\fixtures\\valid-task.json --side-effect \"python -m unittest discover tests\"",
-    "python -m harness_v2 gate tests\\fixtures\\valid-task.json --root . --side-effect \"python -m unittest discover tests\"",
-    "python -m harness_v2 doctor --root <repo root>",
-    "python -m harness_v2 mcp < JSON-RPC smoke input",
-    "python -m harness_v2 init --root <temporary project>",
-    "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
-    "npm pack --dry-run",
+    "python -m harness_v2 gate tests\\fixtures\\valid-task.json --root .",
+    "node bin\\harness-v2.js gate tests\\fixtures\\valid-task.json --root .",
 }
-ALLOWED_GIT_COMMANDS = set()
+PERMISSION_COMMANDS = GOAL2_COMMANDS
+ALLOWED_GIT_COMMANDS = {
+    "git add <intended Goal 2 product files>",
+    "git commit",
+    "git push",
+}
 EXPECTED_SCAFFOLD_CREATED = {
     "AGENTS.md",
     "RULES.md",
@@ -864,11 +860,11 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         )
         self.assertEqual(
             commands_under_heading(ROOT / "control" / "approval.md", "## Bound Local Verification Commands"),
-            ALLOWED_COMMANDS,
+            GOAL2_COMMANDS,
         )
         self.assertEqual(
             commands_under_heading(ROOT / "control" / "proof.md", "## Verification Commands"),
-            ALLOWED_COMMANDS,
+            GOAL2_COMMANDS,
         )
         self.assertEqual(
             commands_under_heading(ROOT / "control" / "permission.md", "## Allowed Local Commands"),
@@ -892,8 +888,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertNotIn("--root F:\\Folder\\harness-v2", readme)
         self.assertNotIn("--root F:\\Folder\\harness-v2", approval)
         self.assertNotIn("--root F:\\Folder\\harness-v2", permission)
-        self.assertIn("--root <repo root>", approval)
-        self.assertIn("--root <repo root>", permission)
+        self.assertIn("--root .", approval)
+        self.assertIn("--root .", permission)
         self.assertIn("python -m harness_v2 status --root <repo root>", current_commands)
 
     def test_current_program_surfaces_are_not_stale_third_slice(self):
@@ -1275,6 +1271,316 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertNotIn("proof", payload["gate_state"])
         self.assertNotIn("permission", payload["gate_state"])
         self.assertNotIn("lifecycle_transition", payload["gate_state"])
+
+    def test_goal2_transition_schema_template_and_parser_contract(self):
+        from harness_v2.lifecycle import parse_transition_log
+
+        schema = json.loads((ROOT / "contracts" / "transition.schema.json").read_text(encoding="utf-8"))
+        template = (ROOT / "templates" / "transition-log.md").read_text(encoding="utf-8")
+        transitions = parse_transition_log((ROOT / "tests" / "fixtures" / "valid-transition-log.md").read_text(encoding="utf-8"))
+
+        self.assertEqual(schema["title"], "HARNESS V2 Transition")
+        self.assertEqual(schema["required"], ["timestamp", "from_gate", "to_gate", "reason", "source_refs", "approval_ref", "permission_ref", "proof_ref", "freshness_refs", "stale_check", "actor"])
+        self.assertIn("Lifecycle movement is an evaluated operation, not a log line.", template)
+        self.assertEqual(transitions[-1].from_gate, "plan_approval")
+        self.assertEqual(transitions[-1].to_gate, "development")
+
+    def test_goal2_valid_transition_appends_and_evaluates(self):
+        from harness_v2.lifecycle import TransitionRecord, append_transition_record, evaluate_transition_log, parse_transition_log
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            task_path = write_goal2_task(root, stage="plan_approval")
+            log_path = root / "records" / "transition-log.md"
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+
+            append_transition_record(
+                log_path,
+                TransitionRecord(
+                    timestamp="2026-06-19T00:00:00Z",
+                    from_gate="plan_approval",
+                    to_gate="development",
+                    reason="exact plan approval permits development entry",
+                    source_refs=("CURRENT.md",),
+                    approval_ref="control\\approval.md",
+                    permission_ref="control\\permission.md",
+                    proof_ref="not_required",
+                    freshness_refs=("CURRENT.md",),
+                    stale_check="fresh",
+                    actor="test",
+                ),
+            )
+            result = evaluate_transition_log(task_path, log_path)
+
+            self.assertTrue(result.ok, result.errors)
+            self.assertEqual(result.transition["from_gate"], "plan_approval")
+            self.assertEqual(result.transition["to_gate"], "development")
+            self.assertEqual(len(parse_transition_log(log_path.read_text(encoding="utf-8"))), 1)
+
+    def test_goal2_denies_review_only_transition_into_development(self):
+        from harness_v2.lifecycle import TransitionRecord, evaluate_transition_record
+
+        task = goal2_task_payload(stage="plan_review")
+        result = evaluate_transition_record(
+            task,
+            TransitionRecord(
+                timestamp="2026-06-19T00:00:00Z",
+                from_gate="plan_review",
+                to_gate="development",
+                reason="review pass only",
+                source_refs=("records\\stages\\plan-review.md",),
+                approval_ref="missing",
+                permission_ref="missing",
+                proof_ref="not_required",
+                freshness_refs=("records\\stages\\plan-review.md",),
+                stale_check="fresh",
+                actor="test",
+            ),
+        )
+
+        self.assertFalse(result.ok)
+        self.assertIn("transition route is not allowed: plan_review -> development", result.errors)
+        self.assertIn("development entry requires active approval and permission", result.errors)
+
+    def test_goal2_denies_stale_approval_transition_into_development(self):
+        from harness_v2.lifecycle import TransitionRecord, evaluate_transition_record
+
+        task = goal2_task_payload(stage="plan_approval")
+        result = evaluate_transition_record(
+            task,
+            TransitionRecord(
+                timestamp="2026-06-19T00:00:00Z",
+                from_gate="plan_approval",
+                to_gate="development",
+                reason="approval exists but stale",
+                source_refs=("CURRENT.md",),
+                approval_ref="control\\approval.md",
+                permission_ref="control\\permission.md",
+                proof_ref="not_required",
+                freshness_refs=("CURRENT.md",),
+                stale_check="stale_approval",
+                actor="test",
+            ),
+        )
+
+        self.assertFalse(result.ok)
+        self.assertIn("stale approval denies lifecycle transition", result.errors)
+
+    def test_goal2_denies_stale_permission_proof_and_source(self):
+        from harness_v2.lifecycle import TransitionRecord, evaluate_transition_record
+
+        cases = [
+            ("stale_permission", "plan_approval", "development", "stale permission denies lifecycle transition"),
+            ("stale_proof", "development_review", "improvement", "stale proof denies lifecycle transition"),
+            ("stale_source", "plan_approval", "development", "stale source denies lifecycle transition"),
+        ]
+
+        for stale_check, from_gate, to_gate, expected_error in cases:
+            with self.subTest(stale_check=stale_check):
+                result = evaluate_transition_record(
+                    goal2_task_payload(stage=from_gate),
+                    TransitionRecord(
+                        timestamp="2026-06-19T00:00:00Z",
+                        from_gate=from_gate,
+                        to_gate=to_gate,
+                        reason="stale evidence must fail closed",
+                        source_refs=("CURRENT.md",),
+                        approval_ref="control\\approval.md",
+                        permission_ref="control\\permission.md",
+                        proof_ref="records\\proof.md",
+                        freshness_refs=("CURRENT.md", "records\\proof.md"),
+                        stale_check=stale_check,
+                        actor="test",
+                    ),
+                )
+
+                self.assertFalse(result.ok)
+                self.assertIn(expected_error, result.errors)
+
+    def test_goal2_denies_proof_only_transition_into_improvement(self):
+        from harness_v2.lifecycle import TransitionRecord, evaluate_transition_record
+
+        task = goal2_task_payload(stage="development_review")
+        result = evaluate_transition_record(
+            task,
+            TransitionRecord(
+                timestamp="2026-06-19T00:00:00Z",
+                from_gate="development_review",
+                to_gate="improvement",
+                reason="proof alone must not create approval or permission",
+                source_refs=("records\\stages\\development-review.md",),
+                approval_ref="not_required",
+                permission_ref="not_required",
+                proof_ref="records\\proof.md",
+                freshness_refs=("records\\stages\\development-review.md", "records\\proof.md"),
+                stale_check="fresh",
+                actor="test",
+            ),
+        )
+
+        self.assertFalse(result.ok)
+        self.assertIn("improvement entry requires active approval and permission", result.errors)
+
+    def test_goal2_valid_improvement_requires_active_approval_permission_and_current_proof(self):
+        from harness_v2.lifecycle import TransitionRecord, evaluate_transition_record
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            task_path = write_goal2_task(root, stage="development_review")
+            task = json.loads(task_path.read_text(encoding="utf-8"))
+            result = evaluate_transition_record(
+                task,
+                TransitionRecord(
+                    timestamp="2026-06-19T00:00:00Z",
+                    from_gate="development_review",
+                    to_gate="improvement",
+                    reason="review proof permits improvement intake",
+                    source_refs=("records\\stages\\development-review.md",),
+                    approval_ref="control\\approval.md",
+                    permission_ref="control\\permission.md",
+                    proof_ref="records\\proof.md",
+                    freshness_refs=("records\\stages\\development-review.md", "records\\proof.md"),
+                    stale_check="fresh",
+                    actor="test",
+                ),
+                root=root,
+            )
+
+        self.assertTrue(result.ok, result.errors)
+
+    def test_goal2_denies_absolute_parent_and_missing_transition_refs(self):
+        from harness_v2.lifecycle import TransitionRecord, evaluate_transition_log, evaluate_transition_record
+
+        with tempfile.TemporaryDirectory() as temp_root, tempfile.TemporaryDirectory() as outside_temp:
+            root = Path(temp_root)
+            task_path = write_goal2_task(root, stage="plan_approval")
+            task = json.loads(task_path.read_text(encoding="utf-8"))
+            outside_log = Path(outside_temp) / "outside-transition-log.md"
+            outside_log.write_text("# outside\n", encoding="utf-8")
+            result = evaluate_transition_record(
+                task,
+                TransitionRecord(
+                    timestamp="2026-06-19T00:00:00Z",
+                    from_gate="plan_approval",
+                    to_gate="development",
+                    reason="bad refs",
+                    source_refs=("..\\outside.md",),
+                    approval_ref="C:\\outside\\approval.md",
+                    permission_ref="control\\missing-permission.md",
+                    proof_ref="not_required",
+                    freshness_refs=("missing\\freshness.md",),
+                    stale_check="fresh",
+                    actor="test",
+                ),
+                root=root,
+            )
+            outside_log_result = evaluate_transition_log(task_path, outside_log)
+
+        self.assertFalse(result.ok)
+        self.assertIn("source_refs entry must stay under project root: ..\\outside.md", result.errors)
+        self.assertIn("approval_ref must be project-relative: C:\\outside\\approval.md", result.errors)
+        self.assertIn("permission_ref does not exist: control\\missing-permission.md", result.errors)
+        self.assertIn("freshness_refs entry does not exist: missing\\freshness.md", result.errors)
+        self.assertFalse(outside_log_result.ok)
+        self.assertIn("transition log path must stay under project root", outside_log_result.errors)
+
+    def test_goal2_transition_fixture_and_hash_guard_are_exercised(self):
+        from harness_v2.lifecycle import (
+            TransitionRecord,
+            append_transition_record,
+            evaluate_transition_log,
+            transition_log_sha256,
+        )
+
+        stale_fixture = evaluate_transition_log(
+            VALID_TASK,
+            ROOT / "tests" / "fixtures" / "invalid-transition-stale-approval.md",
+        )
+        self.assertFalse(stale_fixture.ok)
+        self.assertIn("stale approval denies lifecycle transition", stale_fixture.errors)
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            log_path = root / "records" / "transition-log.md"
+            log_path.parent.mkdir(parents=True)
+            append_transition_record(
+                log_path,
+                TransitionRecord(
+                    timestamp="2026-06-19T00:00:00Z",
+                    from_gate="spec",
+                    to_gate="spec_review",
+                    reason="initial append",
+                    source_refs=("records\\stages\\spec.md",),
+                    approval_ref="not_required",
+                    permission_ref="not_required",
+                    proof_ref="not_required",
+                    freshness_refs=("records\\stages\\spec.md",),
+                    stale_check="fresh",
+                    actor="test",
+                ),
+            )
+            previous_hash = transition_log_sha256(log_path)
+            log_path.write_text(log_path.read_text(encoding="utf-8").replace("initial append", "tampered"), encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "transition ledger hash mismatch"):
+                append_transition_record(
+                    log_path,
+                    TransitionRecord(
+                        timestamp="2026-06-19T00:01:00Z",
+                        from_gate="spec_review",
+                        to_gate="plan",
+                        reason="append after tamper",
+                        source_refs=("records\\stages\\spec-review.md",),
+                        approval_ref="not_required",
+                        permission_ref="not_required",
+                        proof_ref="not_required",
+                        freshness_refs=("records\\stages\\spec-review.md",),
+                        stale_check="fresh",
+                        actor="test",
+                    ),
+                    previous_ledger_hash=previous_hash,
+                )
+
+    def test_goal2_denies_legacy_or_same_task_improvement_to_spec_transitions(self):
+        from harness_v2.lifecycle import TransitionRecord, evaluate_transition_record
+
+        legacy = evaluate_transition_record(
+            goal2_task_payload(stage="plan_approval"),
+            TransitionRecord(
+                timestamp="2026-06-19T00:00:00Z",
+                from_gate="approval",
+                to_gate="development",
+                reason="legacy transition",
+                source_refs=("CURRENT.md",),
+                approval_ref="control\\approval.md",
+                permission_ref="control\\permission.md",
+                proof_ref="not_required",
+                freshness_refs=("CURRENT.md",),
+                stale_check="fresh",
+                actor="test",
+            ),
+        )
+        same_task_loop = evaluate_transition_record(
+            goal2_task_payload(stage="improvement"),
+            TransitionRecord(
+                timestamp="2026-06-19T00:00:00Z",
+                from_gate="improvement",
+                to_gate="spec",
+                reason="same task loop",
+                source_refs=("records\\stages\\improvement.md",),
+                approval_ref="not_required",
+                permission_ref="not_required",
+                proof_ref="not_required",
+                freshness_refs=("records\\stages\\improvement.md",),
+                stale_check="fresh",
+                actor="test",
+            ),
+        )
+
+        self.assertFalse(legacy.ok)
+        self.assertIn("transition uses legacy stage alias 'approval'; use 'plan_approval'", legacy.errors)
+        self.assertFalse(same_task_loop.ok)
+        self.assertIn("same-task improvement-to-spec transition is denied", same_task_loop.errors)
 
     def test_verifier_accepts_all_known_workflow_stages(self):
         from harness_v2.core import validate_task
@@ -1831,6 +2137,58 @@ def write_goal1_project(
         ),
         encoding="utf-8",
     )
+    return task_path
+
+
+def goal2_task_payload(stage: str) -> dict:
+    payload = valid_task_payload()
+    payload["task_id"] = f"harness-v2-goal2-{stage}"
+    payload["title"] = f"Validate Goal 2 transition from {stage}"
+    payload["workflow_stage"] = stage
+    payload["approval"]["packet"] = f"Approve exact Goal 2 {stage} transition test"
+    payload["approval"]["approved_paths"] = {
+        "plan_approval": ["control\\approval.md", "control\\permission.md", "records\\stages\\plan-approval.md"],
+        "plan_review": ["records\\stages\\plan-review.md"],
+        "improvement": ["records\\stages\\improvement.md", "records\\handoff.md"],
+    }.get(stage, ["control\\approval.md", "control\\permission.md", "records\\stages\\development-review.md", "records\\proof.md"])
+    payload["permission"]["allowed_side_effects"] = {
+        "plan_approval": ["local readback/search only"],
+        "plan_review": ["local readback/search only"],
+        "improvement": ["local file writes to stage record files"],
+    }.get(stage, ["local readback/search only"])
+    payload["proof"]["obligations"] = [f"{stage} transition evaluation checked"]
+    return payload
+
+
+def write_goal2_task(root: Path, *, stage: str) -> Path:
+    (root / "contracts").mkdir(parents=True)
+    (root / "control").mkdir(parents=True)
+    (root / "records" / "stages").mkdir(parents=True)
+    (root / "CURRENT.md").write_text(
+        "\n".join(
+            [
+                "workflow: `remaining_completion_program`",
+                "state: `workflow_realignment_review`",
+                "substate: `goal2-test`",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    for relative_path in (
+        "control\\approval.md",
+        "control\\permission.md",
+        "records\\proof.md",
+        "records\\stages\\spec.md",
+        "records\\stages\\spec-review.md",
+        "records\\stages\\plan-review.md",
+        "records\\stages\\plan-approval.md",
+        "records\\stages\\development-review.md",
+    ):
+        path = root / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"# {relative_path}\n", encoding="utf-8")
+    task_path = root / "contracts" / "harness-task.json"
+    task_path.write_text(json.dumps(goal2_task_payload(stage), indent=2, sort_keys=True), encoding="utf-8")
     return task_path
 
 

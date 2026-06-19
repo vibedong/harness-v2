@@ -23,6 +23,7 @@ This file maps operation modes to suggested local routes. Routing is guidance, n
 | development review | source, approval, permission, proof, lifecycle, route, artifact, safety surfaces | findings are not proof |
 | proof check | `control\proof.md` plus readback/search/listing | artifact checks must match obligation |
 | current gate read-model | task contract `workflow_stage` plus optional `records\gate-state.json` | gate-state is generated and hash-bound; it is not approval, permission, proof, lifecycle transition, or release readiness |
+| lifecycle transition evaluation | `contracts\transition.schema.json`, `templates\transition-log.md`, and `harness_v2.lifecycle` | transition records are evidence; lifecycle movement is evaluated, not a log line |
 | side-effect preflight | `harness_v2` CLI with `preflight <task> --side-effect ...` or `--path ... --mode write` | preflight checks a proposed action; it does not execute or automatically block shell/editor actions |
 | hook-equivalent gate | `harness_v2` CLI with `gate <task> --root .`, or MCP tool `harness_gate` | combines status, verify, and optional preflight; no direct Codex app hook surface was found and this does not automatically block shell/editor actions |
 | executable local MVP | `harness_v2` CLI with `status`, `verify`, and `doctor` | only approved local commands and no external dependency |

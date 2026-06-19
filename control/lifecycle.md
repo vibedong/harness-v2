@@ -1,6 +1,6 @@
 # HARNESS V2 Lifecycle Control
 
-status: package_github_surface / workflow_stage_realignment / lifecycle_control
+status: package_github_surface / transition_ledger_lifecycle_guard / lifecycle_control
 
 workflow: `remaining_completion_program`
 
@@ -22,6 +22,8 @@ Known local states:
 - `npm_wrapper_review`
 - `workflow_realignment_authoring`
 - `workflow_realignment_review`
+- `transition_ledger_authoring`
+- `transition_ledger_review`
 - `public_release_candidate`
 - `public_release_published`
 - `package_candidate_ready`
@@ -34,13 +36,13 @@ Known local states:
 The current local lifecycle entry is:
 
 ```text
-public_release_published -> workflow_realignment_review
+workflow_realignment_review -> transition_ledger_review
 ```
 
 Active slice:
 
 ```text
-canonical_8_stage_realign / unreleased_local / release_closed
+transition_ledger_lifecycle_guard / unreleased_local / release_closed
 ```
 
 Scope:
@@ -52,24 +54,45 @@ Scope:
 - artifact, routing, safety/regression, and release transaction remain control surfaces;
 - generated downstream project scaffold now includes task-local stage records under `records\`;
 - generated `records\gate-state.json`, when present, is a validated read-model derived from a source task `workflow_stage` and source hash;
+- `contracts\transition.schema.json`, `templates\transition-log.md`, and `harness_v2\lifecycle.py` define the Goal 2 transition ledger surface;
+- transition log records are append-only evidence and do not move lifecycle state by themselves;
+- appending a transition record may be guarded by the previous transition ledger hash so earlier block edits or deletions fail before append;
+- lifecycle movement is an evaluated operation, not a log line;
+- transition evaluation checks route edge, task source gate, project-relative source refs, approval reference, permission reference, proof reference, freshness refs, and stale check before accepting movement;
+- legacy stage aliases and same-task `improvement -> spec` movement fail closed;
 - the hook-equivalent gate remains an explicit status/verify/preflight command, not a real shell/editor hook;
 - local verification commands are named in `control\permission.md`;
-- no npm publish, Python package registry publish, GitHub release or tag mutation, git push, dependency install, secret access, external mutation, or destructive operation is part of this lifecycle entry.
+- no npm publish, Python package registry publish, GitHub release or tag mutation, dependency install, secret access, external mutation outside the approved Goal 2 git push, or destructive operation is part of this lifecycle entry.
 
-This entry is not a public release, repeat npm publish, Python package registry publish, future release authority, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, MCP client configuration, ApprovalDecision, PermissionDecision, ProofReceipt, or LifecycleTransition.
+This entry is not a public release, repeat npm publish, Python package registry publish, future release authority, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, MCP client configuration, ApprovalDecision, PermissionDecision, ProofReceipt, or an automatic LifecycleTransition.
 
 ## Transition Requirements
 
-A later state movement must name:
+A lifecycle state movement must be evaluated from a transition record. Lifecycle movement is an evaluated operation, not a log line.
 
-- source state
-- target state
-- approval basis
-- permission scope
-- proof obligation or proof result dependency
-- target surface
-- stale triggers
-- rollback or backtrack target
+A transition record must name:
+
+- `from_gate`
+- `to_gate`
+- `reason`
+- `source_refs`
+- `approval_ref`
+- `permission_ref`
+- `proof_ref`
+- `freshness_refs`
+- `stale_check`
+- `actor`
+
+The evaluator must reject:
+
+- unknown or legacy gate names;
+- route edges outside the canonical same-task route graph;
+- `from_gate` that does not match the task contract `workflow_stage`;
+- missing, absolute, escaping, or non-existent source or freshness references;
+- stale approval, permission, proof, or source evidence;
+- `plan_approval -> development` without active approval and permission references;
+- `development_review -> improvement` without active approval, active permission, and current proof evidence;
+- same-task `improvement -> spec`.
 
 ## Backtrack Rule
 

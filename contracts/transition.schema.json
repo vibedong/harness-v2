@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "harness-v2://contracts/transition.schema.json",
+  "title": "HARNESS V2 Transition",
+  "type": "object",
+  "required": ["timestamp", "from_gate", "to_gate", "reason", "source_refs", "approval_ref", "permission_ref", "proof_ref", "freshness_refs", "stale_check", "actor"],
+  "properties": {
+    "timestamp": { "type": "string", "minLength": 1 },
+    "from_gate": { "type": "string", "minLength": 1 },
+    "to_gate": { "type": "string", "minLength": 1 },
+    "reason": { "type": "string", "minLength": 1 },
+    "source_refs": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "approval_ref": { "type": "string", "minLength": 1 },
+    "permission_ref": { "type": "string", "minLength": 1 },
+    "proof_ref": { "type": "string", "minLength": 1 },
+    "freshness_refs": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "stale_check": { "type": "string", "minLength": 1 },
+    "actor": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}
