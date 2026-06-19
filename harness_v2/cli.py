@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from .core import initialize_project, read_current_status
+from .decisions import evaluate_decision_file
 from .doctor import inspect_project
 from .gate import evaluate_gate
 from .preflight import evaluate_preflight
@@ -40,6 +41,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     doctor = subparsers.add_parser("doctor", help="Report read-only next action and local project shape.")
     doctor.add_argument("--root", default=".", help="HARNESS V2 product root. Defaults to current directory.")
+
+    decision = subparsers.add_parser("decision", help="Validate an ApprovalDecision, PermissionDecision, or ProofReceipt record.")
+    decision.add_argument("record", help="Path to a decision or receipt JSON file.")
+    decision.add_argument("--task", help="Optional task JSON file to bind the record against.")
+    decision.add_argument("--root", default=".", help="HARNESS V2 product root. Defaults to current directory.")
 
     subparsers.add_parser("mcp", help="Run the HARNESS V2 MCP stdio adapter.")
 
@@ -97,6 +103,11 @@ def main(argv: list[str] | None = None) -> int:
         payload = inspect_project(Path(args.root))
         print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
         return 0
+
+    if args.command == "decision":
+        result = evaluate_decision_file(Path(args.record), task_path=Path(args.task) if args.task else None, root=Path(args.root))
+        print(json.dumps(result.to_json(), ensure_ascii=False, sort_keys=True))
+        return 0 if result.ok else 1
 
     if args.command == "mcp":
         from .mcp import run_stdio_server

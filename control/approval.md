@@ -93,4 +93,14 @@ An action is inside approval scope only when it matches the work unit, target su
 
 If any part is wider, missing, or stale, approval does not fit and the workflow fails closed.
 
+## Structured ApprovalDecision Records
+
+Goal 5 adds executable ApprovalDecision records.
+
+An ApprovalDecision must bind an approval request to an exact user response, exact edit paths, commands, side effects, git scope, release scope, exclusions, and current source refs.
+
+Broad chat responses, review passes, metadata, package state, test success, and agent claims are not ApprovalDecision records.
+
+An ApprovalDecision can bind approval scope, but it cannot grant permission, produce proof, move lifecycle state, or expand beyond the active task approval ceiling.
+
 This file does not grant permission, produce proof, move lifecycle state, grant route permission, create regression pass, execute improvement, prepare release, or claim automatic enforcement completion.

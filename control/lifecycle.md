@@ -72,6 +72,8 @@ Scope:
 
 This entry is not a public release, repeat npm publish, Python package registry publish, future release authority, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, MCP client configuration, ApprovalDecision, PermissionDecision, ProofReceipt, or an automatic LifecycleTransition.
 
+Goal 5 decision/receipt records are evidence records only. ApprovalDecision, PermissionDecision, and ProofReceipt can satisfy inputs to later lifecycle evaluation, but none of them can declare or perform lifecycle movement by itself.
+
 ## Transition Requirements
 
 A lifecycle state movement must be evaluated from a transition record. Lifecycle movement is an evaluated operation, not a log line.

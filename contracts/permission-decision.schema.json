@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "harness-v2://contracts/permission-decision.schema.json",
+  "title": "HARNESS V2 PermissionDecision",
+  "type": "object",
+  "required": [
+    "kind",
+    "decision_id",
+    "task_id",
+    "approval_decision_ref",
+    "side_effect_class",
+    "requested_side_effects",
+    "approved_side_effects",
+    "denied_side_effects",
+    "approval_ceiling",
+    "preflight",
+    "source_refs"
+  ],
+  "properties": {
+    "kind": { "const": "PermissionDecision" },
+    "decision_id": { "type": "string", "minLength": 1 },
+    "task_id": { "type": "string", "minLength": 1 },
+    "approval_decision_ref": { "type": "string", "minLength": 1 },
+    "side_effect_class": { "type": "string", "minLength": 1 },
+    "requested_side_effects": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "approved_side_effects": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "denied_side_effects": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "approval_ceiling": {
+      "type": "object",
+      "required": ["side_effects", "exclusions"],
+      "properties": {
+        "side_effects": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "exclusions": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": true
+    },
+    "preflight": {
+      "type": "object",
+      "required": ["ok"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "task_id": { "type": "string", "minLength": 1 },
+        "command": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "lifecycle_transition": { "type": "boolean" }
+  },
+  "additionalProperties": true
+}

@@ -49,4 +49,14 @@ The previous `harness-v2@0.1.7` / `v0.1.7` release evidence remains closed histo
 
 Proof evidence becomes stale when target files, source hashes, approval scope, permission scope, proof obligation, lifecycle state, transition schema, transition log format, freshness map, artifact registry, route guidance, npm target, release boundary, generated scaffold behavior, workflow stage enum, or automatic-enforcement wording changes.
 
+## Structured ProofReceipt Records
+
+Goal 5 adds executable ProofReceipt records.
+
+A ProofReceipt must bind a proof obligation to a verifier command or readback method, verifier result, current source hashes, and proof predicates. A test pass, review pass, metadata value, or agent claim is not proof unless it is captured in a current ProofReceipt.
+
+When a task declares that a proof receipt is required, verification fails closed if no ProofReceipt is supplied or if any referenced source hash is stale.
+
+ProofReceipt records cannot grant approval, grant permission, move lifecycle state, or create release readiness.
+
 This file does not grant approval, permission, lifecycle state, route permission, regression pass, improvement execution, package registry publish state, release state, final completion, or future-slice authority.

@@ -13,6 +13,10 @@ VALID_TASK = ROOT / "tests" / "fixtures" / "valid-task.json"
 INVALID_TASK = ROOT / "tests" / "fixtures" / "invalid-missing-approval.json"
 INVALID_GATE_MISMATCH = ROOT / "tests" / "fixtures" / "invalid-gate-mismatch.json"
 INVALID_RECORD_STRENGTH = ROOT / "tests" / "fixtures" / "invalid-record-strength.json"
+VALID_APPROVAL_DECISION = ROOT / "tests" / "fixtures" / "valid-approval-decision.json"
+INVALID_BROAD_APPROVAL = ROOT / "tests" / "fixtures" / "invalid-broad-approval.json"
+VALID_PROOF_RECEIPT = ROOT / "tests" / "fixtures" / "valid-proof-receipt.json"
+INVALID_STALE_PROOF_RECEIPT = ROOT / "tests" / "fixtures" / "invalid-stale-proof-receipt.json"
 APPROVED_SOURCE_FILES = {
     ".gitattributes",
     ".gitignore",
@@ -43,6 +47,9 @@ APPROVED_SOURCE_FILES = {
     "contracts/gate-state.schema.json",
     "contracts/transition.schema.json",
     "contracts/freshness.schema.json",
+    "contracts/approval-decision.schema.json",
+    "contracts/permission-decision.schema.json",
+    "contracts/proof-receipt.schema.json",
     "contracts/task.schema.json",
     "contracts/approval.schema.json",
     "contracts/permission.schema.json",
@@ -53,6 +60,9 @@ APPROVED_SOURCE_FILES = {
     "templates/gate-state.json",
     "templates/transition-log.md",
     "templates/freshness-map.json",
+    "templates/approval-decision.json",
+    "templates/permission-decision.json",
+    "templates/proof-receipt.json",
     "templates/gate-manifest.md",
     "templates/approval-request.md",
     "templates/proof-report.md",
@@ -67,6 +77,7 @@ APPROVED_SOURCE_FILES = {
     "harness_v2/lifecycle.py",
     "harness_v2/freshness.py",
     "harness_v2/modes.py",
+    "harness_v2/decisions.py",
     "harness_v2/mcp.py",
     "tests/test_harness_v2.py",
     "tests/fixtures/valid-task.json",
@@ -77,6 +88,10 @@ APPROVED_SOURCE_FILES = {
     "tests/fixtures/invalid-stale-approval.json",
     "tests/fixtures/invalid-stale-proof.json",
     "tests/fixtures/invalid-record-strength.json",
+    "tests/fixtures/valid-approval-decision.json",
+    "tests/fixtures/invalid-broad-approval.json",
+    "tests/fixtures/valid-proof-receipt.json",
+    "tests/fixtures/invalid-stale-proof-receipt.json",
 }
 ALLOWED_COMMANDS = {
     "python -m compileall harness_v2",
@@ -752,6 +767,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                     {"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "harness_preflight", "arguments": {"task": "tests\\fixtures\\valid-task.json", "side_effect": "python -m unittest discover tests"}}},
                     {"jsonrpc": "2.0", "id": 6, "method": "tools/call", "params": {"name": "harness_gate", "arguments": {"task": "tests\\fixtures\\valid-task.json", "root": ".", "side_effects": ["python -m unittest discover tests"]}}},
                     {"jsonrpc": "2.0", "id": 7, "method": "tools/call", "params": {"name": "harness_init", "arguments": {"root": str(root)}}},
+                    {"jsonrpc": "2.0", "id": 8, "method": "tools/call", "params": {"name": "harness_decision", "arguments": {"record": "tests\\fixtures\\valid-proof-receipt.json", "task": "tests\\fixtures\\valid-task.json", "root": "."}}},
                 ),
                 text=True,
                 capture_output=True,
@@ -761,17 +777,18 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertEqual(completed.returncode, 0, completed.stderr)
             self.assertEqual(completed.stderr, "")
             responses = [json.loads(line) for line in completed.stdout.splitlines()]
-            self.assertEqual([response["id"] for response in responses], [1, 2, 3, 4, 5, 6, 7])
+            self.assertEqual([response["id"] for response in responses], [1, 2, 3, 4, 5, 6, 7, 8])
             self.assertEqual(responses[0]["result"]["capabilities"], {"tools": {"listChanged": False}})
 
             tool_names = {tool["name"] for tool in responses[1]["result"]["tools"]}
-            self.assertEqual(tool_names, {"harness_status", "harness_verify", "harness_preflight", "harness_gate", "harness_init", "harness_apply"})
+            self.assertEqual(tool_names, {"harness_status", "harness_verify", "harness_preflight", "harness_gate", "harness_decision", "harness_init", "harness_apply"})
 
             status_payload = responses[2]["result"]["structuredContent"]
             verify_payload = responses[3]["result"]["structuredContent"]
             preflight_payload = responses[4]["result"]["structuredContent"]
             gate_payload = responses[5]["result"]["structuredContent"]
             init_payload = responses[6]["result"]["structuredContent"]
+            decision_payload = responses[7]["result"]["structuredContent"]
 
             self.assertEqual(status_payload["status"]["workflow"], "remaining_completion_program")
             self.assertTrue(verify_payload["ok"])
@@ -788,6 +805,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertTrue(gate_payload["ok"])
             self.assertTrue(gate_payload["hook_equivalent"])
             assert_fresh_scaffold_shape(self, root, init_payload, root)
+            self.assertTrue(decision_payload["ok"], decision_payload["errors"])
+            self.assertEqual(decision_payload["kind"], "ProofReceipt")
 
     def test_node_wrapper_delegates_mcp_to_python_cli(self):
         completed = subprocess.run(
@@ -1358,6 +1377,163 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("record_density.generated_file_count cannot exceed approval.approved_paths count", "\n".join(generated_result.errors))
         self.assertIn("record_density.field_presence must be at least effective_record_strength", "\n".join(field_presence_result.errors))
         self.assertIn("capability_request must be a non-empty string when present", "\n".join(capability_result.errors))
+
+    def test_goal5_decision_schema_template_and_fixture_surfaces_exist(self):
+        for stem in ("approval-decision", "permission-decision", "proof-receipt"):
+            schema = json.loads((ROOT / "contracts" / f"{stem}.schema.json").read_text(encoding="utf-8"))
+            template = json.loads((ROOT / "templates" / f"{stem}.json").read_text(encoding="utf-8"))
+
+            self.assertIn("HARNESS V2", schema["title"])
+            self.assertIn("kind", schema["required"])
+            self.assertIn("source_refs", schema["properties"])
+            self.assertIn("kind", template)
+            self.assertFalse(template["lifecycle_transition"])
+
+        self.assertEqual(json.loads(VALID_APPROVAL_DECISION.read_text(encoding="utf-8"))["kind"], "ApprovalDecision")
+        self.assertEqual(json.loads(VALID_PROOF_RECEIPT.read_text(encoding="utf-8"))["kind"], "ProofReceipt")
+
+    def test_goal5_approval_decision_binds_user_response_and_scope(self):
+        from harness_v2.decisions import evaluate_decision, evaluate_decision_file
+
+        valid = evaluate_decision_file(VALID_APPROVAL_DECISION, task_path=VALID_TASK, root=ROOT)
+        broad = evaluate_decision_file(INVALID_BROAD_APPROVAL, task_path=VALID_TASK, root=ROOT)
+        no_user_response = json.loads(VALID_APPROVAL_DECISION.read_text(encoding="utf-8"))
+        no_user_response.pop("user_response")
+        no_user_response_result = evaluate_decision(no_user_response, task=valid_task_payload(), root=ROOT)
+        broad_with_metadata = json.loads(VALID_APPROVAL_DECISION.read_text(encoding="utf-8"))
+        broad_with_metadata["user_response"]["text"] = "Approve broad unspecified work."
+        broad_with_metadata["user_response"]["sha256"] = "76aa8eaeee04042890cec8789a8a945e62e42d71125bee81f6b9fd83d08a665b"
+        broad_with_metadata_result = evaluate_decision(broad_with_metadata, task=valid_task_payload(), root=ROOT)
+        git_scope_widening = json.loads(VALID_APPROVAL_DECISION.read_text(encoding="utf-8"))
+        git_scope_widening["git_scope"] = "git push"
+        git_scope_widening_result = evaluate_decision(git_scope_widening, task=valid_task_payload(), root=ROOT)
+
+        self.assertTrue(valid.ok, valid.errors)
+        self.assertEqual(valid.kind, "ApprovalDecision")
+        self.assertFalse(broad.ok)
+        self.assertIn("ApprovalDecision requires exact edit_paths", "\n".join(broad.errors))
+        self.assertFalse(no_user_response_result.ok)
+        self.assertIn("ApprovalDecision requires user_response binding", "\n".join(no_user_response_result.errors))
+        self.assertFalse(broad_with_metadata_result.ok)
+        self.assertIn("ApprovalDecision user_response is too broad to bind approval", "\n".join(broad_with_metadata_result.errors))
+        self.assertFalse(git_scope_widening_result.ok)
+        self.assertIn("ApprovalDecision git_scope exceeds task permission ceiling: git push", "\n".join(git_scope_widening_result.errors))
+
+    def test_goal5_permission_decision_cannot_exceed_approval_ceiling(self):
+        from harness_v2.decisions import evaluate_decision
+
+        task = valid_task_payload()
+        permission_decision = {
+            "kind": "PermissionDecision",
+            "decision_id": "permission-decision-exceeds-approval",
+            "task_id": task["task_id"],
+            "approval_decision_ref": "tests\\fixtures\\valid-approval-decision.json",
+            "side_effect_class": "git",
+            "requested_side_effects": ["git push"],
+            "approved_side_effects": ["git push"],
+            "denied_side_effects": [],
+            "approval_ceiling": {
+                "side_effects": ["local file writes under F:\\Folder\\harness-v2"],
+                "exclusions": ["npm publish", "release execution"],
+            },
+            "preflight": {
+                "ok": True,
+                "task_id": task["task_id"],
+                "command": "harness-v2 preflight tests\\fixtures\\valid-task.json --side-effect \"git push\"",
+            },
+            "source_refs": [
+                {
+                    "path": "CURRENT.md",
+                    "sha256": "046229e6f7c8009afec331482dd67c4e265fc9e34bf3c114f5a3bbc4a5bbae95",
+                }
+            ],
+            "lifecycle_transition": False,
+        }
+
+        result = evaluate_decision(permission_decision, task=task, root=ROOT)
+
+        self.assertFalse(result.ok)
+        self.assertIn("PermissionDecision approved side effect exceeds approval ceiling: git push", "\n".join(result.errors))
+
+        missing_ref = dict(permission_decision)
+        missing_ref["approval_decision_ref"] = "tests\\fixtures\\missing-approval-decision.json"
+        missing_ref_result = evaluate_decision(missing_ref, task=task, root=ROOT)
+
+        self.assertFalse(missing_ref_result.ok)
+        self.assertIn("PermissionDecision approval_decision_ref does not exist", "\n".join(missing_ref_result.errors))
+
+    def test_goal5_proof_receipt_binds_obligation_and_current_source(self):
+        from harness_v2.decisions import evaluate_decision, evaluate_decision_file
+
+        valid = evaluate_decision_file(VALID_PROOF_RECEIPT, task_path=VALID_TASK, root=ROOT)
+        stale = evaluate_decision_file(INVALID_STALE_PROOF_RECEIPT, task_path=VALID_TASK, root=ROOT)
+        missing_source = json.loads(VALID_PROOF_RECEIPT.read_text(encoding="utf-8"))
+        missing_source.pop("source_refs")
+        transition_claim = json.loads(VALID_PROOF_RECEIPT.read_text(encoding="utf-8"))
+        transition_claim["lifecycle_transition"] = True
+
+        missing_source_result = evaluate_decision(missing_source, task=valid_task_payload(), root=ROOT)
+        transition_result = evaluate_decision(transition_claim, task=valid_task_payload(), root=ROOT)
+
+        self.assertTrue(valid.ok, valid.errors)
+        self.assertEqual(valid.kind, "ProofReceipt")
+        self.assertFalse(stale.ok)
+        self.assertEqual(stale.stale[0]["path"], "CURRENT.md")
+        self.assertFalse(missing_source_result.ok)
+        self.assertIn("ProofReceipt requires current source_refs", "\n".join(missing_source_result.errors))
+        self.assertFalse(transition_result.ok)
+        self.assertIn("decision/receipt records cannot declare lifecycle transition", "\n".join(transition_result.errors))
+
+    def test_goal5_required_proof_receipt_is_not_replaced_by_test_pass(self):
+        from harness_v2.core import validate_task
+        from harness_v2.decisions import evaluate_proof_receipt_requirement
+
+        task = valid_task_payload()
+        task["proof"]["receipt_required"] = True
+        task["proof"]["receipts"] = []
+
+        missing = validate_task(task, root=ROOT)
+
+        task["proof"]["receipts"] = ["tests\\fixtures\\valid-proof-receipt.json"]
+        present = validate_task(task, root=ROOT)
+        requirement = evaluate_proof_receipt_requirement(
+            task,
+            [json.loads(VALID_PROOF_RECEIPT.read_text(encoding="utf-8"))],
+            root=ROOT,
+        )
+        task["proof"]["receipts"] = ["tests\\fixtures\\valid-approval-decision.json"]
+        substituted = validate_task(task, root=ROOT)
+
+        self.assertFalse(missing.ok)
+        self.assertIn("proof receipt required but proof.receipts is empty", "\n".join(missing.errors))
+        self.assertTrue(present.ok, present.errors)
+        self.assertTrue(requirement.ok, requirement.errors)
+        self.assertFalse(substituted.ok)
+        self.assertIn("expected ProofReceipt, got ApprovalDecision", "\n".join(substituted.errors))
+
+    def test_goal5_cli_decision_command_reports_decision_result(self):
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "harness_v2",
+                "decision",
+                str(VALID_PROOF_RECEIPT),
+                "--task",
+                str(VALID_TASK),
+                "--root",
+                str(ROOT),
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertTrue(payload["ok"], payload["errors"])
+        self.assertEqual(payload["kind"], "ProofReceipt")
 
     def test_goal1_gate_state_schema_and_template_are_product_surfaces(self):
         schema = json.loads((ROOT / "contracts" / "gate-state.schema.json").read_text(encoding="utf-8"))

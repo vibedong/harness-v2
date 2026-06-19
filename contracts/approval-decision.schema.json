@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "harness-v2://contracts/approval-decision.schema.json",
+  "title": "HARNESS V2 ApprovalDecision",
+  "type": "object",
+  "required": [
+    "kind",
+    "decision_id",
+    "task_id",
+    "approval_request_ref",
+    "user_response",
+    "edit_paths",
+    "commands",
+    "side_effects",
+    "git_scope",
+    "release_scope",
+    "exclusions",
+    "source_refs"
+  ],
+  "properties": {
+    "kind": { "const": "ApprovalDecision" },
+    "decision_id": { "type": "string", "minLength": 1 },
+    "task_id": { "type": "string", "minLength": 1 },
+    "approval_request_ref": { "type": "string", "minLength": 1 },
+    "user_response": {
+      "type": "object",
+      "required": ["text", "sha256"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      },
+      "additionalProperties": true
+    },
+    "edit_paths": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "commands": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "side_effects": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "git_scope": { "type": "string", "minLength": 1 },
+    "release_scope": { "type": "string", "minLength": 1 },
+    "exclusions": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "lifecycle_transition": { "type": "boolean" }
+  },
+  "additionalProperties": true
+}

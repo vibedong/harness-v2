@@ -1,0 +1,24 @@
+{
+  "kind": "ProofReceipt",
+  "receipt_id": "<proof-receipt-id>",
+  "task_id": "<task-id>",
+  "proof_obligation": "<proof obligation>",
+  "proof_obligation_sha256": "<sha256 of proof_obligation>",
+  "verifier": {
+    "method": "<command|readback>",
+    "command": "<command if method is command>",
+    "command_sha256": "<sha256 of command if method is command>",
+    "readback": "<readback description if method is readback>",
+    "ok": false,
+    "exit_code": 1,
+    "output_sha256": "<sha256 of verifier output summary>"
+  },
+  "source_refs": [
+    {
+      "path": "<source path>",
+      "sha256": "<current source sha256>",
+      "affects": ["proof predicate"]
+    }
+  ],
+  "lifecycle_transition": false
+}

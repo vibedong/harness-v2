@@ -67,4 +67,12 @@ Any mutation outside `F:\Folder\harness-v2` fails closed except generated TEMP v
 
 Permission cannot widen approval scope and cannot produce proof, lifecycle state, route permission, regression pass, improvement execution, package registry publish readiness, release readiness, real hook installation, or automatic enforcement completion.
 
+## Structured PermissionDecision Records
+
+Goal 5 adds executable PermissionDecision records.
+
+A PermissionDecision must reference active approval when side effects exist, classify the side-effect class, stay within the approval ceiling, and include preflight status for file, git, network, release, package, secret, or destructive side effects.
+
+PermissionDecision records cannot approve side effects excluded by approval, cannot exceed the approval ceiling, cannot produce proof, and cannot move lifecycle state.
+
 This permission surface allows git push only for the verified Goal 3 commit. It denies npm publish, Git tag creation, GitHub release creation, Python package registry publish, dependency installation from network, secret access, external network mutation outside the approved Goal 3 git push, remote MCP hosting, MCP client configuration mutation, Codex app configuration mutation, real shell/editor hook installation, and destructive action outside generated verification artifacts for the current stale/backtrack slice.

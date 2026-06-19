@@ -333,6 +333,7 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None, task_pat
     _validate_current_context(data, root_path, errors)
     _validate_goal0_compatibility_fields(data, compatibility_mode, errors)
     _validate_workflow_stage(data, errors)
+    _validate_proof_receipt_requirement(data, root_path, errors)
 
     return ValidationResult(
         ok=not errors,
@@ -670,6 +671,35 @@ def _validate_workflow_stage(data: dict[str, Any], errors: list[str]) -> None:
         _reject_product_implementation_paths(stage, approved_paths, errors)
         _reject_non_record_side_effects(stage, allowed_side_effects, errors)
         _reject_release_execution_side_effects(stage, allowed_side_effects, errors)
+
+
+def _validate_proof_receipt_requirement(data: dict[str, Any], root: Path | None, errors: list[str]) -> None:
+    proof = data.get("proof") if isinstance(data.get("proof"), dict) else {}
+    if proof.get("receipt_required") is not True:
+        return
+    receipt_refs = _string_list(proof.get("receipts"))
+    if not receipt_refs:
+        errors.append("proof receipt required but proof.receipts is empty")
+        return
+    if root is None:
+        errors.append("proof receipt validation requires project root")
+        return
+
+    from .decisions import evaluate_decision_file
+
+    for receipt_ref in receipt_refs:
+        receipt_path = _resolve_project_relative_path(root, receipt_ref, "proof.receipts", errors)
+        if receipt_path is None:
+            continue
+        if not receipt_path.exists():
+            errors.append(f"proof receipt does not exist: {receipt_ref}")
+            continue
+        result = evaluate_decision_file(receipt_path, task=data, root=root)
+        if result.kind != "ProofReceipt":
+            errors.append(f"proof receipt {receipt_ref}: expected ProofReceipt, got {result.kind or '<missing>'}")
+        if not result.ok:
+            errors.extend(f"proof receipt {receipt_ref}: {error}" for error in result.errors)
+            errors.extend(f"proof receipt {receipt_ref}: stale source ref {item.get('path')}" for item in result.stale)
 
 
 def _reject_broad_approved_paths(paths: list[str], errors: list[str]) -> None:

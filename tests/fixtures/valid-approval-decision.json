@@ -1,0 +1,40 @@
+{
+  "kind": "ApprovalDecision",
+  "decision_id": "approval-decision-valid-goal5-fixture",
+  "task_id": "harness-v2-valid-task",
+  "approval_request_ref": "tests\\fixtures\\valid-task.json#approval.packet",
+  "user_response": {
+    "text": "Approve exact HARNESS V2 decision evaluator fixture scope.",
+    "sha256": "9a2d6458ebea4c4c218aaef91ff2b416473235144ec0d8a9cbf2b7cd9ae210c8"
+  },
+  "edit_paths": [
+    "harness_v2\\core.py",
+    "tests\\test_harness_v2.py"
+  ],
+  "commands": [
+    "python -m compileall harness_v2"
+  ],
+  "side_effects": [
+    "local file writes under F:\\Folder\\harness-v2"
+  ],
+  "git_scope": "none",
+  "release_scope": "none",
+  "exclusions": [
+    "npm publish",
+    "Python package registry publish",
+    "GitHub release creation",
+    "release tag creation",
+    "release execution",
+    "dependency install from network",
+    "secret read",
+    "external network mutation",
+    "destructive operation outside generated TEMP verification artifacts"
+  ],
+  "source_refs": [
+    {
+      "path": "CURRENT.md",
+      "sha256": "046229e6f7c8009afec331482dd67c4e265fc9e34bf3c114f5a3bbc4a5bbae95"
+    }
+  ],
+  "lifecycle_transition": false
+}
