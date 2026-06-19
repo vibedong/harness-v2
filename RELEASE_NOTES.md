@@ -1,4 +1,14 @@
-# HARNESS V2 0.1.7 Release Notes
+# HARNESS V2 Release Notes
+
+## Unreleased
+
+- Realigns `workflow_stage` to the canonical HARNESS V2 task flow: `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`.
+- Removes `artifact_observation`, `routing`, `safety_improvement`, and `release_boundary` from `workflow_stage`; those remain control or observability surfaces.
+- Adds generated task-local stage records under `records\` when applying `harness-v2 init` or `harness-v2 apply`.
+- Classifies the local explicit CLI/MCP/task-contract surface as `workflow_binding_engine` after the Goal 6 whole-plan conformance audit.
+- This unreleased local source state is not an npm publish, GitHub release, or release tag.
+
+## HARNESS V2 0.1.7 Release Notes
 
 npm and GitHub release notes for the current Codex-app-focused HARNESS V2 source.
 

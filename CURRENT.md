@@ -1,6 +1,6 @@
 # HARNESS V2 Current State
 
-status: package_github_surface / workflow_stage_realignment / current_pointer
+status: package_github_surface / whole_plan_conformance_audit / current_pointer
 
 This file is the visible current pointer for the local HARNESS V2 product surface.
 
@@ -10,7 +10,7 @@ workflow: `remaining_completion_program`
 
 state: `workflow_realignment_review`
 
-substate: `canonical_8_stage_realign / unreleased_local / release_closed`
+substate: `workflow_binding_engine_classified / unreleased_local / release_closed`
 
 source basis:
 
@@ -22,7 +22,7 @@ source basis:
 
 ## Current Program
 
-The local worktree is in a post-0.1.7 workflow realignment slice.
+The local worktree is in a post-0.1.7 workflow engine completion and conformance audit slice.
 
 Completed release history:
 
@@ -35,7 +35,7 @@ Completed release history:
 
 Current active slice:
 
-- realign executable `workflow_stage` to the canonical task flow:
+- audit and preserve executable `workflow_stage` alignment to the canonical task flow:
   - `spec`
   - `spec_review`
   - `plan`
@@ -51,7 +51,8 @@ Current active slice:
 - keep artifact, routing, safety/regression, and release transaction as control surfaces;
 - add generated task-local records scaffold under `records\`;
 - verify locally without npm publish, GitHub release, release tag, dependency install, secret access, or destructive work.
-- do not treat this local Goal 0 slice as a new npm publish, GitHub release, or release tag.
+- do not treat this local Goal 6 audit slice as a new npm publish, GitHub release, or release tag.
+- classify the current explicit CLI/MCP/task-contract surface as `workflow_binding_engine`, not `advisory_cli_validator` or `blocked`, while preserving the boundary that HARNESS V2 is not an automatic shell/editor blocker or Codex app hook installer.
 
 Future release path:
 

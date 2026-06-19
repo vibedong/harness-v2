@@ -113,17 +113,22 @@ ALLOWED_COMMANDS = {
     "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
     "npm pack --dry-run",
 }
-GOAL3_COMMANDS = {
+GOAL6_COMMANDS = {
     "python -m compileall harness_v2",
     "python -m unittest discover tests",
+    "python -m harness_v2 status --root .",
     "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
     "python -m harness_v2 gate tests\\fixtures\\valid-task.json --root .",
+    "python -m harness_v2 doctor --root .",
+    "node bin\\harness-v2.js status --root .",
     "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
     "node bin\\harness-v2.js gate tests\\fixtures\\valid-task.json --root .",
+    "node bin\\harness-v2.js doctor --root .",
+    "npm pack --dry-run",
 }
-PERMISSION_COMMANDS = GOAL3_COMMANDS
+PERMISSION_COMMANDS = GOAL6_COMMANDS
 ALLOWED_GIT_COMMANDS = {
-    "git add <intended Goal 3 product files>",
+    "git add <intended Goal 6 product files>",
     "git commit",
     "git push",
 }
@@ -824,8 +829,10 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         responses = [json.loads(line) for line in completed.stdout.splitlines()]
         self.assertEqual(responses[0]["result"]["serverInfo"]["name"], "harness-v2")
-        self.assertIn("harness_preflight", {tool["name"] for tool in responses[1]["result"]["tools"]})
-        self.assertIn("harness_gate", {tool["name"] for tool in responses[1]["result"]["tools"]})
+        tool_names = {tool["name"] for tool in responses[1]["result"]["tools"]}
+        self.assertIn("harness_preflight", tool_names)
+        self.assertIn("harness_gate", tool_names)
+        self.assertIn("harness_decision", tool_names)
 
     def test_mcp_adapter_reports_protocol_errors_as_json_rpc(self):
         from harness_v2.mcp import handle_message
@@ -899,11 +906,11 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         )
         self.assertEqual(
             commands_under_heading(ROOT / "control" / "approval.md", "## Bound Local Verification Commands"),
-            GOAL3_COMMANDS,
+            GOAL6_COMMANDS,
         )
         self.assertEqual(
             commands_under_heading(ROOT / "control" / "proof.md", "## Verification Commands"),
-            GOAL3_COMMANDS,
+            GOAL6_COMMANDS,
         )
         self.assertEqual(
             commands_under_heading(ROOT / "control" / "permission.md", "## Allowed Local Commands"),
@@ -963,6 +970,16 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             ROOT / "routing" / "manifest.md",
         ):
             self.assertIn("remaining_completion_program", path.read_text())
+        for path in (
+            ROOT / "control" / "approval.md",
+            ROOT / "control" / "permission.md",
+            ROOT / "control" / "proof.md",
+            ROOT / "control" / "lifecycle.md",
+        ):
+            content = path.read_text()
+            self.assertIn("whole_plan_conformance_audit", content)
+            self.assertNotIn("The active Goal is Goal 3", content)
+            self.assertNotIn("verified Goal 3 commit", content)
 
         root_rules = (ROOT / "RULES.md").read_text()
         self.assertNotIn("Do not create package metadata", root_rules)
@@ -1016,6 +1033,30 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("MCP stdio adapter mistaken for source of truth", regression)
         self.assertIn("hook-equivalent gate mistaken for a real shell/editor blocker", regression)
 
+    def test_goal6_classification_and_release_boundary_are_honest(self):
+        readme = (ROOT / "README.md").read_text()
+        korean_readme = (ROOT / "README.ko.md").read_text(encoding="utf-8")
+        release = (ROOT / "release" / "transaction.md").read_text()
+        release_notes = (ROOT / "RELEASE_NOTES.md").read_text()
+        lifecycle = (ROOT / "control" / "lifecycle.md").read_text()
+
+        for content in (readme, korean_readme, lifecycle):
+            self.assertIn("workflow_binding_engine", content)
+        self.assertIn("shell/editor", readme)
+        self.assertIn("shell/editor", lifecycle)
+        self.assertIn("shell, editor", korean_readme)
+        self.assertIn("explicit CLI/MCP/task-contract surface", readme)
+        self.assertIn("명시적 local surface", korean_readme)
+        self.assertIn("Closed release target", release)
+        self.assertIn("closed release history", release.casefold())
+        self.assertNotIn("current release transaction allows", release.casefold())
+        self.assertIn("npm publish;", release)
+        self.assertIn("GitHub release creation or mutation", release)
+        self.assertIn(
+            "`spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`",
+            release_notes,
+        )
+        self.assertNotIn("`planning`, `plan_review`, `approval`", release_notes)
 
     def test_mcp_adapter_is_stdio_wrapper_not_source_of_truth(self):
         readme = (ROOT / "README.md").read_text()
@@ -1025,10 +1066,12 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertIn("local stdio MCP adapter", readme)
         self.assertIn("does not replace `CURRENT.md`", readme)
+        self.assertIn("decision", readme)
         self.assertIn("MCP stdio adapter", routing)
         self.assertIn("local stdio only", routing)
-        self.assertIn("local stdio JSON-RPC adapter", proof)
-        self.assertIn("MCP adapter around `status`, `verify`, `preflight`, and `init/apply`", improvement)
+        self.assertIn("decision", routing)
+        self.assertIn("MCP wrapper behavior", proof)
+        self.assertIn("MCP adapter around `status`, `verify`, `preflight`, `gate`, `decision`, and `init/apply`", improvement)
 
     def test_hook_equivalent_gate_is_not_claimed_as_real_shell_or_editor_hook(self):
         readme = (ROOT / "README.md").read_text()
@@ -2491,7 +2534,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(status["workflow"], "remaining_completion_program")
         self.assertEqual(status["state"], "workflow_realignment_review")
-        self.assertIn("canonical_8_stage_realign", status["substate"])
+        self.assertIn("workflow_binding_engine_classified", status["substate"])
         self.assertIn("unreleased_local", status["substate"])
         self.assertIn("release_closed", status["substate"])
 
@@ -2682,8 +2725,19 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                 capture_output=True,
                 check=True,
             )
-            custom_agents = "# Custom AGENTS\n\nKeep this file.\n"
-            (root / "AGENTS.md").write_text(custom_agents, encoding="utf-8")
+            protected_edits = {
+                "AGENTS.md": "# Custom AGENTS\n\nKeep this file.\n",
+                "CURRENT.md": "# Custom CURRENT\n\nworkflow: `custom`\nstate: `custom_state`\nsubstate: `custom_substate`\n",
+                "control\\approval.md": "# Custom Approval\n\nDo not overwrite approval state.\n",
+                "control\\permission.md": "# Custom Permission\n\nDo not overwrite permission state.\n",
+                "control\\proof.md": "# Custom Proof\n\nDo not overwrite proof state.\n",
+                "control\\lifecycle.md": "# Custom Lifecycle\n\nDo not overwrite lifecycle state.\n",
+                "contracts\\harness-task.json": json.dumps({"custom": "contract"}, indent=2) + "\n",
+                "records\\stages\\spec.md": "# Custom Spec Record\n\nDo not overwrite record state.\n",
+                "records\\proof.md": "# Custom Proof Record\n\nDo not overwrite proof notes.\n",
+            }
+            for relative_path, content in protected_edits.items():
+                (root / relative_path).write_text(content, encoding="utf-8")
 
             applied = subprocess.run(
                 [sys.executable, "-m", "harness_v2", "apply", "--root", str(root)],
@@ -2695,8 +2749,11 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
             self.assertEqual(applied.returncode, 0, applied.stderr)
             payload = json.loads(applied.stdout)
-            self.assertIn("AGENTS.md", payload["skipped"])
-            self.assertEqual((root / "AGENTS.md").read_text(encoding="utf-8"), custom_agents)
+            self.assertEqual(payload["overwritten"], [])
+            self.assertGreaterEqual(set(payload["skipped"]), EXPECTED_SCAFFOLD_CREATED)
+            for relative_path, content in protected_edits.items():
+                self.assertIn(relative_path, payload["skipped"])
+                self.assertEqual((root / relative_path).read_text(encoding="utf-8"), content)
 
     def test_cli_init_from_package_checkout_applies_to_parent_project(self):
         with tempfile.TemporaryDirectory() as temp_root:

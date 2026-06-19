@@ -1,6 +1,6 @@
 # HARNESS V2 Release Transaction
 
-status: package_github_surface / remaining_completion_program / release_transaction_boundary
+status: package_github_surface / whole_plan_conformance_audit / release_transaction_boundary
 
 This file defines the local markdown boundary for install and release transactions. It records release readiness inputs but does not execute npm, Python package registry publish, GitHub release, release tag, deploy, or product release work by itself.
 
@@ -16,9 +16,31 @@ Release work is separate from:
 - route guidance;
 - artifact registry/log entries;
 - regression mapping;
-- improvement intake.
+- improvement intake;
+- binding-surface classification.
 
 No one of these surfaces can create release readiness by itself.
+
+## Closed Release History
+
+Closed release target:
+
+```text
+harness-v2@0.1.7 / v0.1.7
+```
+
+Closed status:
+
+```text
+NPM_PUBLISHED / GITHUB_RELEASE_PUBLISHED / RELEASE_EXECUTION_CLOSED
+```
+
+Historical notes:
+
+- npm package `harness-v2@0.1.7` and Git tag/GitHub release `v0.1.7` are closed release history.
+- That transaction authorized one npm publish, one Git tag, and one GitHub release for the exact 0.1.7 transaction only.
+- The closed transaction does not authorize repeat npm publish, tag mutation, GitHub release mutation, Python package registry publish, dependency installation, secret access, external mutation, or destructive work.
+- Local post-0.1.7 workflow engine completion, conformance audit, and `workflow_binding_engine` classification are not npm publish, GitHub release, release tag, deploy, or release readiness by themselves.
 
 ## Future Transaction Inputs
 
@@ -32,46 +54,22 @@ A future release transaction must name:
 - lifecycle transition target;
 - stale triggers and rollback path.
 
-## Current Release Transaction Status
-
-Target:
-
-```text
-harness-v2@0.1.7
-```
-
-Status:
-
-```text
-NPM_PUBLISHED / GITHUB_RELEASE_PUBLISHED / RELEASE_EXECUTION_CLOSED
-```
-
-Reason:
-
-- npm package `harness-v2@0.1.7` is the current release target.
-- The current release slice authorizes exactly one npm publish for `harness-v2@0.1.7`.
-- Generated scaffold hardening improves the files created by `harness-v2 init --root .` and `harness-v2 apply --root .` for future package updates.
-- Hook-equivalent gate hardening adds local `gate` checks to the source surface, but it does not execute a release, create a tag, or republish the package.
-- Integration hardening and release preparation add a read-only `doctor` report for local surface composition.
-- Git tag `v0.1.7` and GitHub release creation for `vibedong/harness-v2` are permitted only for this exact transaction.
-- Python package registry publish is not permitted by the current transaction.
-
 ## Current Permission Ceiling
 
-The current release transaction allows local verification, generated TEMP project verification, read-only subagent review, npm publish for `harness-v2@0.1.7`, Git tag `v0.1.7`, GitHub release creation for `vibedong/harness-v2`, and git push after verification and review pass.
+The current Goal 6 audit slice allows local verification, generated TEMP project verification through tests, read-only subagent review, and git add/commit/push only for the verified Goal 6 commit.
 
-After this transaction completes, the permission ceiling denies:
+The current Goal 6 audit slice denies:
 
-- repeat npm publish;
+- npm publish;
 - Python package registry publish or deploy work;
-- additional GitHub release mutation;
-- additional release tag mutation;
+- GitHub release creation or mutation;
+- release tag creation or mutation;
 - dependency installation from network;
 - secret access;
-- external network mutation outside allowed git push;
+- external network mutation outside the approved Goal 6 git push;
 - destructive action outside generated temporary verification artifacts;
 - release readiness claims.
 
 ## Non-Authority Boundary
 
-This file does not execute npm publish, Python package registry publish, deploy, GitHub release, tag creation, approval, permission, proof, lifecycle transition, automatic enforcement completion, or implementation completion by itself.
+This file does not execute npm publish, Python package registry publish, deploy, GitHub release, tag creation, approval, permission, proof, lifecycle transition, automatic external enforcement, or implementation completion by itself.

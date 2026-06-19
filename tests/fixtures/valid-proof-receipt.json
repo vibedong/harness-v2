@@ -15,7 +15,7 @@
   "source_refs": [
     {
       "path": "CURRENT.md",
-      "sha256": "046229e6f7c8009afec331482dd67c4e265fc9e34bf3c114f5a3bbc4a5bbae95",
+      "sha256": "72498d43057d66f4752eb00ee2df5aeaf1028f514b5f1f4d3ad27f0ef9ba459c",
       "affects": [
         "proof predicate"
       ]
@@ -29,7 +29,7 @@
     },
     {
       "path": "tests\\test_harness_v2.py",
-      "sha256": "7f6a237c105f0da5ce3f9665676a7ec99b0d4cb13dec12869b2261c049314954",
+      "sha256": "a9704ccec7035f135df8927c4a3b7fdb0043eb9cedad4c5d77fafd8451ac5e39",
       "affects": [
         "tests"
       ]

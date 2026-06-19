@@ -1,6 +1,6 @@
 # HARNESS V2 Lifecycle Control
 
-status: package_github_surface / stale_backtrack_engine / lifecycle_control
+status: package_github_surface / whole_plan_conformance_audit / lifecycle_control
 
 workflow: `remaining_completion_program`
 
@@ -26,6 +26,13 @@ Known local states:
 - `transition_ledger_review`
 - `stale_backtrack_authoring`
 - `stale_backtrack_review`
+- `record_density_authoring`
+- `record_density_review`
+- `decision_receipt_authoring`
+- `decision_receipt_review`
+- `whole_plan_conformance_authoring`
+- `whole_plan_conformance_review`
+- `workflow_binding_engine_classified`
 - `public_release_candidate`
 - `public_release_published`
 - `package_candidate_ready`
@@ -38,41 +45,42 @@ Known local states:
 The current local lifecycle entry is:
 
 ```text
-transition_ledger_review -> stale_backtrack_review
+decision_receipt_review -> whole_plan_conformance_review
 ```
 
 Active slice:
 
 ```text
-stale_backtrack_engine / unreleased_local / release_closed
+whole_plan_conformance_audit / unreleased_local / release_closed
 ```
 
 Scope:
 
 - product writes only under `F:\Folder\harness-v2`;
 - published `harness-v2@0.1.7` / `v0.1.7` is closed release history;
-- executable `workflow_stage` now follows the canonical task flow from the brainstorming/stage-plan records;
-- `artifact_observation`, `routing`, `safety_improvement`, and `release_boundary` are no longer lifecycle workflow stages;
-- artifact, routing, safety/regression, and release transaction remain control surfaces;
-- generated downstream project scaffold now includes task-local stage records under `records\`;
+- executable `workflow_stage` follows the canonical task flow from the brainstorming/stage-plan records: `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`;
+- `workflow_stage` is the writable compatibility owner and `current_gate` is derived/read-model only unless a later explicit migration changes ownership;
+- `artifact_observation`, `routing`, `safety_improvement`, and `release_boundary` are not lifecycle workflow stages;
+- artifact, routing, safety/regression, improvement, and release transaction surfaces remain control or observability surfaces;
+- generated downstream project scaffold includes task-local stage records under `records\`;
 - generated `records\gate-state.json`, when present, is a validated read-model derived from a source task `workflow_stage` and source hash;
-- `contracts\transition.schema.json`, `templates\transition-log.md`, and `harness_v2\lifecycle.py` define the Goal 2 transition ledger surface;
+- `contracts\transition.schema.json`, `templates\transition-log.md`, and `harness_v2\lifecycle.py` define the transition ledger surface;
 - transition log records are append-only evidence and do not move lifecycle state by themselves;
 - appending a transition record may be guarded by the previous transition ledger hash so earlier block edits or deletions fail before append;
 - lifecycle movement is an evaluated operation, not a log line;
 - transition evaluation checks route edge, task source gate, project-relative source refs, approval reference, permission reference, proof reference, freshness refs, and stale check before accepting movement;
 - legacy stage aliases and same-task `improvement -> spec` movement fail closed;
-- `contracts\freshness.schema.json`, `templates\freshness-map.json`, and `harness_v2\freshness.py` define the Goal 3 freshness/backtrack surface;
+- `contracts\freshness.schema.json`, `templates\freshness-map.json`, and `harness_v2\freshness.py` define the freshness/backtrack surface;
 - absent freshness maps produce compatibility diagnostics and do not silently overwrite existing projects;
 - stale freshness anchors emit explicit `backtrack_target` and `reason` values;
 - stale approval, permission, proof, artifact, source, or transition evidence cannot be reused silently;
+- ApprovalDecision, PermissionDecision, and ProofReceipt records are evidence records only; none can declare or perform lifecycle movement by itself;
+- task-mode and record-strength evaluation control record density without weakening approval, permission, proof, lifecycle, stale, route, capability, regression, or release checks;
 - the hook-equivalent gate remains an explicit status/verify/preflight command, not a real shell/editor hook;
 - local verification commands are named in `control\permission.md`;
-- no npm publish, Python package registry publish, GitHub release or tag mutation, dependency install, secret access, external mutation outside the approved Goal 3 git push, or destructive operation is part of this lifecycle entry.
+- no npm publish, Python package registry publish, GitHub release or tag mutation, dependency install, secret access, external mutation outside the approved Goal 6 git push, or destructive operation is part of this lifecycle entry.
 
-This entry is not a public release, repeat npm publish, Python package registry publish, future release authority, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, MCP client configuration, ApprovalDecision, PermissionDecision, ProofReceipt, or an automatic LifecycleTransition.
-
-Goal 5 decision/receipt records are evidence records only. ApprovalDecision, PermissionDecision, and ProofReceipt can satisfy inputs to later lifecycle evaluation, but none of them can declare or perform lifecycle movement by itself.
+This entry supports classifying the current explicit CLI/MCP/task-contract surface as `workflow_binding_engine`. It is not a public release, repeat npm publish, Python package registry publish, future release authority, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, MCP client configuration, ApprovalDecision, PermissionDecision, ProofReceipt, or an automatic LifecycleTransition.
 
 ## Transition Requirements
 
@@ -116,6 +124,6 @@ Backtrack targets for freshness anchors:
 - transition ledger stale -> last verified lifecycle gate
 - release boundary stale -> improvement or blocked release audit
 
-Backtrack to `stale_backtrack_authoring`, `transition_ledger_review`, `workflow_realignment_authoring`, `package_publish_review`, or `public_release_published` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, npm wrapper surface, generated scaffold behavior, workflow stage enum, freshness map, or target surface becomes stale or conflicting.
+Backtrack to `whole_plan_conformance_review`, `decision_receipt_review`, `stale_backtrack_authoring`, `transition_ledger_review`, `workflow_realignment_authoring`, `package_publish_review`, or `public_release_published` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, npm wrapper surface, generated scaffold behavior, workflow stage enum, freshness map, binding-surface classification, or target surface becomes stale or conflicting.
 
 This file does not produce proof, approval, npm publish state, Python package registry publish state, release state, route permission, regression pass, improvement execution, or permission for future slices.

@@ -10,7 +10,7 @@ Korean documentation is available in [README.ko.md](README.ko.md).
 
 HARNESS V2 is not an AI model and it does not write code for you. It is a workflow harness that makes the working boundary visible and checkable.
 
-Current implementation status: HARNESS V2 is a project scaffold, task-contract validator, and CLI helper. It makes boundaries explicit and checkable, but it is not a complete automatic enforcement or completion layer.
+Current implementation status: HARNESS V2 is classified as a local `workflow_binding_engine` for explicit CLI/MCP/task-contract use. It evaluates current gate, workflow stage rules, lifecycle transition authority, stale/backtrack anchors, approval/permission/proof decision records, preflight, gate, and record density. It is still not an automatic shell/editor blocker, Codex app hook installer, or completion layer.
 
 Before a task starts, you describe:
 
@@ -33,7 +33,10 @@ The executable surface currently covers:
 - stage-specific workflow checks through `workflow_stage`;
 - canonical workflow stages: `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`;
 - task-local stage records under `records\stages\` in generated project scaffolds;
+- transition-ledger evaluation that denies log-only lifecycle movement;
+- freshness/stale-backtrack checks that reject stale source, approval, permission, proof, artifact, and transition evidence;
 - task-mode and record-strength checks with an executable `effective_record_strength` profile;
+- ApprovalDecision, PermissionDecision, and ProofReceipt evaluators for exact approval, permission, and proof binding;
 - side-effect and write-path preflight checks with `preflight`;
 - hook-equivalent gate checks with `gate`;
 - read-only integration reports with `doctor`;
@@ -41,7 +44,7 @@ The executable surface currently covers:
 
 HARNESS V2 ships a hook-equivalent gate command: `harness-v2 gate <task.json> --root .`. It combines `status`, `verify`, and optional `preflight` checks into one explicit boundary check. From local evidence for this repo, no direct Codex app hook surface was found, so the gate does not install a real Codex app hook and does not automatically block your shell or editor.
 
-HARNESS V2 ships a local stdio MCP adapter that exposes `status`, `verify`, `preflight`, `gate`, `init`, and `apply` as MCP tools. The MCP adapter is a thin wrapper over the existing HARNESS V2 core and does not replace `CURRENT.md`, task contracts, approval, permission, proof, lifecycle, or release boundaries.
+HARNESS V2 ships a local stdio MCP adapter that exposes `status`, `verify`, `preflight`, `gate`, `decision`, `init`, and `apply` as MCP tools. The MCP adapter is a thin wrapper over the existing HARNESS V2 core and does not replace `CURRENT.md`, task contracts, approval, permission, proof, lifecycle, or release boundaries.
 
 HARNESS V2 does not currently ship an HTTP MCP server, real editor hook, shell-level blocker, or Codex app configuration installer.
 
@@ -123,6 +126,26 @@ When `records\gate-state.json` exists, HARNESS V2 treats it as a generated read-
 `artifact_observation`, `routing`, `safety_improvement`, and `release_boundary` are not workflow stages. They remain control or observability surfaces.
 
 This local realignment is not an npm publish, GitHub release, or release tag by itself.
+
+## Goal 6 Audit Classification
+
+Current local source classification:
+
+```text
+workflow_binding_engine
+```
+
+This classification is limited to HARNESS V2's explicit CLI/MCP/task-contract surface: task contracts, CLI commands, npm wrapper delegation to the Python CLI, local stdio MCP tools, generated scaffold, and tests. It is not a claim that HARNESS V2 automatically intercepts every shell, editor, network, package, or Codex app action.
+
+The classification is based on executable checks for:
+
+- canonical `workflow_stage` values and derived `current_gate`;
+- lifecycle transition evaluation instead of log-only movement;
+- stale/backtrack detection with source hashes and backtrack targets;
+- task-mode and record-density evaluation;
+- approval, permission, and proof receipt evaluators;
+- preflight and gate checks for proposed side effects and write paths;
+- fresh-project scaffold verification and existing-project preservation tests.
 
 ## Updating HARNESS V2
 
@@ -329,7 +352,7 @@ Run the local MCP stdio adapter:
 harness-v2 mcp
 ```
 
-The MCP adapter speaks newline-delimited JSON-RPC over stdio. It is meant to be launched by an MCP-capable client, not used as an interactive shell command. Exposed tools are `harness_status`, `harness_verify`, `harness_preflight`, `harness_gate`, `harness_init`, and `harness_apply`.
+The MCP adapter speaks newline-delimited JSON-RPC over stdio. It is meant to be launched by an MCP-capable client, not used as an interactive shell command. Exposed tools are `harness_status`, `harness_verify`, `harness_preflight`, `harness_gate`, `harness_decision`, `harness_init`, and `harness_apply`.
 
 Inspect project shape without mutating files:
 
