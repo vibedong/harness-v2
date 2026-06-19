@@ -4,30 +4,30 @@ status: package_github_surface / whole_plan_conformance_audit / permission_contr
 
 workflow: `remaining_completion_program`
 
-This file separates approved intent from allowed side effects.
+이 파일은 approved intent와 allowed side effect를 분리합니다.
 
-## Side Effect Classes
+## Side Effect 분류
 
-| class | current Goal 6 decision |
+| class | 현재 Goal 6 decision |
 | --- | --- |
-| local read | allowed under `F:\Folder\harness-v2` and generated TEMP verification folders |
-| local file write | allowed under `F:\Folder\harness-v2` only for the exact Goal 6 docs/control/test audit surface |
-| new files | denied for this slice |
-| local command execution | allowed only for the commands listed below |
-| local MCP stdio adapter | readback only through existing CLI/MCP surfaces; no remote hosting or client configuration mutation |
-| hook-equivalent gate | allowed only as an explicit local command that combines `status`, `verify`, and optional `preflight`; it is not a real shell/editor hook |
-| temporary verification folders | allowed under TEMP only when created by approved verification commands or tests |
-| cleanup | allowed only for generated TEMP folders, `__pycache__`, and `*.egg-info` |
-| read-only subagent review | allowed with `vowline`; subagents may not edit, mutate git/network, grant approval, produce proof, or declare lifecycle transition |
-| git push | allowed only for the verified Goal 6 commit |
-| npm publish | denied for this local slice |
-| GitHub release or release tag | denied for this local slice |
+| local read | `F:\Folder\harness-v2`와 generated TEMP verification folder 안에서 허용 |
+| local file write | exact Goal 6 docs/control/test audit surface에 필요한 경우 `F:\Folder\harness-v2` 안에서만 허용 |
+| new files | 이 slice에서는 denied |
+| local command execution | 아래 명령 목록에 있는 경우만 허용 |
+| local MCP stdio adapter | 기존 CLI/MCP surface를 통한 readback만 허용. remote hosting 또는 client configuration mutation 없음 |
+| hook-equivalent gate | `status`, `verify`, 선택적 `preflight`를 묶는 explicit local command로만 허용. real shell/editor hook이 아님 |
+| temporary verification folders | approved verification command 또는 test가 만든 TEMP 하위 폴더만 허용 |
+| cleanup | generated TEMP folder, `__pycache__`, `*.egg-info`에 한해 허용 |
+| read-only subagent review | `vowline` 적용 조건으로 허용. subagent는 edit, git/network mutation, approval grant, proof production, lifecycle transition declaration 금지 |
+| git push | verified Goal 6 commit에 한해 허용 |
+| npm publish | 이 local slice에서는 denied |
+| GitHub release or release tag | 이 local slice에서는 denied |
 | Python package registry publish | denied |
-| dependency install from network, secret read, destructive action outside generated verification artifacts | denied |
+| dependency install from network, secret read, generated verification artifact 밖의 destructive action | denied |
 
 ## Exact Write Surface
 
-Allowed write paths are product files under `F:\Folder\harness-v2` needed for Goal 6:
+허용된 write path는 Goal 6에 필요한 `F:\Folder\harness-v2` 하위 product file입니다.
 
 - `README.md`
 - `CURRENT.md`
@@ -43,9 +43,9 @@ Allowed write paths are product files under `F:\Folder\harness-v2` needed for Go
 - `control\proof.md`
 - `control\lifecycle.md`
 
-Any mutation outside `F:\Folder\harness-v2` fails closed except generated TEMP verification artifacts and their cleanup.
+generated TEMP verification artifact와 그 cleanup을 제외하면 `F:\Folder\harness-v2` 밖의 mutation은 fail closed합니다.
 
-## Allowed Local Commands
+## 허용된 Local Commands
 
 - `python -m compileall harness_v2`
 - `python -m unittest discover tests`
@@ -59,20 +59,20 @@ Any mutation outside `F:\Folder\harness-v2` fails closed except generated TEMP v
 - `node bin\harness-v2.js doctor --root .`
 - `npm pack --dry-run`
 
-## Allowed Git/GitHub Commands
+## 허용된 Git/GitHub Commands
 
 - `git add <intended Goal 6 product files>`
 - `git commit`
 - `git push`
 
-## Permission Boundaries
+## Permission 경계
 
-Permission cannot widen approval scope and cannot produce proof, lifecycle state, route permission, regression pass, improvement execution, package registry publish readiness, release readiness, real hook installation, or automatic external enforcement.
+permission은 approval scope를 넓힐 수 없고 proof, lifecycle state, route permission, regression pass, improvement execution, package registry publish readiness, release readiness, real hook installation, automatic external enforcement를 만들 수 없습니다.
 
 ## Structured PermissionDecision Records
 
-PermissionDecision records must reference active approval when side effects exist, classify the side-effect class, stay within the approval ceiling, and include preflight status for file, git, network, release, package, secret, or destructive side effects.
+PermissionDecision record는 side effect가 있을 때 active approval을 참조해야 하며, side-effect class를 분류하고, approval ceiling 안에 머물며, file, git, network, release, package, secret, destructive side effect에 대한 preflight status를 포함해야 합니다.
 
-PermissionDecision records cannot approve side effects excluded by approval, cannot exceed the approval ceiling, cannot produce proof, and cannot move lifecycle state.
+PermissionDecision record는 approval에서 제외한 side effect를 승인할 수 없고, approval ceiling을 넘을 수 없고, proof를 만들 수 없고, lifecycle state를 이동할 수 없습니다.
 
-This permission surface allows git push only for the verified Goal 6 commit. It denies npm publish, Git tag creation, GitHub release creation, Python package registry publish, dependency installation from network, secret access, external network mutation outside the approved Goal 6 git push, remote MCP hosting, MCP client configuration mutation, Codex app configuration mutation, real shell/editor hook installation, and destructive action outside generated verification artifacts for the current audit slice.
+이 permission surface는 verified Goal 6 commit에 한해서만 git push를 허용합니다. 현재 audit slice에서는 npm publish, Git tag creation, GitHub release creation, Python package registry publish, network dependency installation, secret access, approved Goal 6 git push 밖의 external network mutation, remote MCP hosting, MCP client configuration mutation, Codex app configuration mutation, real shell/editor hook installation, generated verification artifact 밖의 destructive action을 denied합니다.

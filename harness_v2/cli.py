@@ -5,7 +5,7 @@ import json
 import sys
 from pathlib import Path
 
-from .core import initialize_project, read_current_status
+from .core import initialize_project, read_current_status, start_task
 from .decisions import evaluate_decision_file
 from .doctor import inspect_project
 from .gate import evaluate_gate
@@ -56,6 +56,15 @@ def build_parser() -> argparse.ArgumentParser:
     apply = subparsers.add_parser("apply", help="Alias for init: apply HARNESS V2 to a project root.")
     apply.add_argument("--root", default=".", help="Project root to apply HARNESS V2 to. Defaults to current directory.")
     apply.add_argument("--force", action="store_true", help="Overwrite existing HARNESS V2 scaffold files.")
+
+    task = subparsers.add_parser("task", help="Manage the active HARNESS V2 task contract.")
+    task_subparsers = task.add_subparsers(dest="task_command", required=True)
+    task_start = task_subparsers.add_parser("start", help="Register the current user request as the active spec-stage task.")
+    task_start.add_argument("--root", default=".", help="Applied project root. Defaults to current directory.")
+    task_start.add_argument("--title", required=True, help="Short title for the current user request.")
+    task_start.add_argument("--summary", default="", help="Brief summary of the current user request.")
+    task_start.add_argument("--source", dest="sources", action="append", default=[], help="Additional source basis path or label. May be repeated.")
+    task_start.add_argument("--force", action="store_true", help="Replace an already registered active task.")
 
     return parser
 
@@ -121,6 +130,23 @@ def main(argv: list[str] | None = None) -> int:
             print("\n".join(payload.errors), file=sys.stderr)
             return 1
         return 0
+
+    if args.command == "task":
+        if args.task_command == "start":
+            payload = start_task(
+                Path(args.root),
+                title=args.title,
+                summary=args.summary,
+                source_basis=args.sources,
+                force=args.force,
+            )
+            print(json.dumps(payload.to_json(), ensure_ascii=False, sort_keys=True))
+            if not payload.ok:
+                print("\n".join(payload.errors), file=sys.stderr)
+                return 1
+            return 0
+        parser.error(f"unknown task command: {args.task_command}")
+        return 2
 
     parser.error(f"unknown command: {args.command}")
     return 2

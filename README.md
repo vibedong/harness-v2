@@ -24,11 +24,12 @@ HARNESS V2는 AI 에이전트가 다음을 놓치지 않도록 돕습니다.
 
 HARNESS V2의 현재 분류는 `workflow_binding_engine`입니다.
 
-정확히 말하면 HARNESS V2는 `explicit CLI/MCP/task-contract surface` 위에서 작동합니다. 즉 task contract, CLI 명령, Python CLI로 위임되는 npm wrapper, local stdio MCP adapter, generated scaffold, test를 기준으로 작업 경계를 확인합니다.
+정확히 말하면 HARNESS V2는 명시적인 CLI, MCP, task contract 표면 위에서 작동합니다. 즉 task contract, CLI 명령, Python CLI로 위임되는 npm wrapper, local stdio MCP adapter, 생성된 scaffold, test를 기준으로 작업 경계를 확인합니다.
 
 HARNESS V2가 해주는 것:
 
 - `init` / `apply`로 프로젝트 루트에 scaffold 생성
+- `task start`로 사용자의 실제 작업 요청을 현재 task contract와 `CURRENT.md`에 등록
 - `status`로 현재 workflow pointer 확인
 - `verify`로 task contract 검증
 - `gate`로 작업 전 hook-equivalent gate 확인
@@ -45,7 +46,7 @@ HARNESS V2가 아닌 것:
 - 사용자의 판단이나 승인을 대체하는 자동 권한 시스템
 - 모든 외부 도구를 자동으로 차단하는 시스템
 
-현재 repo 기준으로 no direct Codex app hook surface was found. 따라서 `gate`는 실제 Codex app hook을 설치하지 않고, does not automatically block your shell or editor. 한국어로 말하면 shell이나 editor를 자동으로 차단하지 않습니다.
+현재 저장소 기준으로 직접 연결되는 Codex app hook 표면은 없습니다. 따라서 `gate`는 실제 Codex app hook을 설치하지 않고, shell이나 editor를 자동으로 차단하지 않습니다.
 
 ## 설치
 
@@ -120,7 +121,7 @@ F:\my-project\contracts\
 F:\my-project\templates\
 ```
 
-Do not create or leave a nested `harness-v2` folder inside the project.
+프로젝트 안에 중첩된 `harness-v2` 폴더를 만들거나 남겨두지 마세요.
 
 만약 `package.json`, `harness_v2\`, `bin\`, `tests\`, `.git` remote가 `vibedong/harness-v2`인 상태가 프로젝트 루트에 보인다면, 그것은 하네스가 적용된 프로젝트가 아니라 HARNESS V2 소스 체크아웃입니다. 이 경우 `harness-v2 doctor --root .`가 source checkout 경고를 표시합니다.
 
@@ -129,6 +130,7 @@ Do not create or leave a nested `harness-v2` folder inside the project.
 ```powershell
 npm install -g harness-v2
 harness-v2 init --root .
+harness-v2 task start --root . --title "현재 작업" --summary "사용자가 요청한 작업을 짧게 요약"
 harness-v2 status --root .
 harness-v2 verify contracts\harness-task.json
 harness-v2 gate contracts\harness-task.json --root .
@@ -137,9 +139,26 @@ harness-v2 gate contracts\harness-task.json --root .
 정상 동작:
 
 - `init`은 프로젝트 루트에 HARNESS 파일을 생성합니다.
+- `task start`는 사용자의 실제 작업 요청을 `CURRENT.md`와 `contracts\harness-task.json`에 현재 작업으로 등록합니다.
 - `status`는 `CURRENT.md`에서 현재 상태를 읽어 JSON으로 출력합니다.
 - `verify`는 task contract가 현재 HARNESS 상태와 충돌하지 않는지 확인합니다.
 - `gate`는 `status`, `verify`, 선택적 `preflight`를 한 번에 확인합니다.
+
+## 실제 작업 요청 등록
+
+`init` 직후의 `contracts\harness-task.json`은 “하네스가 적용됐다”는 초기 scaffold 증명용입니다. 사용자가 실제 작업을 요청하면, 에이전트는 본격적인 분석이나 파일 변경 전에 그 요청을 현재 작업으로 등록해야 합니다.
+
+```powershell
+harness-v2 task start --root . --title "나라장터 실시설계 크롤링 판단" --summary "전체 추출 후 통과/검토필요/제외 판정 흐름을 설계한다."
+```
+
+이 명령은 다음을 갱신합니다.
+
+- `CURRENT.md`
+- `contracts\harness-task.json`
+- `records\current-task.md`
+
+기본 등록 상태는 `spec` 단계의 `scope_pending`입니다. 즉 “이 작업을 하겠다”는 현재 포인터는 생기지만, 코드 수정, 크롤링 실행, dependency install, release, publish, secret, destructive action 같은 권한이 자동으로 열리지는 않습니다. 그런 작업은 별도 승인과 amended task contract가 필요합니다.
 
 ## 자주 쓰는 명령
 
@@ -173,6 +192,12 @@ local 상태 점검:
 harness-v2 doctor --root .
 ```
 
+사용자 요청을 현재 작업으로 등록:
+
+```powershell
+harness-v2 task start --root . --title "<짧은 작업명>" --summary "<요청 요약>"
+```
+
 local stdio MCP adapter 실행:
 
 ```powershell
@@ -181,7 +206,7 @@ harness-v2 mcp --root .
 
 MCP adapter는 `status`, `verify`, `preflight`, `gate`, `decision`, `init`, `apply`를 tool로 노출합니다. 노출되는 도구 이름은 `harness_status`, `harness_verify`, `harness_preflight`, `harness_gate`, `harness_decision`, `harness_init`, `harness_apply`입니다.
 
-이 MCP adapter는 기존 HARNESS V2 core를 감싸는 wrapper입니다. It does not replace `CURRENT.md`, task contract, approval, permission, proof, lifecycle, or release boundaries.
+이 MCP adapter는 기존 HARNESS V2 core를 감싸는 wrapper입니다. `CURRENT.md`, task contract, approval, permission, proof, lifecycle, release boundary를 대체하지 않습니다.
 
 ## 작업 단계
 

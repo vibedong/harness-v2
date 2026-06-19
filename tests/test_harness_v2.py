@@ -445,7 +445,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertIn("MIT License", license_text)
         self.assertIn("Copyright (c) 2026 vibedong", license_text)
-        self.assertIn("## HARNESS V2 0.1.9 Release Notes", release_notes)
+        self.assertIn("## HARNESS V2 0.1.9 릴리스 노트", release_notes)
         self.assertIn("이 README는 사람을 위한 제품 설명서입니다", readme)
         self.assertIn("npm install -g harness-v2", readme)
         self.assertIn("npm install -g harness-v2@latest", readme)
@@ -460,14 +460,17 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("status`, `verify`, `gate`, `doctor` 결과를 확인합니다", readme)
         self.assertIn("harness-v2 init --root .", readme)
         self.assertIn("harness-v2 apply --root .", readme)
+        self.assertIn("harness-v2 task start --root .", readme)
+        self.assertIn("실제 작업 요청 등록", readme)
+        self.assertIn("scope_pending", readme)
         self.assertIn("0.1.9 업데이트 내용", readme)
         self.assertIn("하네스 업데이트해줘.", readme)
-        self.assertIn("Do not create or leave a nested `harness-v2` folder", readme)
+        self.assertIn("중첩된 `harness-v2` 폴더를 만들거나 남겨두지 마세요", readme)
         self.assertIn("local stdio MCP adapter", readme)
         self.assertIn("harness-v2 mcp", readme)
         self.assertIn("harness-v2 gate", readme)
         self.assertIn("hook-equivalent gate", readme)
-        self.assertIn("does not automatically block your shell or editor", readme)
+        self.assertIn("shell이나 editor를 자동으로 차단하지 않습니다", readme)
         self.assertIn("shell이나 editor를 자동으로 차단하지 않습니다", readme)
         self.assertIn("Python 3.11", readme)
         self.assertIn("Python 3.11", release_notes)
@@ -892,7 +895,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
     def test_command_authority_lists_only_approved_verification_commands(self):
         self.assertEqual(
-            commands_under_heading(ROOT / "CURRENT.md", "## Current Allowed Local Verification Commands"),
+            commands_under_heading(ROOT / "CURRENT.md", "## 현재 허용된 Local Verification Commands"),
             ALLOWED_COMMANDS,
         )
         self.assertEqual(
@@ -904,11 +907,11 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             GOAL6_COMMANDS,
         )
         self.assertEqual(
-            commands_under_heading(ROOT / "control" / "permission.md", "## Allowed Local Commands"),
+            commands_under_heading(ROOT / "control" / "permission.md", "## 허용된 Local Commands"),
             PERMISSION_COMMANDS,
         )
         self.assertEqual(
-            commands_under_heading(ROOT / "control" / "permission.md", "## Allowed Git/GitHub Commands"),
+            commands_under_heading(ROOT / "control" / "permission.md", "## 허용된 Git/GitHub Commands"),
             ALLOWED_GIT_COMMANDS,
         )
 
@@ -918,7 +921,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         permission = (ROOT / "control" / "permission.md").read_text()
         current_commands = commands_under_heading(
             ROOT / "CURRENT.md",
-            "## Current Allowed Local Verification Commands",
+            "## 현재 허용된 Local Verification Commands",
         )
 
         self.assertIn("--root .", readme)
@@ -975,7 +978,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         root_rules = (ROOT / "RULES.md").read_text()
         self.assertNotIn("Do not create package metadata", root_rules)
         self.assertIn("Windows/macOS npm wrapper metadata", root_rules)
-        self.assertIn("Do not perform npm publish", root_rules)
+        self.assertIn("npm publish", root_rules)
+        self.assertIn("수행하지 않습니다", root_rules)
 
     def test_task_fixtures_match_remaining_completion_program_state(self):
         valid = json.loads(VALID_TASK.read_text())
@@ -1032,15 +1036,15 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         for content in (readme, lifecycle):
             self.assertIn("workflow_binding_engine", content)
-        self.assertIn("shell/editor", readme)
-        self.assertIn("shell/editor", lifecycle)
-        self.assertIn("explicit CLI/MCP/task-contract surface", readme)
+        self.assertIn("shell이나 editor", readme)
+        self.assertIn("shell/editor hook", lifecycle)
+        self.assertIn("명시적인 CLI, MCP, task contract 표면", readme)
         self.assertIn("사람을 위한 제품 설명서", readme)
-        self.assertIn("Closed release target", release)
+        self.assertIn("closed release target", release)
         self.assertIn("closed release history", release.casefold())
         self.assertNotIn("current release transaction allows", release.casefold())
-        self.assertIn("npm publish;", release)
-        self.assertIn("GitHub release creation or mutation", release)
+        self.assertIn("npm publish 1회", release)
+        self.assertIn("GitHub release creation 또는 mutation", release)
         self.assertIn(
             "`spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`",
             release_notes,
@@ -1054,13 +1058,13 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         improvement = (ROOT / "safety" / "improvement.md").read_text()
 
         self.assertIn("local stdio MCP adapter", readme)
-        self.assertIn("does not replace `CURRENT.md`", readme)
+        self.assertIn("`CURRENT.md`, task contract, approval, permission, proof, lifecycle, release boundary를 대체하지 않습니다", readme)
         self.assertIn("decision", readme)
         self.assertIn("MCP stdio adapter", routing)
         self.assertIn("local stdio only", routing)
         self.assertIn("decision", routing)
         self.assertIn("MCP wrapper behavior", proof)
-        self.assertIn("MCP adapter around `status`, `verify`, `preflight`, `gate`, `decision`, and `init/apply`", improvement)
+        self.assertIn("MCP adapter around `status`, `verify`, `preflight`, `gate`, `decision`, `init/apply`", improvement)
 
     def test_hook_equivalent_gate_is_not_claimed_as_real_shell_or_editor_hook(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -1072,8 +1076,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         for content in (readme, routing, proof, lifecycle, improvement):
             self.assertIn("hook-equivalent gate", content)
         self.assertIn("harness_gate", routing)
-        self.assertIn("no direct Codex app hook surface was found", readme)
-        self.assertIn("does not automatically block your shell or editor", readme)
+        self.assertIn("직접 연결되는 Codex app hook 표면은 없습니다", readme)
+        self.assertIn("shell이나 editor를 자동으로 차단하지 않습니다", readme)
         self.assertIn("shell이나 editor를 자동으로 차단하지 않습니다", readme)
 
 
@@ -1697,7 +1701,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(schema["title"], "HARNESS V2 Transition")
         self.assertEqual(schema["required"], ["timestamp", "from_gate", "to_gate", "reason", "source_refs", "approval_ref", "permission_ref", "proof_ref", "freshness_refs", "stale_check", "actor"])
-        self.assertIn("Lifecycle movement is an evaluated operation, not a log line.", template)
+        self.assertIn("lifecycle movement는 evaluated operation이며, log line 자체가 아닙니다.", template)
         self.assertEqual(transitions[-1].from_gate, "plan_approval")
         self.assertEqual(transitions[-1].to_gate, "development")
 
@@ -2549,7 +2553,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         )
         self.assertEqual(
             report["integrated_surfaces"],
-            ["init", "status", "verify", "preflight", "gate", "mcp", "doctor", "npm-wrapper"],
+            ["init", "status", "verify", "preflight", "gate", "task-start", "mcp", "doctor", "npm-wrapper"],
         )
         self.assertEqual(
             report["recommended_sequence"],
@@ -2647,32 +2651,36 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             improvement_record = (root / "records" / "stages" / "improvement.md").read_text(encoding="utf-8")
             initial_task = json.loads((root / "contracts" / "harness-task.json").read_text(encoding="utf-8"))
 
-            self.assertIn("AI agent entry point", agents)
-            self.assertIn("README.md` is user documentation", agents)
-            self.assertIn("task-contract validator", agents)
+            self.assertIn("AI 에이전트가 작업을 시작할 때 읽는 진입점", agents)
+            self.assertIn("`README.md`는 사용자 설명서", agents)
+            self.assertIn("task contract validator", agents)
             self.assertIn("CLI helper", agents)
-            self.assertIn("not an automatic enforcement sandbox", agents)
+            self.assertIn("자동 enforcement sandbox", agents)
             self.assertIn("completion layer", agents)
-            self.assertIn("Evidence-Scaled Read Order", agents)
-            self.assertIn("Installation, `init`, `apply`, and CLI availability do not approve", agents)
+            self.assertIn("증거 수준에 맞춘 읽기 순서", agents)
+            self.assertIn("설치, `init`, `apply`, CLI 사용 가능 상태는 임의의 미래 작업을 승인하지 않습니다", agents)
             self.assertIn("active task contract", agents)
             self.assertIn("harness-v2 doctor --root .", agents)
-            self.assertIn("README files are user-facing documentation only", rules)
+            self.assertIn("현재 작업 등록", agents)
+            self.assertIn("harness-v2 task start --root .", agents)
+            self.assertIn("README 파일은 사용자용 문서일 뿐입니다", rules)
             self.assertIn("task-contract validator", rules)
-            self.assertIn("not an automatic enforcement sandbox", rules)
+            self.assertIn("자동 enforcement sandbox", rules)
             self.assertIn("completion layer", rules)
-            self.assertIn("Evidence-Scaled Readback", rules)
-            self.assertIn("No one surface substitutes for another", rules)
-            self.assertIn("not an automatic enforcement sandbox", current)
+            self.assertIn("증거 수준에 맞춘 읽기", rules)
+            self.assertIn("어떤 표면도 다른 표면을 대신하지 않습니다", rules)
+            self.assertIn("harness-v2 task start --root .", rules)
+            self.assertIn("자동 enforcement sandbox", current)
             self.assertIn("not_automatic_enforcement_completion", current)
             self.assertIn("harness-v2 doctor --root .", current)
-            self.assertIn("does not authorize arbitrary feature work", current)
-            self.assertIn("init/apply success", approval)
-            self.assertIn("do not grant permission for the next task", permission)
-            self.assertIn("installation/init/apply success", proof)
-            self.assertIn("# Spec Stage Record", spec_record)
-            self.assertIn("# Plan Stage Record", plan_record)
-            self.assertIn("# Improvement Stage Record", improvement_record)
+            self.assertIn("harness-v2 task start --root .", current)
+            self.assertIn("임의의 feature 작업", current)
+            self.assertIn("init/apply 성공", approval)
+            self.assertIn("다음 작업의 permission을 부여하지 않습니다", permission)
+            self.assertIn("설치/init/apply 성공", proof)
+            self.assertIn("# Spec 단계 기록", spec_record)
+            self.assertIn("# Plan 단계 기록", plan_record)
+            self.assertIn("# Improvement 단계 기록", improvement_record)
 
             self.assertEqual(initial_task["source"]["basis"], ["AGENTS.md", "RULES.md", "CURRENT.md"])
             self.assertEqual(set(initial_task["approval"]["approved_paths"]), INITIAL_APPROVED_PATHS)
@@ -2707,6 +2715,358 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                 result = validate_task(mutated, root=root)
                 self.assertFalse(result.ok, denied)
                 self.assertIn(f"permission side effect conflicts with denied side effect: {denied}", "\n".join(result.errors))
+
+    def test_cli_task_start_registers_real_task_from_initial_scaffold(self):
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            subprocess.run(
+                [sys.executable, "-m", "harness_v2", "init", "--root", str(root)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+
+            started = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "harness_v2",
+                    "task",
+                    "start",
+                    "--root",
+                    str(root),
+                    "--title",
+                    "나라장터 실시설계 크롤링 판단",
+                    "--summary",
+                    "전체 추출 후 통과/검토필요/제외 판정 흐름을 설계한다.",
+                    "--source",
+                    "F:\\dailynara",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(started.returncode, 0, started.stderr)
+            payload = json.loads(started.stdout)
+            self.assertTrue(payload["ok"])
+            self.assertEqual(payload["task"], "contracts\\harness-task.json")
+            self.assertIn("CURRENT.md", payload["written"])
+            self.assertIn("contracts\\harness-task.json", payload["written"])
+            self.assertEqual(
+                payload["next"],
+                [
+                    "harness-v2 status --root .",
+                    "harness-v2 verify contracts\\harness-task.json",
+                    "harness-v2 gate contracts\\harness-task.json --root .",
+                ],
+            )
+
+            status = subprocess.run(
+                [sys.executable, "-m", "harness_v2", "status", "--root", str(root)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            verify = subprocess.run(
+                [sys.executable, "-m", "harness_v2", "verify", str(root / "contracts" / "harness-task.json")],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            gate = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "harness_v2",
+                    "gate",
+                    str(root / "contracts" / "harness-task.json"),
+                    "--root",
+                    str(root),
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            denied_publish = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "harness_v2",
+                    "preflight",
+                    str(root / "contracts" / "harness-task.json"),
+                    "--side-effect",
+                    "npm publish",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            denied_readme_write = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "harness_v2",
+                    "preflight",
+                    str(root / "contracts" / "harness-task.json"),
+                    "--mode",
+                    "write",
+                    "--path",
+                    "README.md",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            allowed_record_write = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "harness_v2",
+                    "preflight",
+                    str(root / "contracts" / "harness-task.json"),
+                    "--mode",
+                    "write",
+                    "--path",
+                    "records\\current-task.md",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(status.returncode, 0, status.stderr)
+            self.assertEqual(json.loads(status.stdout), {"state": "active", "substate": "task_registered / scope_pending", "workflow": "default"})
+            self.assertEqual(verify.returncode, 0, verify.stderr)
+            self.assertEqual(gate.returncode, 0, gate.stderr)
+            self.assertNotEqual(denied_publish.returncode, 0)
+            self.assertIn("side effect is not explicitly allowed", "\n".join(json.loads(denied_publish.stdout)["errors"]))
+            self.assertNotEqual(denied_readme_write.returncode, 0)
+            self.assertIn("write path is not approved", "\n".join(json.loads(denied_readme_write.stdout)["errors"]))
+            self.assertEqual(allowed_record_write.returncode, 0, allowed_record_write.stderr)
+
+            current = (root / "CURRENT.md").read_text(encoding="utf-8")
+            task = json.loads((root / "contracts" / "harness-task.json").read_text(encoding="utf-8"))
+            current_task = (root / "records" / "current-task.md").read_text(encoding="utf-8")
+            self.assertIn("나라장터 실시설계 크롤링 판단", current)
+            self.assertIn("전체 추출 후 통과/검토필요/제외 판정 흐름", current)
+            self.assertEqual(task["title"], "나라장터 실시설계 크롤링 판단")
+            self.assertEqual(task["workflow_stage"], "spec")
+            self.assertEqual(task["current_gate"], "spec")
+            self.assertEqual(task["task_mode"], "planned_change")
+            self.assertEqual(task["lifecycle"], {"current_state": "active", "target_state": "active"})
+            self.assertIn("F:\\dailynara", task["source"]["basis"])
+            self.assertEqual(
+                set(task["approval"]["approved_paths"]),
+                {"records\\current-task.md", "records\\stages\\spec.md", "records\\decisions.md"},
+            )
+            self.assertIn("local file writes to records\\current-task.md", task["permission"]["allowed_side_effects"])
+            self.assertIn("task scope remains pending", task["proof"]["obligations"])
+            self.assertIn("나라장터 실시설계 크롤링 판단", current_task)
+
+    def test_cli_task_start_refuses_to_replace_registered_task_without_force(self):
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            subprocess.run(
+                [sys.executable, "-m", "harness_v2", "init", "--root", str(root)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            first = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "harness_v2",
+                    "task",
+                    "start",
+                    "--root",
+                    str(root),
+                    "--title",
+                    "First task",
+                    "--summary",
+                    "First task summary.",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            second = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "harness_v2",
+                    "task",
+                    "start",
+                    "--root",
+                    str(root),
+                    "--title",
+                    "Second task",
+                    "--summary",
+                    "Second task summary.",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(first.returncode, 0, first.stderr)
+            self.assertEqual(second.returncode, 1)
+            payload = json.loads(second.stdout)
+            self.assertFalse(payload["ok"])
+            self.assertIn("active task already registered", "\n".join(payload["errors"]))
+            self.assertIn("--force", second.stderr)
+            current = (root / "CURRENT.md").read_text(encoding="utf-8")
+            self.assertIn("First task", current)
+            self.assertNotIn("Second task", current)
+
+    def test_cli_task_start_rejects_empty_title_and_missing_scaffold(self):
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            missing = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "harness_v2",
+                    "task",
+                    "start",
+                    "--root",
+                    str(root),
+                    "--title",
+                    "Task",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(missing.returncode, 1)
+            self.assertIn("HARNESS V2 scaffold is missing", "\n".join(json.loads(missing.stdout)["errors"]))
+
+            subprocess.run(
+                [sys.executable, "-m", "harness_v2", "init", "--root", str(root)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            empty = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "harness_v2",
+                    "task",
+                    "start",
+                    "--root",
+                    str(root),
+                    "--title",
+                    "   ",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(empty.returncode, 1)
+            self.assertIn("task title must be a non-empty string", "\n".join(json.loads(empty.stdout)["errors"]))
+
+    def test_cli_task_start_rolls_back_when_registered_contract_fails_validation(self):
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            subprocess.run(
+                [sys.executable, "-m", "harness_v2", "init", "--root", str(root)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            previous_current = (root / "CURRENT.md").read_text(encoding="utf-8")
+            previous_task = (root / "contracts" / "harness-task.json").read_text(encoding="utf-8")
+            previous_current_task = (root / "records" / "current-task.md").read_text(encoding="utf-8")
+            (root / "control" / "lifecycle.md").write_text(
+                "# HARNESS V2 Lifecycle Control\n\nKnown local states:\n\n- `ready`\n",
+                encoding="utf-8",
+            )
+
+            started = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "harness_v2",
+                    "task",
+                    "start",
+                    "--root",
+                    str(root),
+                    "--title",
+                    "Rollback task",
+                    "--summary",
+                    "This should fail validation and rollback.",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(started.returncode, 1)
+            self.assertIn("not a known state: active", "\n".join(json.loads(started.stdout)["errors"]))
+            self.assertEqual((root / "CURRENT.md").read_text(encoding="utf-8"), previous_current)
+            self.assertEqual((root / "contracts" / "harness-task.json").read_text(encoding="utf-8"), previous_task)
+            self.assertEqual((root / "records" / "current-task.md").read_text(encoding="utf-8"), previous_current_task)
+
+    def test_node_wrapper_delegates_task_start_to_python_cli(self):
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            init = subprocess.run(
+                ["node", "bin/harness-v2.js", "init", "--root", str(root)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            started = subprocess.run(
+                [
+                    "node",
+                    "bin/harness-v2.js",
+                    "task",
+                    "start",
+                    "--root",
+                    str(root),
+                    "--title",
+                    "npm wrapper task",
+                    "--summary",
+                    "Register through the npm wrapper.",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            verify = subprocess.run(
+                ["node", "bin/harness-v2.js", "verify", str(root / "contracts" / "harness-task.json")],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(init.returncode, 0, init.stderr)
+            self.assertEqual(started.returncode, 0, started.stderr)
+            self.assertEqual(verify.returncode, 0, verify.stderr)
+            self.assertEqual(json.loads(verify.stdout)["task_id"], "npm-wrapper-task")
 
     def test_cli_apply_alias_is_idempotent_without_force(self):
         with tempfile.TemporaryDirectory() as temp_root:

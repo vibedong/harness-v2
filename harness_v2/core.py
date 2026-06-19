@@ -223,6 +223,31 @@ class InitResult:
         }
 
 
+@dataclass(frozen=True)
+class TaskStartResult:
+    ok: bool
+    root: str
+    task: str
+    task_id: str | None
+    written: tuple[str, ...]
+    errors: tuple[str, ...] = ()
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "ok": self.ok,
+            "root": self.root,
+            "task": self.task,
+            "task_id": self.task_id,
+            "written": list(self.written),
+            "errors": list(self.errors),
+            "next": [
+                "harness-v2 status --root .",
+                f"harness-v2 verify {self.task}",
+                f"harness-v2 gate {self.task} --root .",
+            ],
+        }
+
+
 def load_json(path: str | Path) -> dict[str, Any]:
     payload_path = Path(path)
     with payload_path.open("r", encoding="utf-8") as handle:
@@ -292,6 +317,137 @@ def initialize_project(root: str | Path, force: bool = False) -> InitResult:
         skipped=tuple(skipped),
         overwritten=tuple(overwritten),
         redirected_from_package_root=redirected,
+    )
+
+
+def start_task(
+    root: str | Path,
+    *,
+    title: str,
+    summary: str = "",
+    workflow: str | None = None,
+    stage: str = "spec",
+    source_basis: list[str] | None = None,
+    force: bool = False,
+) -> TaskStartResult:
+    root_path = Path(root).resolve()
+    current_path = root_path / "CURRENT.md"
+    task_path = root_path / "contracts" / "harness-task.json"
+    current_task_path = root_path / "records" / "current-task.md"
+
+    if not current_path.exists() or not task_path.exists():
+        return TaskStartResult(
+            ok=False,
+            root=str(root_path),
+            task=INITIAL_TASK_PATH,
+            task_id=None,
+            written=(),
+            errors=("HARNESS V2 scaffold is missing; run `harness-v2 init --root <project>` first",),
+        )
+
+    normalized_title = _one_line(title)
+    if not normalized_title:
+        return TaskStartResult(
+            ok=False,
+            root=str(root_path),
+            task=INITIAL_TASK_PATH,
+            task_id=None,
+            written=(),
+            errors=("task title must be a non-empty string",),
+        )
+
+    try:
+        current = read_current_status(root_path)
+    except Exception as exc:
+        return TaskStartResult(
+            ok=False,
+            root=str(root_path),
+            task=INITIAL_TASK_PATH,
+            task_id=None,
+            written=(),
+            errors=(f"current status: {exc}",),
+        )
+
+    try:
+        existing_task = load_json(task_path)
+    except Exception as exc:
+        return TaskStartResult(
+            ok=False,
+            root=str(root_path),
+            task=INITIAL_TASK_PATH,
+            task_id=None,
+            written=(),
+            errors=(f"task json: {exc}",),
+        )
+
+    previous_current_text = current_path.read_text(encoding="utf-8")
+    previous_task_text = task_path.read_text(encoding="utf-8")
+    previous_current_task_text = current_task_path.read_text(encoding="utf-8") if current_task_path.exists() else None
+
+    if not force and not _is_initial_task_binding(existing_task, current):
+        return TaskStartResult(
+            ok=False,
+            root=str(root_path),
+            task=INITIAL_TASK_PATH,
+            task_id=_string_value(existing_task.get("task_id")) or None,
+            written=(),
+            errors=("active task already registered; pass --force to replace the current task contract",),
+        )
+
+    if stage not in WORKFLOW_STAGES:
+        return TaskStartResult(
+            ok=False,
+            root=str(root_path),
+            task=INITIAL_TASK_PATH,
+            task_id=None,
+            written=(),
+            errors=(f"workflow stage is not known: {stage}",),
+        )
+    if stage != "spec":
+        return TaskStartResult(
+            ok=False,
+            root=str(root_path),
+            task=INITIAL_TASK_PATH,
+            task_id=None,
+            written=(),
+            errors=("task start currently registers new work at the spec stage only",),
+        )
+
+    selected_workflow = workflow.strip() if isinstance(workflow, str) and workflow.strip() else current["workflow"]
+    task_id = _task_id_from_title(normalized_title)
+    source_items = _dedupe_strings(["AGENTS.md", "RULES.md", "CURRENT.md", *(source_basis or [])])
+    summary_text = _one_line(summary) or "User requested task registered through HARNESS V2 task start."
+    task_data = _registered_task_json(task_id, normalized_title, summary_text, selected_workflow, stage, source_items)
+
+    current_path.write_text(_registered_current_md(normalized_title, summary_text, selected_workflow), encoding="utf-8")
+    task_path.write_text(json.dumps(task_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    current_task_path.parent.mkdir(parents=True, exist_ok=True)
+    current_task_path.write_text(_registered_current_task_md(task_id, normalized_title, summary_text, stage, source_items), encoding="utf-8")
+
+    validation = validate_task(task_data, root=root_path, task_path=task_path)
+    if not validation.ok:
+        current_path.write_text(previous_current_text, encoding="utf-8")
+        task_path.write_text(previous_task_text, encoding="utf-8")
+        if previous_current_task_text is None:
+            if current_task_path.exists():
+                current_task_path.unlink()
+        else:
+            current_task_path.write_text(previous_current_task_text, encoding="utf-8")
+        return TaskStartResult(
+            ok=False,
+            root=str(root_path),
+            task=INITIAL_TASK_PATH,
+            task_id=task_id,
+            written=(),
+            errors=validation.errors,
+        )
+
+    return TaskStartResult(
+        ok=True,
+        root=str(root_path),
+        task=INITIAL_TASK_PATH,
+        task_id=task_id,
+        written=("CURRENT.md", INITIAL_TASK_PATH, "records\\current-task.md"),
     )
 
 
@@ -903,30 +1059,239 @@ def _display_path(parts: tuple[str, ...]) -> str:
     return "\\".join(parts)
 
 
+def _string_value(value: Any) -> str:
+    return value if isinstance(value, str) and value.strip() else ""
+
+
+def _one_line(value: str) -> str:
+    return " ".join(value.split()) if isinstance(value, str) else ""
+
+
+def _is_initial_task_binding(task: dict[str, Any], current: dict[str, str]) -> bool:
+    return (
+        task.get("task_id") == "harness-v2-initial-task"
+        and task.get("task_mode") == "scaffold_only"
+        and current.get("state") == "ready"
+        and "initialized" in current.get("substate", "")
+    )
+
+
+def _task_id_from_title(title: str) -> str:
+    chars: list[str] = []
+    previous_separator = False
+    for char in title.casefold():
+        if char.isascii() and char.isalnum():
+            chars.append(char)
+            previous_separator = False
+        elif not previous_separator:
+            chars.append("-")
+            previous_separator = True
+    slug = "".join(chars).strip("-")
+    if not slug:
+        slug = "task-" + hashlib.sha256(title.encode("utf-8")).hexdigest()[:12]
+    return slug[:80]
+
+
+def _dedupe_strings(values: list[str]) -> list[str]:
+    result: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        item = value.strip() if isinstance(value, str) else ""
+        if not item:
+            continue
+        normalized = _normalize_side_effect(item)
+        if normalized in seen:
+            continue
+        result.append(item)
+        seen.add(normalized)
+    return result
+
+
+def _registered_task_json(
+    task_id: str,
+    title: str,
+    summary: str,
+    workflow: str,
+    stage: str,
+    source_basis: list[str],
+) -> dict[str, Any]:
+    if stage != "spec":
+        raise ValueError("task start currently registers new work at the spec stage only")
+    approved_paths = [
+        "records\\current-task.md",
+        "records\\stages\\spec.md",
+        "records\\decisions.md",
+    ]
+    denied_side_effects = [
+        "package publish",
+        "release execution",
+        "dependency install from network",
+        "secret access",
+        "external network mutation",
+        "destructive operation",
+    ]
+    return {
+        "task_id": task_id,
+        "title": title,
+        "workflow": workflow,
+        "contract_version": "0.1.8",
+        "workflow_stage": stage,
+        "current_gate": stage,
+        "task_mode": "planned_change",
+        "record_strength": "strict",
+        "risk_flags": [
+            "user_task_request",
+            "scope_pending",
+        ],
+        "proof_profile": "current",
+        "capability_request": [
+            "task_registration",
+        ],
+        "classification_required": True,
+        "record_density": {
+            "generated_file_count": 0,
+            "required_read_set_size": min(3, len(source_basis)),
+            "field_presence": "strict",
+        },
+        "source": {
+            "basis": source_basis,
+            "current_pointer": "CURRENT.md",
+        },
+        "approval": {
+            "packet": f"Register user task request for specification only: {title}. {summary}",
+            "approved_paths": approved_paths,
+            "excluded_side_effects": denied_side_effects,
+        },
+        "permission": {
+            "allowed_side_effects": [
+                "local file writes to records\\current-task.md",
+                "local file writes to records\\stages\\spec.md",
+                "local file writes to records\\decisions.md",
+                "harness-v2 status --root .",
+                "harness-v2 verify contracts\\harness-task.json",
+                "harness-v2 gate contracts\\harness-task.json --root .",
+            ],
+            "denied_side_effects": denied_side_effects,
+        },
+        "proof": {
+            "obligations": [
+                "task scope remains pending",
+                "harness-v2 status --root .",
+                "harness-v2 verify contracts\\harness-task.json",
+                "harness-v2 gate contracts\\harness-task.json --root .",
+            ],
+        },
+        "lifecycle": {
+            "current_state": "active",
+            "target_state": "active",
+        },
+    }
+
+
+def _registered_current_md(title: str, summary: str, workflow: str) -> str:
+    return f"""# HARNESS V2 Current State
+
+status: applied_project_surface / task_registered / current_pointer
+
+이 프로젝트 루트에는 HARNESS V2가 적용되어 있습니다. AI 에이전트는 `AGENTS.md`, `RULES.md`, 이 파일, `control\\`, `contracts\\harness-task.json`을 작업 경계로 사용해야 합니다.
+
+현재 작업은 사용자의 요청에서 등록되었습니다. 이 등록은 작업을 보이게 만들고 검증 가능하게 만들지만, 구현, dependency, release, secret, external mutation, destructive action 같은 넓은 권한을 자동으로 열지 않습니다.
+
+workflow: `{workflow}`
+
+state: `active`
+
+substate: `task_registered / scope_pending`
+
+source basis:
+
+- `AGENTS.md`
+- `RULES.md`
+- `CURRENT.md`
+- `contracts\\harness-task.json`
+
+## Current Task
+
+title: {title}
+
+summary: {summary}
+
+현재 작업 계약은 `contracts\\harness-task.json`입니다.
+
+실질적인 작업 전에 아래 명령을 실행합니다.
+
+```powershell
+harness-v2 status --root .
+harness-v2 verify contracts\\harness-task.json
+harness-v2 gate contracts\\harness-task.json --root .
+```
+
+등록된 계약은 `spec` 단계에서 시작하며 범위는 `scope_pending` 상태로 둡니다. 구현, package 작업, release, external mutation, dependency 설치, secret 접근, destructive action, 넓은 파일 쓰기 전에 정확한 approval, permission, proof, lifecycle 필드를 가진 amended task contract를 만들거나 받아야 합니다.
+
+## Stop Conditions
+
+요청된 작업이 active task contract 밖의 경로, 명령, side effect, secret, external mutation, dependency 변경, package publish, release execution, destructive operation을 필요로 하면 멈춥니다.
+"""
+
+
+def _registered_current_task_md(task_id: str, title: str, summary: str, stage: str, source_basis: list[str]) -> str:
+    source_lines = "\n".join(f"- `{item}`" for item in source_basis)
+    return f"""# 현재 작업 기록
+
+task_id: `{task_id}`
+
+title: {title}
+
+workflow_stage: `{stage}`
+
+status: registered / scope_pending
+
+## 요약
+
+{summary}
+
+## Source Basis
+
+{source_lines}
+
+이 기록은 `contracts\\harness-task.json`을 사람이 읽기 쉽게 보조하는 파일입니다. 이 파일, `CURRENT.md`, task contract가 서로 다르면 `CURRENT.md`와 task contract가 우선합니다.
+"""
+
+
 def _agents_md() -> str:
-    return """# HARNESS V2 Agent Entry
+    return """# HARNESS V2 에이전트 진입점
 
-This project has HARNESS V2 applied at the project root. This file is the AI agent entry point.
+이 프로젝트에는 루트에 HARNESS V2가 적용되어 있습니다. 이 파일은 AI 에이전트가 작업을 시작할 때 읽는 진입점입니다.
 
-The applied surface is a scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, or lifecycle transition engine.
+적용된 표면은 scaffold, task contract validator, CLI helper입니다. 자동 enforcement sandbox, completion layer, approval engine, proof generator, lifecycle transition engine이 아닙니다.
 
-HARNESS V2 provides a hook-equivalent gate command for Codex-app-focused work. `harness-v2 gate <task.json> --root .` combines `status`, `verify`, and optional `preflight` checks into one executable boundary check. It does not automatically block shell or editor actions.
+HARNESS V2는 Codex 앱 중심 작업을 위해 hook-equivalent gate 명령을 제공합니다. `harness-v2 gate <task.json> --root .`는 `status`, `verify`, 선택적 `preflight`를 하나의 실행 가능한 경계 확인으로 묶습니다. 이 명령은 shell이나 editor 동작을 자동으로 차단하지 않습니다.
 
-`README.md` is user documentation. It explains the tool for people, but it does not grant source authority, approval, permission, proof, lifecycle state, or release authority.
+`README.md`는 사용자 설명서입니다. 사람에게 도구를 설명하지만 source authority, approval, permission, proof, lifecycle state, release authority를 부여하지 않습니다.
 
-## Evidence-Scaled Read Order
+## 증거 수준에 맞춘 읽기 순서
 
-For routine current-task work, read:
+일반적인 현재 작업은 아래만 먼저 읽습니다.
 
 1. `RULES.md`
 2. `CURRENT.md`
-3. The active task contract, initially `contracts\\harness-task.json`
+3. active task contract. 초기값은 `contracts\\harness-task.json`입니다.
 
-Then read only the owner surface required by the task. Expand to exact `control\\source.md`, `control\\approval.md`, `control\\permission.md`, `control\\proof.md`, or `control\\lifecycle.md` text before approval binding, permission-sensitive commands, proof/completion claims, lifecycle movement, stale/conflicting state, release work, external mutation, destructive action, or product implementation risk.
+그 다음에는 작업에 필요한 owner surface만 읽습니다. approval binding, permission-sensitive command, proof/completion claim, lifecycle movement, stale/conflicting state, release work, external mutation, destructive action, product implementation risk가 있으면 `control\\source.md`, `control\\approval.md`, `control\\permission.md`, `control\\proof.md`, `control\\lifecycle.md`의 정확한 원문까지 확장해서 읽습니다.
 
-## Required Preflight
+## 현재 작업 등록
 
-Run these checks before changing files or side-effectful commands:
+사용자가 구체적인 작업을 요청했는데 `CURRENT.md`가 아직 initial scaffold pointer라면, 실질 작업 전에 그 요청을 등록합니다.
+
+```powershell
+harness-v2 task start --root . --title "<짧은 작업명>" --summary "<사용자 요청 요약>"
+```
+
+등록 후 `status`, `verify`, `gate`를 실행합니다. 사용자 요청만 보고 구현, dependency, package, release, secret, external mutation, destructive permission을 넓게 추론하지 않습니다. 정확한 amended task contract가 명시하기 전까지 닫아둡니다.
+
+## 필수 사전 확인
+
+파일 변경이나 side-effectful command 전에 아래를 실행합니다.
 
 ```powershell
 harness-v2 status --root .
@@ -935,53 +1300,54 @@ harness-v2 gate contracts\\harness-task.json --root .
 harness-v2 doctor --root .
 ```
 
-## Working Boundary
+## 작업 경계
 
-Installation, `init`, `apply`, and CLI availability do not approve arbitrary future work. Stay inside `approval.approved_paths`. Do not execute `approval.excluded_side_effects` or `permission.denied_side_effects`.
+설치, `init`, `apply`, CLI 사용 가능 상태는 임의의 미래 작업을 승인하지 않습니다. `approval.approved_paths` 안에서만 움직입니다. `approval.excluded_side_effects` 또는 `permission.denied_side_effects`에 있는 작업은 실행하지 않습니다.
 
-If the current user request does not fit the active task contract, stop before mutating files or running side-effectful commands and ask for a new or amended task contract.
+현재 사용자 요청이 active task contract와 맞지 않으면 파일 변경이나 side-effectful command 전에 멈추고 새 contract 또는 amended contract를 요청합니다.
 
-Completion requires current proof from `proof.obligations`; previous chat, README text, skipped checks, or successful installation are not proof.
+완료를 말하려면 `proof.obligations`에 맞는 현재 proof가 필요합니다. 이전 채팅, README 문구, 생략한 검사, 설치 성공은 proof가 아닙니다.
 """
 
 
 def _rules_md() -> str:
-    return """# HARNESS V2 Project Rules
+    return """# HARNESS V2 프로젝트 규칙
 
-HARNESS V2 records the current task boundary for AI-assisted work. It is a scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, lifecycle transition engine, editor, shell, network, or release sandbox.
+HARNESS V2는 AI 보조 작업의 현재 작업 경계를 기록합니다. HARNESS V2는 scaffold, task-contract validator, CLI helper입니다. 자동 enforcement sandbox, completion layer, approval engine, proof generator, lifecycle transition engine, editor, shell, network, release sandbox가 아닙니다.
 
-The local hook-equivalent gate is an explicit command: `harness-v2 gate <task.json> --root .`. It checks the active task boundary through status, verify, and optional preflight. It does not install a real Codex app hook and does not automatically block shell or editor actions.
+local hook-equivalent gate는 명시적인 명령입니다: `harness-v2 gate <task.json> --root .`. 이 명령은 status, verify, 선택적 preflight를 통해 active task boundary를 확인합니다. 실제 Codex app hook을 설치하지 않고, shell이나 editor 동작을 자동으로 차단하지 않습니다.
 
-README files are user-facing documentation only. They never grant approval, permission, proof, lifecycle state, route authority, release readiness, or package publish authority.
+README 파일은 사용자용 문서일 뿐입니다. README는 approval, permission, proof, lifecycle state, route authority, release readiness, package publish authority를 부여하지 않습니다.
 
-## Required Flow
+## 필수 흐름
 
-1. Read `CURRENT.md`.
-2. Read the active task contract.
-3. Verify the task contract with `harness-v2 verify <task.json>`.
-4. Run `harness-v2 gate <task.json> --root .` before file changes or side-effectful commands.
-5. Run `harness-v2 doctor --root .` when checking local integration and release boundary status.
-6. Modify only paths named in `approval.approved_paths`.
-7. Do not execute side effects named in `approval.excluded_side_effects` or `permission.denied_side_effects`.
-8. Before completion, run or report every item in `proof.obligations`.
+1. `CURRENT.md`를 읽습니다.
+2. active task contract를 읽습니다.
+3. 사용자 요청이 실제 작업이고 active contract가 아직 initial scaffold binding이면 `harness-v2 task start --root . --title "<짧은 작업명>" --summary "<사용자 요청 요약>"`을 실행합니다.
+4. `harness-v2 verify <task.json>`로 task contract를 검증합니다.
+5. 파일 변경이나 side-effectful command 전에 `harness-v2 gate <task.json> --root .`를 실행합니다.
+6. local integration과 release boundary 상태를 확인할 때는 `harness-v2 doctor --root .`를 실행합니다.
+7. `approval.approved_paths`에 명시된 경로만 수정합니다.
+8. `approval.excluded_side_effects` 또는 `permission.denied_side_effects`에 명시된 side effect는 실행하지 않습니다.
+9. 완료 전에는 `proof.obligations`의 모든 항목을 실행하거나 blocked 상태를 보고합니다.
 
-## Evidence-Scaled Readback
+## 증거 수준에 맞춘 읽기
 
-Routine current-task work may start from this file, `CURRENT.md`, and the active task contract.
+일반적인 현재 작업은 이 파일, `CURRENT.md`, active task contract에서 시작할 수 있습니다.
 
-Read exact source, approval, permission, proof, and lifecycle control text before approval binding, permission-sensitive commands, proof/completion claims, lifecycle movement, stale/conflicting state, release work, external mutation, destructive action, or product implementation risk. Extra reading must improve the current decision evidence; it does not widen the active contract.
+approval binding, permission-sensitive command, proof/completion claim, lifecycle movement, stale/conflicting state, release work, external mutation, destructive action, product implementation risk가 있으면 source, approval, permission, proof, lifecycle control 원문을 정확히 읽습니다. 추가 읽기는 현재 판단 증거를 강화하기 위한 것이며 active contract를 넓히지 않습니다.
 
-## Authority Separation
+## 권한 분리
 
-- `source` names what can be trusted.
-- `approval` names exact user-approved paths and exclusions.
-- `permission` names allowed and denied side effects.
-- `proof` names required current evidence.
-- `lifecycle` names the current and target state.
+- `source`는 신뢰할 수 있는 근거를 지정합니다.
+- `approval`은 사용자가 승인한 정확한 경로와 제외 항목을 지정합니다.
+- `permission`은 허용되거나 금지된 side effect를 지정합니다.
+- `proof`는 필요한 현재 증거를 지정합니다.
+- `lifecycle`은 현재 상태와 목표 상태를 지정합니다.
 
-No one surface substitutes for another. Installation, package metadata, README examples, prior conversation, and tool availability do not widen the active contract.
+어떤 표면도 다른 표면을 대신하지 않습니다. 설치, package metadata, README 예시, 이전 대화, tool availability는 active contract를 넓히지 않습니다.
 
-If source, approval, permission, proof, lifecycle, or requested paths conflict, fail closed and ask for a new contract.
+source, approval, permission, proof, lifecycle, 요청 경로가 충돌하면 fail closed하고 새 contract를 요청합니다.
 """
 
 
@@ -990,13 +1356,13 @@ def _current_md() -> str:
 
 status: applied_project_surface / init / current_pointer
 
-This project root has HARNESS V2 applied. AI agents should use `AGENTS.md`, `RULES.md`, this file, `control\\`, and the active task contract as the operating boundary.
+이 프로젝트 루트에는 HARNESS V2가 적용되어 있습니다. AI 에이전트는 `AGENTS.md`, `RULES.md`, 이 파일, `control\\`, active task contract를 작업 경계로 사용해야 합니다.
 
-The applied surface is a scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, or lifecycle transition engine, and it does not approve future work by installation, `init`, `apply`, or CLI availability.
+적용된 표면은 scaffold, task-contract validator, CLI helper입니다. 자동 enforcement sandbox, completion layer, approval engine, proof generator, lifecycle transition engine이 아니며, 설치, `init`, `apply`, CLI 사용 가능 상태만으로 미래 작업을 승인하지 않습니다.
 
-Use `harness-v2 gate contracts\\harness-task.json --root .` as the local hook-equivalent gate before work. The gate is explicit and checkable, but it does not automatically block shell or editor actions.
+작업 전 local hook-equivalent gate로 `harness-v2 gate contracts\\harness-task.json --root .`를 사용합니다. 이 gate는 명시적이고 확인 가능하지만 shell이나 editor 동작을 자동으로 차단하지 않습니다.
 
-Use `harness-v2 doctor --root .` as a read-only integration report. It does not create release readiness, proof by itself, or lifecycle movement.
+`harness-v2 doctor --root .`는 read-only integration report로 사용합니다. 이 명령은 release readiness, proof 자체, lifecycle movement를 만들지 않습니다.
 
 workflow: `default`
 
@@ -1012,15 +1378,21 @@ source basis:
 
 ## Current Task
 
-The initial task contract is `contracts\\harness-task.json`.
+초기 task contract는 `contracts\\harness-task.json`입니다.
 
-That initial contract proves the scaffold was applied and can be verified. It does not authorize arbitrary feature work, package work, dependency changes, release execution, secrets, destructive operations, or external mutation.
+이 초기 contract는 scaffold가 적용되었고 검증 가능하다는 것만 증명합니다. 임의의 feature 작업, package 작업, dependency 변경, release execution, secret 접근, destructive operation, external mutation을 승인하지 않습니다.
 
-For each real task, create or receive a task contract whose source, approval, permission, proof, and lifecycle fields match the requested work.
+실제 작업마다 요청된 작업에 맞는 source, approval, permission, proof, lifecycle 필드를 가진 task contract를 만들거나 받아야 합니다.
+
+이 파일이 아직 initial scaffold pointer를 보여주고 있고 사용자가 구체적인 작업을 요청했다면 먼저 등록합니다.
+
+```powershell
+harness-v2 task start --root . --title "<짧은 작업명>" --summary "<사용자 요청 요약>"
+```
 
 ## Stop Conditions
 
-Stop if the requested work needs paths, commands, side effects, secrets, external mutation, dependency changes, package publish, release execution, or destructive operations outside the active task contract.
+요청된 작업이 active task contract 밖의 경로, 명령, side effect, secret, external mutation, dependency 변경, package publish, release execution, destructive operation을 필요로 하면 멈춥니다.
 """
 
 
@@ -1029,11 +1401,11 @@ def _source_md() -> str:
 
 status: applied_project_surface / init / source_control
 
-Source basis is declared by each task contract in `source.basis`.
+source basis는 각 task contract의 `source.basis`에 선언됩니다.
 
-`README.md`, package metadata, old chat, skipped checks, and successful installation are not source authority unless the active task contract names them as source basis for the current task.
+`README.md`, package metadata, 오래된 채팅, 생략된 검사, 설치 성공은 active task contract가 현재 작업의 source basis로 명시하지 않는 한 source authority가 아닙니다.
 
-This file is guidance only. The active task contract and `CURRENT.md` decide the current source pointer.
+이 파일은 guidance입니다. 현재 source pointer는 active task contract와 `CURRENT.md`가 결정합니다.
 """
 
 
@@ -1042,11 +1414,11 @@ def _approval_md() -> str:
 
 status: applied_project_surface / init / approval_control
 
-Approval is declared by each task contract in `approval.packet` and `approval.approved_paths`.
+approval은 각 task contract의 `approval.packet`과 `approval.approved_paths`에 선언됩니다.
 
-No file path is approved unless the active task contract names it.
+active task contract가 명시하지 않은 파일 경로는 승인된 것이 아닙니다.
 
-Broad phrases such as "go ahead", installation success, init/apply success, README examples, or tool availability do not approve extra paths, package publish, release execution, dependency installation, secrets, external mutation, or destructive operations.
+“진행해”, 설치 성공, init/apply 성공, README 예시, tool availability 같은 넓은 표현은 추가 경로, package publish, release execution, dependency 설치, secret 접근, external mutation, destructive operation을 승인하지 않습니다.
 """
 
 
@@ -1055,13 +1427,13 @@ def _permission_md() -> str:
 
 status: applied_project_surface / init / permission_control
 
-Permission is declared by each task contract in `permission.allowed_side_effects` and `permission.denied_side_effects`.
+permission은 각 task contract의 `permission.allowed_side_effects`와 `permission.denied_side_effects`에 선언됩니다.
 
-Denied side effects win over broad requests. Secrets, dependency installation, package publish, release execution, external mutation, and destructive operations require a separate explicit task contract.
+denied side effect는 넓은 요청보다 우선합니다. secret 접근, dependency 설치, package publish, release execution, external mutation, destructive operation은 별도의 명시적 task contract가 필요합니다.
 
-Approval text does not become permission by itself. Permission must be checked against the active task contract before running commands or changing files.
+approval 문구는 그 자체로 permission이 되지 않습니다. 명령 실행이나 파일 변경 전 active task contract에 맞춰 permission을 확인해야 합니다.
 
-`harness-v2 init`, `harness-v2 apply`, and successful verification do not grant permission for the next task.
+`harness-v2 init`, `harness-v2 apply`, 검증 성공은 다음 작업의 permission을 부여하지 않습니다.
 """
 
 
@@ -1070,11 +1442,11 @@ def _proof_md() -> str:
 
 status: applied_project_surface / init / proof_control
 
-Proof obligations are declared by each task contract in `proof.obligations`.
+proof obligation은 각 task contract의 `proof.obligations`에 선언됩니다.
 
-Do not claim completion until the active proof obligations are run or their blocked status is reported.
+active proof obligation을 실행하거나 blocked 상태를 보고하기 전에는 완료를 주장하지 않습니다.
 
-Proof must be current evidence from the actual project root or the consumer surface named by the task. README text, previous success, installation/init/apply success, and unverified assumptions are not proof.
+proof는 실제 프로젝트 루트 또는 task가 명시한 consumer surface에서 나온 현재 증거여야 합니다. README 문구, 이전 성공, 설치/init/apply 성공, 검증되지 않은 추정은 proof가 아닙니다.
 """
 
 
@@ -1083,25 +1455,25 @@ def _lifecycle_md() -> str:
 
 status: applied_project_surface / init / lifecycle_control
 
-Known local states:
+알려진 local state:
 
 - `ready`
 - `active`
 - `blocked`
 - `done`
 
-Lifecycle movement must be named in the active task contract. Progress notes are not lifecycle transitions.
+lifecycle movement는 active task contract에 명시되어야 합니다. 진행 메모는 lifecycle transition이 아닙니다.
 
-Do not mark work done, release-ready, published, migrated, or automatically enforced unless the active task contract names that transition and current proof satisfies it.
+active task contract가 해당 transition을 명시하고 현재 proof가 충족되기 전에는 작업을 done, release-ready, published, migrated, automatically enforced 상태로 표시하지 않습니다.
 """
 
 
 def _records_readme_md() -> str:
     return """# HARNESS V2 Records
 
-This folder keeps task-local records for the applied project.
+이 폴더는 적용된 프로젝트의 task-local record를 보관합니다.
 
-`records\\stages\\` follows the official HARNESS V2 workflow stages:
+`records\\stages\\`는 공식 HARNESS V2 workflow stage를 따릅니다.
 
 1. `spec`
 2. `spec_review`
@@ -1112,54 +1484,64 @@ This folder keeps task-local records for the applied project.
 7. `development_review`
 8. `improvement`
 
-These records support continuity. They are not source authority, approval, permission, proof, lifecycle transition, routing permission, or release readiness by themselves.
+이 기록들은 연속성을 돕습니다. 하지만 그 자체로 source authority, approval, permission, proof, lifecycle transition, routing permission, release readiness가 되지 않습니다.
 """
 
 
 def _current_task_md() -> str:
-    return """# Current Task Record
+    return """# 현재 작업 기록
 
-Use this file to summarize the current task in human-readable form.
+이 파일은 현재 작업을 사람이 읽기 쉬운 형태로 요약할 때 사용합니다.
 
-Keep it aligned with `contracts\\harness-task.json`. If the task contract and this note disagree, the task contract and `CURRENT.md` win.
+`contracts\\harness-task.json`과 맞춰 유지합니다. task contract와 이 메모가 다르면 task contract와 `CURRENT.md`가 우선합니다.
 """
 
 
 def _stage_record_md(title: str) -> str:
-    return f"""# {title} Stage Record
+    korean_title = {
+        "Spec": "Spec",
+        "Spec Review": "Spec Review",
+        "Plan": "Plan",
+        "Plan Review": "Plan Review",
+        "Plan Approval": "Plan Approval",
+        "Development": "Development",
+        "Development Review": "Development Review",
+        "Improvement": "Improvement",
+    }.get(title, title)
+    return f"""# {korean_title} 단계 기록
 
 status: initialized / empty
 
-Use this file for task-local notes from the `{title.casefold().replace(" ", "_")}` workflow stage.
+이 파일은 `{title.casefold().replace(" ", "_")}` workflow stage의 task-local note를 기록할 때 사용합니다.
 
-Do not treat this record as approval, permission, proof, lifecycle transition, route authority, release readiness, or source of truth by itself.
+이 기록만으로 approval, permission, proof, lifecycle transition, route authority, release readiness, source of truth가 되지 않습니다.
 """
 
 
 def _decisions_md() -> str:
-    return """# Decision Record
+    return """# 결정 기록
 
-Use this file to summarize task-local decisions and deferred items.
+이 파일은 task-local decision과 deferred item을 요약할 때 사용합니다.
 
-Every decision must point back to the active task contract, current source basis, or user-approved packet before it can affect implementation.
+모든 decision은 구현에 영향을 주기 전에 active task contract, current source basis, user-approved packet 중 하나를 근거로 가져야 합니다.
 """
 
 
 def _records_proof_md() -> str:
-    return """# Proof Record
+    return """# Proof 기록
 
-Use this file to summarize proof commands, outputs, blocked checks, and readback evidence for the active task.
+이 파일은 active task의 proof command, output, blocked check, readback evidence를 요약할 때 사용합니다.
 
-Proof is valid only when it matches the active task contract's `proof.obligations` and current consumer surface.
+proof는 active task contract의 `proof.obligations`와 현재 consumer surface에 맞을 때만 유효합니다.
 """
 
 
 def _handoff_md() -> str:
-    return """# Handoff Record
+    return """# Handoff 기록
 
-Use this file only when continuity notes are needed for another agent or later session.
+이 파일은 다른 에이전트나 이후 세션을 위한 continuity note가 필요할 때만 사용합니다.
 
-Handoff notes are not approval, permission, proof, lifecycle transition, or source authority.
+handoff note는 approval, permission, proof, lifecycle transition, source authority가 아닙니다.
 """
 
 

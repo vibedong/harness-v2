@@ -1,27 +1,27 @@
-# HARNESS V2 Release Notes
+# HARNESS V2 릴리스 노트
 
-## HARNESS V2 0.1.9 Release Notes
+## HARNESS V2 0.1.9 릴리스 노트
 
-npm release notes for the install/apply confusion guard release.
+install/apply 혼동 방지 release를 위한 npm release note입니다.
 
-## Changed
+## 변경 사항
 
-- Publishes the current source package metadata as `0.1.9`.
-- Clarifies that `git clone https://github.com/vibedong/harness-v2.git .` is not the project-application path.
-- Makes `init` / `apply` fail closed when the target root is a direct HARNESS V2 source checkout with an arbitrary project name.
-- Keeps the package-root redirect only for a nested `harness-v2` package folder.
-- Adds `doctor` diagnostics that distinguish a HARNESS V2 source checkout from an applied project scaffold.
-- Keeps README as user-facing product documentation, not AI operating authority.
+- current source package metadata를 `0.1.9`로 publish합니다.
+- `git clone https://github.com/vibedong/harness-v2.git .`가 project-application path가 아님을 명확히 합니다.
+- target root가 임의 project name을 가진 direct HARNESS V2 source checkout이면 `init` / `apply`가 fail closed하도록 합니다.
+- package-root redirect는 nested `harness-v2` package folder에만 유지합니다.
+- HARNESS V2 source checkout과 applied project scaffold를 구분하는 `doctor` diagnostic을 추가합니다.
+- README는 AI operating authority가 아니라 user-facing product documentation으로 유지합니다.
 
-## Runtime Requirements
+## Runtime 요구사항
 
-- Node.js 18 or newer.
-- Python 3.11 or newer on PATH.
-- Supported npm wrapper platforms for this release: Windows and macOS.
+- Node.js 18 이상
+- PATH에 등록된 Python 3.11 이상
+- 이번 release의 npm wrapper 지원 platform: Windows, macOS
 
-## Verification
+## 검증
 
-The release was verified with:
+release는 아래 명령으로 검증했습니다.
 
 ```text
 python -m compileall harness_v2
@@ -38,40 +38,40 @@ npm pack --dry-run
 npm publish
 ```
 
-## Publish Scope
+## Publish 범위
 
-Release target:
+release target:
 
 ```text
 harness-v2@0.1.9
 ```
 
-Repeat npm publish for this version is not possible. A later package update requires a new version.
+이 version에 대한 repeat npm publish는 불가능합니다. 이후 package update에는 새 version이 필요합니다.
 
-## HARNESS V2 0.1.8 Release Notes
+## HARNESS V2 0.1.8 릴리스 노트
 
-npm release notes for the Korean public README release.
+Korean public README release를 위한 npm release note입니다.
 
-## Changed
+## 변경 사항
 
-- Publishes the current source package metadata as `0.1.8`.
-- Uses a single Korean `README.md` for GitHub and npm users.
-- Removes the separate `README.ko.md` package surface.
-- Keeps README as user-facing product documentation, not AI operating authority.
-- Preserves the `workflow_binding_engine` classification and explicit CLI/MCP/task-contract boundary wording.
-- Preserves the canonical workflow stages: `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`.
-- Keeps `harness-v2 init --root .` and `harness-v2 apply --root .` focused on project-root files, not a nested `harness-v2` folder.
-- Keeps the hook-equivalent `gate` command, local stdio MCP adapter, `harness_decision`, and read-only `doctor` report.
+- current source package metadata를 `0.1.8`로 publish합니다.
+- GitHub와 npm user를 위해 single Korean `README.md`를 사용합니다.
+- 별도 `README.ko.md` package surface를 제거합니다.
+- README는 AI operating authority가 아니라 user-facing product documentation으로 유지합니다.
+- `workflow_binding_engine` classification과 explicit CLI/MCP/task-contract boundary wording을 보존합니다.
+- canonical workflow stage `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`를 보존합니다.
+- `harness-v2 init --root .`와 `harness-v2 apply --root .`는 nested `harness-v2` folder가 아니라 project-root file에 집중합니다.
+- hook-equivalent `gate` command, local stdio MCP adapter, `harness_decision`, read-only `doctor` report를 유지합니다.
 
-## Runtime Requirements
+## Runtime 요구사항
 
-- Node.js 18 or newer.
-- Python 3.11 or newer on PATH.
-- Supported npm wrapper platforms for this release: Windows and macOS.
+- Node.js 18 이상
+- PATH에 등록된 Python 3.11 이상
+- 이번 release의 npm wrapper 지원 platform: Windows, macOS
 
-## Verification
+## 검증
 
-The release was verified with:
+release는 아래 명령으로 검증했습니다.
 
 ```text
 python -m compileall harness_v2
@@ -88,31 +88,31 @@ npm pack --dry-run
 npm publish
 ```
 
-## Publish Scope
+## Publish 범위
 
-Release target:
+release target:
 
 ```text
 harness-v2@0.1.8
 ```
 
-Release transaction state after publish:
+publish 후 release transaction state:
 
 ```text
 NPM_PUBLISHED / GITHUB_SOURCE_PUSHED / RELEASE_EXECUTION_CLOSED
 ```
 
-Repeat npm publish for this version is not possible. A later package update requires a new version.
+이 version에 대한 repeat npm publish는 불가능합니다. 이후 package update에는 새 version이 필요합니다.
 
-## HARNESS V2 0.1.7 Release Notes
+## HARNESS V2 0.1.7 릴리스 노트
 
-npm and GitHub release notes for the previous Codex-app-focused HARNESS V2 source.
+이전 Codex-app-focused HARNESS V2 source를 위한 npm/GitHub release note입니다.
 
-## Changed In 0.1.7
+## 0.1.7 변경 사항
 
-- Publishes the source package metadata as `0.1.7`.
-- Includes generated scaffold hardening for `AGENTS.md`, `RULES.md`, `CURRENT.md`, and `control\`.
-- Keeps `harness-v2 init --root .` and `harness-v2 apply --root .` focused on project-root files, not a nested `harness-v2` folder.
-- Includes executable 8-stage workflow checks, side-effect preflight checks, and the hook-equivalent `gate` command.
-- Includes the local stdio MCP adapter for `status`, `verify`, `preflight`, `gate`, `init`, and `apply`.
-- Keeps `doctor` as a read-only integration report that does not mutate project files.
+- source package metadata를 `0.1.7`로 publish합니다.
+- `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`에 대한 generated scaffold hardening을 포함합니다.
+- `harness-v2 init --root .`와 `harness-v2 apply --root .`는 nested `harness-v2` folder가 아니라 project-root file에 집중합니다.
+- executable 8-stage workflow check, side-effect preflight check, hook-equivalent `gate` command를 포함합니다.
+- `status`, `verify`, `preflight`, `gate`, `init`, `apply`를 위한 local stdio MCP adapter를 포함합니다.
+- `doctor`는 project file을 mutate하지 않는 read-only integration report로 유지합니다.

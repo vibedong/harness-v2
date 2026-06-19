@@ -1,15 +1,15 @@
-# HARNESS V2 Approval Request Template
+# HARNESS V2 Approval Request 템플릿
 
 status: template / not_approval / not_permission / not_execution
 
 ```text
 Approve <work unit>:
-create or modify only these paths under <root>:
+<root> 아래에서 아래 path만 만들거나 수정:
 <path list>
-Allowed local commands for verification only:
+verification only로 허용할 local command:
 <command list>
-No package metadata, package build, install, publish, deploy, release, git,
-dependency install, secret access, external network mutation, or destructive operation.
+package metadata, package build, install, publish, deploy, release, git,
+dependency install, secret access, external network mutation, destructive operation 금지.
 ```
 
-This template is not a user response and does not bind approval by itself.
+이 템플릿은 user response가 아니며, 자체로 approval을 묶지 않습니다.

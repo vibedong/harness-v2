@@ -34,6 +34,7 @@ def inspect_project(root: str | Path) -> dict[str, Any]:
             "verify",
             "preflight",
             "gate",
+            "task-start",
             "mcp",
             "doctor",
             "npm-wrapper",

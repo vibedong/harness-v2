@@ -1,6 +1,6 @@
 # HARNESS V2 Transition Log
 
-Lifecycle movement is an evaluated operation, not a log line.
+lifecycle movement는 evaluated operation이며, log line 자체가 아닙니다.
 
 ## transition: <iso8601 timestamp>
 from_gate: <spec|spec_review|plan|plan_review|plan_approval|development|development_review|improvement>
