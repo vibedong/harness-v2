@@ -201,6 +201,7 @@ class InitResult:
     skipped: tuple[str, ...]
     overwritten: tuple[str, ...]
     redirected_from_package_root: bool
+    errors: tuple[str, ...] = ()
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -212,6 +213,7 @@ class InitResult:
             "skipped": list(self.skipped),
             "overwritten": list(self.overwritten),
             "redirected_from_package_root": self.redirected_from_package_root,
+            "errors": list(self.errors),
             "next": [
                 "harness-v2 status --root .",
                 f"harness-v2 verify {self.initial_task}",
@@ -242,6 +244,24 @@ def validate_task_file(path: str | Path) -> ValidationResult:
 def initialize_project(root: str | Path, force: bool = False) -> InitResult:
     requested_root = Path(root).resolve()
     redirected = _looks_like_harness_package_root(requested_root)
+    if _looks_like_harness_source_checkout(requested_root) and not redirected:
+        error = (
+            "target appears to be a HARNESS V2 source checkout, not an applied project root; "
+            "do not git clone vibedong/harness-v2 into the project folder. "
+            "Install the CLI with `npm install -g harness-v2@latest`, then run "
+            "`harness-v2 init --root <project>` in the real project root."
+        )
+        return InitResult(
+            ok=False,
+            requested_root=str(requested_root),
+            root=str(requested_root),
+            initial_task=INITIAL_TASK_PATH,
+            created=(),
+            skipped=(),
+            overwritten=(),
+            redirected_from_package_root=False,
+            errors=(error,),
+        )
     root_path = requested_root.parent if redirected else requested_root
     root_path.mkdir(parents=True, exist_ok=True)
 
@@ -852,7 +872,17 @@ def _contains_normalized(values: list[str], expected: str) -> bool:
     return any(_normalize_side_effect(value) == expected_normalized for value in values)
 
 
+def is_harness_source_checkout(path: str | Path) -> bool:
+    return _looks_like_harness_source_checkout(Path(path).resolve())
+
+
 def _looks_like_harness_package_root(path: Path) -> bool:
+    if path.name.casefold() not in {"harness-v2", "harness_v2"}:
+        return False
+    return _looks_like_harness_source_checkout(path)
+
+
+def _looks_like_harness_source_checkout(path: Path) -> bool:
     if path.parent == path:
         return False
     package_json = path / "package.json"

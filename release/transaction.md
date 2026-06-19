@@ -1,6 +1,6 @@
 # HARNESS V2 Release Transaction
 
-status: package_github_surface / npm_0.1.8_release / release_transaction_boundary
+status: package_github_surface / npm_0.1.9_release / release_transaction_boundary
 
 This file defines the local markdown boundary for install and release transactions. It records release readiness inputs but does not execute npm, Python package registry publish, GitHub release, release tag, deploy, or product release work by itself.
 
@@ -26,14 +26,15 @@ No one of these surfaces can create release readiness by itself.
 Release target:
 
 ```text
-harness-v2@0.1.8
+harness-v2@0.1.9
 ```
 
 Release scope:
 
-- publish the current GitHub source state as npm package `harness-v2@0.1.8`;
-- include the single Korean public `README.md`;
-- exclude the removed `README.ko.md` package surface;
+- publish the current GitHub source state as npm package `harness-v2@0.1.9`;
+- include install/apply confusion guards for direct source checkouts;
+- keep the single Korean public `README.md`;
+- keep the removed `README.ko.md` package surface excluded;
 - keep Python package registry publish denied;
 - keep GitHub release/tag creation out of this npm-only transaction unless separately approved.
 
@@ -54,14 +55,14 @@ npm pack --dry-run
 npm publish
 ```
 
-After successful publish, this transaction is closed for `harness-v2@0.1.8`.
+After successful publish, this transaction is closed for `harness-v2@0.1.9`.
 
 ## Closed Release History
 
 Closed release target:
 
 ```text
-harness-v2@0.1.7 / v0.1.7
+harness-v2@0.1.8 / harness-v2@0.1.7 / v0.1.7
 ```
 
 Closed status:
@@ -72,6 +73,7 @@ NPM_PUBLISHED / GITHUB_RELEASE_PUBLISHED / RELEASE_EXECUTION_CLOSED
 
 Historical notes:
 
+- npm package `harness-v2@0.1.8` is closed npm release history.
 - npm package `harness-v2@0.1.7` and Git tag/GitHub release `v0.1.7` are closed release history.
 - That transaction authorized one npm publish, one Git tag, and one GitHub release for the exact 0.1.7 transaction only.
 - The closed transaction does not authorize repeat npm publish, tag mutation, GitHub release mutation, Python package registry publish, dependency installation, secret access, external mutation, or destructive work.
@@ -91,9 +93,9 @@ A future release transaction must name:
 
 ## Current Permission Ceiling
 
-The current npm 0.1.8 release transaction allows local verification, git add/commit/push for the verified release commit, and one npm publish for `harness-v2@0.1.8`.
+The current npm 0.1.9 release transaction allows local verification, git add/commit/push for the verified release commit, and one npm publish for `harness-v2@0.1.9`.
 
-The current npm 0.1.8 release transaction denies:
+The current npm 0.1.9 release transaction denies:
 
 - Python package registry publish or deploy work;
 - GitHub release creation or mutation;

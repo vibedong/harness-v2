@@ -1,5 +1,53 @@
 # HARNESS V2 Release Notes
 
+## HARNESS V2 0.1.9 Release Notes
+
+npm release notes for the install/apply confusion guard release.
+
+## Changed
+
+- Publishes the current source package metadata as `0.1.9`.
+- Clarifies that `git clone https://github.com/vibedong/harness-v2.git .` is not the project-application path.
+- Makes `init` / `apply` fail closed when the target root is a direct HARNESS V2 source checkout with an arbitrary project name.
+- Keeps the package-root redirect only for a nested `harness-v2` package folder.
+- Adds `doctor` diagnostics that distinguish a HARNESS V2 source checkout from an applied project scaffold.
+- Keeps README as user-facing product documentation, not AI operating authority.
+
+## Runtime Requirements
+
+- Node.js 18 or newer.
+- Python 3.11 or newer on PATH.
+- Supported npm wrapper platforms for this release: Windows and macOS.
+
+## Verification
+
+The release was verified with:
+
+```text
+python -m compileall harness_v2
+python -m unittest discover tests
+python -m harness_v2 status --root .
+python -m harness_v2 verify tests\fixtures\valid-task.json
+python -m harness_v2 gate tests\fixtures\valid-task.json --root .
+python -m harness_v2 doctor --root .
+node bin\harness-v2.js status --root .
+node bin\harness-v2.js verify tests\fixtures\valid-task.json
+node bin\harness-v2.js gate tests\fixtures\valid-task.json --root .
+node bin\harness-v2.js doctor --root .
+npm pack --dry-run
+npm publish
+```
+
+## Publish Scope
+
+Release target:
+
+```text
+harness-v2@0.1.9
+```
+
+Repeat npm publish for this version is not possible. A later package update requires a new version.
+
 ## HARNESS V2 0.1.8 Release Notes
 
 npm release notes for the Korean public README release.

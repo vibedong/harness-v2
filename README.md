@@ -49,6 +49,16 @@ HARNESS V2가 아닌 것:
 
 ## 설치
 
+프로젝트에 HARNESS V2를 적용할 때는 GitHub 저장소를 프로젝트 폴더에 clone하지 않습니다. GitHub clone은 HARNESS V2 자체를 개발하거나 기여할 때 쓰는 방식입니다.
+
+아래처럼 실행하면 대상 프로젝트가 HARNESS V2 소스 저장소가 되어버리므로 적용 방식이 아닙니다.
+
+```powershell
+git clone https://github.com/vibedong/harness-v2.git .
+```
+
+일반 사용자는 npm으로 CLI를 설치한 뒤, 실제 프로젝트 루트에서 `init`을 실행합니다.
+
 ```powershell
 npm install -g harness-v2
 ```
@@ -89,6 +99,8 @@ F:\my-project\templates\
 ```
 
 Do not create or leave a nested `harness-v2` folder inside the project.
+
+만약 `package.json`, `harness_v2\`, `bin\`, `tests\`, `.git` remote가 `vibedong/harness-v2`인 상태가 프로젝트 루트에 보인다면, 그것은 하네스가 적용된 프로젝트가 아니라 HARNESS V2 소스 체크아웃입니다. 이 경우 `harness-v2 doctor --root .`가 source checkout 경고를 표시합니다.
 
 ## 5분 Quick Start
 
@@ -260,9 +272,12 @@ AI 코딩 도구에 맡길 때는 짧게 말해도 됩니다.
 
 단, README 자체는 AI 지시문이 아닙니다. 실제 작업 규칙은 프로젝트-local HARNESS 파일이 담당합니다.
 
-## 0.1.8 업데이트 내용
+## 0.1.9 업데이트 내용
 
-- `harness-v2@0.1.8` npm package로 한국어 단일 README를 배포합니다.
+- `harness-v2@0.1.9` npm package로 설치/적용 혼동 방지 guard를 배포합니다.
+- GitHub clone을 프로젝트 적용 방식으로 오해하지 않도록 README 설치 흐름을 강화했습니다.
+- 임의 이름의 프로젝트 폴더에 HARNESS V2 소스가 직접 clone된 경우 `init/apply`가 실패하고 진단을 출력합니다.
+- `doctor`가 HARNESS V2 source checkout과 applied project scaffold를 구분해서 보고합니다.
 - GitHub/npm 메인 문서는 `README.md` 하나만 사용하고, 별도 `README.ko.md`는 제거했습니다.
 - README를 사람을 위한 초보자용 제품 설명서로 정리했습니다.
 - 적용 파일이 대상 프로젝트 루트에 바로 생성되도록 정리했습니다.

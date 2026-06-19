@@ -117,6 +117,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.command in {"init", "apply"}:
         payload = initialize_project(Path(args.root), force=args.force)
         print(json.dumps(payload.to_json(), ensure_ascii=False, sort_keys=True))
+        if not payload.ok:
+            print("\n".join(payload.errors), file=sys.stderr)
+            return 1
         return 0
 
     parser.error(f"unknown command: {args.command}")
