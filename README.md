@@ -319,6 +319,14 @@ AI 코딩 도구에 맡길 때는 짧게 말해도 됩니다.
 
 단, README 자체는 AI 지시문이 아닙니다. 실제 작업 규칙은 프로젝트-local HARNESS 파일이 담당합니다.
 
+## 0.1.10 업데이트 내용
+
+- `harness-v2@0.1.10` npm package로 한국어 scaffold 설명문과 `task start` 흐름을 배포합니다.
+- 새로 적용되는 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `records\`, `templates\` 설명문을 한국어 중심으로 정리했습니다.
+- `harness-v2 task start --root .`로 실제 작업 요청을 current task contract에 등록할 수 있습니다.
+- task start 결과는 `CURRENT.md`, `contracts\harness-task.json`, `records\current-task.md`에 반영되며, 기존 initial scaffold 상태를 임의 작업 승인으로 오해하지 않도록 `scope_pending` 경계를 둡니다.
+- 기존 npm `0.1.9`처럼 설치/적용 혼동 방지 guard와 source checkout 진단은 유지합니다.
+
 ## 0.1.9 업데이트 내용
 
 - `harness-v2@0.1.9` npm package로 설치/적용 혼동 방지 guard를 배포합니다.

@@ -1,6 +1,6 @@
 # HARNESS V2 Release Transaction
 
-status: package_github_surface / npm_0.1.9_release / release_transaction_boundary
+status: package_github_surface / npm_0.1.10_release / release_transaction_boundary
 
 이 파일은 install/release transaction을 위한 local markdown boundary를 정의합니다. release readiness input을 기록하지만, 자체로 npm, Python package registry publish, GitHub release, release tag, deploy, product release work를 실행하지 않습니다.
 
@@ -26,13 +26,14 @@ release work는 아래 표면과 분리됩니다.
 release target:
 
 ```text
-harness-v2@0.1.9
+harness-v2@0.1.10
 ```
 
 release scope:
 
-- current GitHub source state를 npm package `harness-v2@0.1.9`로 publish합니다.
-- direct source checkout에 대한 install/apply confusion guard를 포함합니다.
+- current GitHub source state를 npm package `harness-v2@0.1.10`으로 publish합니다.
+- 한국어 scaffold 설명문과 `task start` 흐름을 포함합니다.
+- direct source checkout에 대한 install/apply confusion guard를 유지합니다.
 - single Korean public `README.md`를 유지합니다.
 - 제거된 `README.ko.md` package surface는 제외 상태로 유지합니다.
 - Python package registry publish는 denied 상태로 유지합니다.
@@ -55,14 +56,14 @@ npm pack --dry-run
 npm publish
 ```
 
-publish 성공 후 이 transaction은 `harness-v2@0.1.9`에 대해 closed 상태입니다.
+publish 성공 후 이 transaction은 `harness-v2@0.1.10`에 대해 closed 상태입니다.
 
 ## 닫힌 Release History
 
 closed release target:
 
 ```text
-harness-v2@0.1.8 / harness-v2@0.1.7 / v0.1.7
+harness-v2@0.1.9 / harness-v2@0.1.8 / harness-v2@0.1.7 / v0.1.7
 ```
 
 closed status:
@@ -73,6 +74,7 @@ NPM_PUBLISHED / GITHUB_RELEASE_PUBLISHED / RELEASE_EXECUTION_CLOSED
 
 historical notes:
 
+- npm package `harness-v2@0.1.9`는 closed npm release history입니다.
 - npm package `harness-v2@0.1.8`은 closed npm release history입니다.
 - npm package `harness-v2@0.1.7`과 Git tag/GitHub release `v0.1.7`은 closed release history입니다.
 - 해당 transaction은 exact 0.1.7 transaction에 대해서만 npm publish 1회, Git tag 1회, GitHub release 1회를 승인했습니다.
@@ -93,9 +95,9 @@ future release transaction은 아래를 명시해야 합니다.
 
 ## 현재 Permission Ceiling
 
-현재 npm 0.1.9 release transaction은 local verification, verified release commit을 위한 git add/commit/push, `harness-v2@0.1.9` npm publish 1회를 허용합니다.
+현재 npm 0.1.10 release transaction은 local verification, verified release commit을 위한 git add/commit/push, `harness-v2@0.1.10` npm publish 1회를 허용합니다.
 
-현재 npm 0.1.9 release transaction은 아래를 denied로 둡니다.
+현재 npm 0.1.10 release transaction은 아래를 denied로 둡니다.
 
 - Python package registry publish 또는 deploy work
 - GitHub release creation 또는 mutation

@@ -1,5 +1,53 @@
 # HARNESS V2 릴리스 노트
 
+## HARNESS V2 0.1.10 릴리스 노트
+
+한국어 scaffold 설명문과 실제 작업 등록 흐름을 포함한 npm release note입니다.
+
+## 변경 사항
+
+- current source package metadata를 `0.1.10`으로 publish합니다.
+- generated project scaffold의 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `records\`, `templates\` 설명문을 한국어 중심으로 정리합니다.
+- `harness-v2 task start --root .` 명령으로 실제 작업 요청을 active task contract에 등록하는 흐름을 추가합니다.
+- `task start`는 `CURRENT.md`, `contracts\harness-task.json`, `records\current-task.md`를 함께 갱신하고, initial scaffold 상태를 임의 작업 승인으로 오해하지 않도록 `scope_pending` 상태를 사용합니다.
+- 기존 `0.1.9`의 install/apply confusion guard와 source checkout diagnostic을 유지합니다.
+- README는 AI operating authority가 아니라 user-facing product documentation으로 유지합니다.
+
+## Runtime 요구사항
+
+- Node.js 18 이상
+- PATH에 등록된 Python 3.11 이상
+- 이번 release의 npm wrapper 지원 platform: Windows, macOS
+
+## 검증
+
+release는 아래 명령으로 검증했습니다.
+
+```text
+python -m compileall harness_v2
+python -m unittest discover tests
+python -m harness_v2 status --root .
+python -m harness_v2 verify tests\fixtures\valid-task.json
+python -m harness_v2 gate tests\fixtures\valid-task.json --root .
+python -m harness_v2 doctor --root .
+node bin\harness-v2.js status --root .
+node bin\harness-v2.js verify tests\fixtures\valid-task.json
+node bin\harness-v2.js gate tests\fixtures\valid-task.json --root .
+node bin\harness-v2.js doctor --root .
+npm pack --dry-run
+npm publish
+```
+
+## Publish 범위
+
+release target:
+
+```text
+harness-v2@0.1.10
+```
+
+이 version에 대한 repeat npm publish는 불가능합니다. 이후 package update에는 새 version이 필요합니다.
+
 ## HARNESS V2 0.1.9 릴리스 노트
 
 install/apply 혼동 방지 release를 위한 npm release note입니다.
