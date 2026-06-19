@@ -1,6 +1,6 @@
 # HARNESS V2 Lifecycle Control
 
-status: package_github_surface / transition_ledger_lifecycle_guard / lifecycle_control
+status: package_github_surface / stale_backtrack_engine / lifecycle_control
 
 workflow: `remaining_completion_program`
 
@@ -24,6 +24,8 @@ Known local states:
 - `workflow_realignment_review`
 - `transition_ledger_authoring`
 - `transition_ledger_review`
+- `stale_backtrack_authoring`
+- `stale_backtrack_review`
 - `public_release_candidate`
 - `public_release_published`
 - `package_candidate_ready`
@@ -36,13 +38,13 @@ Known local states:
 The current local lifecycle entry is:
 
 ```text
-workflow_realignment_review -> transition_ledger_review
+transition_ledger_review -> stale_backtrack_review
 ```
 
 Active slice:
 
 ```text
-transition_ledger_lifecycle_guard / unreleased_local / release_closed
+stale_backtrack_engine / unreleased_local / release_closed
 ```
 
 Scope:
@@ -60,9 +62,13 @@ Scope:
 - lifecycle movement is an evaluated operation, not a log line;
 - transition evaluation checks route edge, task source gate, project-relative source refs, approval reference, permission reference, proof reference, freshness refs, and stale check before accepting movement;
 - legacy stage aliases and same-task `improvement -> spec` movement fail closed;
+- `contracts\freshness.schema.json`, `templates\freshness-map.json`, and `harness_v2\freshness.py` define the Goal 3 freshness/backtrack surface;
+- absent freshness maps produce compatibility diagnostics and do not silently overwrite existing projects;
+- stale freshness anchors emit explicit `backtrack_target` and `reason` values;
+- stale approval, permission, proof, artifact, source, or transition evidence cannot be reused silently;
 - the hook-equivalent gate remains an explicit status/verify/preflight command, not a real shell/editor hook;
 - local verification commands are named in `control\permission.md`;
-- no npm publish, Python package registry publish, GitHub release or tag mutation, dependency install, secret access, external mutation outside the approved Goal 2 git push, or destructive operation is part of this lifecycle entry.
+- no npm publish, Python package registry publish, GitHub release or tag mutation, dependency install, secret access, external mutation outside the approved Goal 3 git push, or destructive operation is part of this lifecycle entry.
 
 This entry is not a public release, repeat npm publish, Python package registry publish, future release authority, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, MCP client configuration, ApprovalDecision, PermissionDecision, ProofReceipt, or an automatic LifecycleTransition.
 
@@ -96,6 +102,18 @@ The evaluator must reject:
 
 ## Backtrack Rule
 
-Backtrack to `workflow_realignment_authoring`, `package_publish_review`, or `public_release_published` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, npm wrapper surface, generated scaffold behavior, workflow stage enum, or target surface becomes stale or conflicting.
+Backtrack targets for freshness anchors:
+
+- spec source stale -> `spec`
+- spec review source stale -> `spec_review` or `spec` depending changed source
+- plan source stale -> `plan`
+- plan review stale -> `plan_review` or `plan` depending changed source
+- plan approval scope stale -> `plan_approval`
+- permission side-effect scope stale -> `plan_approval` or `development` depending whether development started
+- proof obligation stale -> `development_review` or `development` depending changed source
+- transition ledger stale -> last verified lifecycle gate
+- release boundary stale -> improvement or blocked release audit
+
+Backtrack to `stale_backtrack_authoring`, `transition_ledger_review`, `workflow_realignment_authoring`, `package_publish_review`, or `public_release_published` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, npm wrapper surface, generated scaffold behavior, workflow stage enum, freshness map, or target surface becomes stale or conflicting.
 
 This file does not produce proof, approval, npm publish state, Python package registry publish state, release state, route permission, regression pass, improvement execution, or permission for future slices.

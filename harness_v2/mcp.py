@@ -214,6 +214,7 @@ def _call_tool(params: Any) -> dict[str, Any]:
             "effective_record_strength": result.effective_record_strength,
             "compatibility_mode": result.compatibility_mode,
             "gate_state": result.gate_state,
+            "freshness": result.freshness,
         }
     elif name == "harness_preflight":
         result = evaluate_preflight(

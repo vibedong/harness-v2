@@ -41,6 +41,7 @@ APPROVED_SOURCE_FILES = {
     "release/transaction.md",
     "contracts/gate-state.schema.json",
     "contracts/transition.schema.json",
+    "contracts/freshness.schema.json",
     "contracts/task.schema.json",
     "contracts/approval.schema.json",
     "contracts/permission.schema.json",
@@ -50,6 +51,7 @@ APPROVED_SOURCE_FILES = {
     "templates/task.json",
     "templates/gate-state.json",
     "templates/transition-log.md",
+    "templates/freshness-map.json",
     "templates/gate-manifest.md",
     "templates/approval-request.md",
     "templates/proof-report.md",
@@ -62,6 +64,7 @@ APPROVED_SOURCE_FILES = {
     "harness_v2/preflight.py",
     "harness_v2/gate.py",
     "harness_v2/lifecycle.py",
+    "harness_v2/freshness.py",
     "harness_v2/mcp.py",
     "tests/test_harness_v2.py",
     "tests/fixtures/valid-task.json",
@@ -69,6 +72,8 @@ APPROVED_SOURCE_FILES = {
     "tests/fixtures/invalid-gate-mismatch.json",
     "tests/fixtures/valid-transition-log.md",
     "tests/fixtures/invalid-transition-stale-approval.md",
+    "tests/fixtures/invalid-stale-approval.json",
+    "tests/fixtures/invalid-stale-proof.json",
 }
 ALLOWED_COMMANDS = {
     "python -m compileall harness_v2",
@@ -90,15 +95,17 @@ ALLOWED_COMMANDS = {
     "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
     "npm pack --dry-run",
 }
-GOAL2_COMMANDS = {
+GOAL3_COMMANDS = {
     "python -m compileall harness_v2",
     "python -m unittest discover tests",
+    "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
     "python -m harness_v2 gate tests\\fixtures\\valid-task.json --root .",
+    "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
     "node bin\\harness-v2.js gate tests\\fixtures\\valid-task.json --root .",
 }
-PERMISSION_COMMANDS = GOAL2_COMMANDS
+PERMISSION_COMMANDS = GOAL3_COMMANDS
 ALLOWED_GIT_COMMANDS = {
-    "git add <intended Goal 2 product files>",
+    "git add <intended Goal 3 product files>",
     "git commit",
     "git push",
 }
@@ -764,6 +771,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertEqual(verify_payload["record_strength"], "minimal")
             self.assertEqual(verify_payload["effective_record_strength"], "strict")
             self.assertTrue(verify_payload["compatibility_mode"])
+            self.assertIn("freshness", verify_payload)
+            self.assertFalse(verify_payload["freshness"]["present"])
             self.assertTrue(preflight_payload["ok"])
             self.assertTrue(gate_payload["ok"])
             self.assertTrue(gate_payload["hook_equivalent"])
@@ -860,11 +869,11 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         )
         self.assertEqual(
             commands_under_heading(ROOT / "control" / "approval.md", "## Bound Local Verification Commands"),
-            GOAL2_COMMANDS,
+            GOAL3_COMMANDS,
         )
         self.assertEqual(
             commands_under_heading(ROOT / "control" / "proof.md", "## Verification Commands"),
-            GOAL2_COMMANDS,
+            GOAL3_COMMANDS,
         )
         self.assertEqual(
             commands_under_heading(ROOT / "control" / "permission.md", "## Allowed Local Commands"),
@@ -1582,6 +1591,305 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertFalse(same_task_loop.ok)
         self.assertIn("same-task improvement-to-spec transition is denied", same_task_loop.errors)
 
+    def test_goal3_freshness_schema_template_and_compatibility_diagnostic(self):
+        from harness_v2.core import validate_task_file
+        from harness_v2.freshness import evaluate_freshness_map
+
+        schema = json.loads((ROOT / "contracts" / "freshness.schema.json").read_text(encoding="utf-8"))
+        template = json.loads((ROOT / "templates" / "freshness-map.json").read_text(encoding="utf-8"))
+        result = validate_task_file(VALID_TASK)
+        freshness = evaluate_freshness_map(ROOT)
+        stale_approval = evaluate_freshness_map(ROOT, ROOT / "tests" / "fixtures" / "invalid-stale-approval.json")
+        stale_proof = evaluate_freshness_map(ROOT, ROOT / "tests" / "fixtures" / "invalid-stale-proof.json")
+
+        self.assertEqual(schema["title"], "HARNESS V2 Freshness Map")
+        self.assertIn("anchors", schema["required"])
+        self.assertIn("evidence_refs", schema["properties"]["anchors"]["items"]["required"])
+        self.assertEqual(template["schema_version"], "0.1.8")
+        self.assertIn("anchors", template)
+        self.assertIn("evidence_refs", template["anchors"][0])
+        self.assertTrue(result.ok, result.errors)
+        self.assertFalse(result.freshness["present"])
+        self.assertIn("compatibility_diagnostic", result.freshness)
+        self.assertFalse(freshness.present)
+        self.assertTrue(freshness.ok)
+        self.assertFalse(stale_approval.ok)
+        self.assertEqual(stale_approval.stale[0]["backtrack_target"], "plan_approval")
+        self.assertFalse(stale_proof.ok)
+        self.assertEqual(stale_proof.stale[0]["backtrack_target"], "development_review")
+
+    def test_goal3_stale_plan_source_emits_backtrack_target(self):
+        from harness_v2.core import validate_task_file
+        from harness_v2.freshness import evaluate_freshness_map
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            task_path = write_goal2_task(root, stage="plan_review")
+            plan_path = root / "records" / "stages" / "plan.md"
+            plan_hash = sha256_file(plan_path)
+            evidence_ref = write_goal3_evidence(root, "records\\stages\\plan-review.md", plan_hash)
+            write_goal3_freshness_map(
+                root,
+                [
+                    goal3_anchor(
+                        "plan-source",
+                        "records\\stages\\plan.md",
+                        plan_hash,
+                        affects=["plan_review", "plan_approval"],
+                        backtrack_target="plan",
+                        reason="plan source changed",
+                        evidence_refs=[evidence_ref],
+                    )
+                ],
+            )
+            plan_path.write_text("# Plan Stage Record\nchanged\n", encoding="utf-8")
+            freshness = evaluate_freshness_map(root)
+            validation = validate_task_file(task_path)
+
+        self.assertFalse(freshness.ok)
+        self.assertEqual(freshness.stale[0]["backtrack_target"], "plan")
+        self.assertEqual(freshness.stale[0]["reason"], "plan source changed")
+        self.assertIn("plan_review", freshness.stale[0]["affects"])
+        self.assertFalse(validation.ok)
+        self.assertIn("freshness stale: plan-source -> plan: plan source changed", validation.errors)
+
+    def test_goal3_approval_scope_invalidates_permission_and_development_transition(self):
+        from harness_v2.freshness import evaluate_freshness_map
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            write_goal2_task(root, stage="plan_approval")
+            approval_path = root / "control" / "approval.md"
+            approval_hash = sha256_file(approval_path)
+            evidence_ref = write_goal3_evidence(root, "control\\permission.md", approval_hash)
+            write_goal3_freshness_map(
+                root,
+                [
+                    goal3_anchor(
+                        "approval-scope",
+                        "control\\approval.md",
+                        approval_hash,
+                        affects=["permission", "development_transition"],
+                        backtrack_target="plan_approval",
+                        reason="approval scope changed",
+                        evidence_refs=[evidence_ref],
+                    )
+                ],
+            )
+            approval_path.write_text("# Approval\nchanged scope\n", encoding="utf-8")
+            result = evaluate_freshness_map(root)
+
+        self.assertFalse(result.ok)
+        self.assertEqual(result.stale[0]["anchor_id"], "approval-scope")
+        self.assertEqual(result.stale[0]["backtrack_target"], "plan_approval")
+        self.assertIn("permission", result.stale[0]["affects"])
+        self.assertIn("development_transition", result.stale[0]["affects"])
+
+    def test_goal3_permission_side_effect_scope_invalidates_development_transition(self):
+        from harness_v2.freshness import evaluate_freshness_map
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            write_goal2_task(root, stage="development")
+            permission_path = root / "control" / "permission.md"
+            permission_hash = sha256_file(permission_path)
+            evidence_ref = write_goal3_evidence(root, "records\\stages\\development.md", permission_hash)
+            write_goal3_freshness_map(
+                root,
+                [
+                    goal3_anchor(
+                        "permission-side-effect-scope",
+                        "control\\permission.md",
+                        permission_hash,
+                        affects=["permission", "development_transition"],
+                        backtrack_target="development",
+                        reason="permission side-effect scope changed after development started",
+                        evidence_refs=[evidence_ref],
+                    )
+                ],
+            )
+            permission_path.write_text("# Permission\nchanged side effect scope\n", encoding="utf-8")
+            result = evaluate_freshness_map(root)
+
+        self.assertFalse(result.ok)
+        self.assertEqual(result.stale[0]["anchor_id"], "permission-side-effect-scope")
+        self.assertEqual(result.stale[0]["backtrack_target"], "development")
+        self.assertEqual(result.stale[0]["reason"], "permission side-effect scope changed after development started")
+
+    def test_goal3_proof_and_test_changes_invalidate_proof_receipt(self):
+        from harness_v2.freshness import evaluate_freshness_map
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            write_goal2_task(root, stage="development_review")
+            proof_path = root / "control" / "proof.md"
+            tests_path = root / "tests" / "test_harness_v2.py"
+            tests_path.parent.mkdir(parents=True)
+            tests_path.write_text("# proof test\n", encoding="utf-8")
+            proof_hash = sha256_file(proof_path)
+            tests_hash = sha256_file(tests_path)
+            evidence_ref = write_goal3_evidence(root, "records\\proof.md", proof_hash, tests_hash)
+            write_goal3_freshness_map(
+                root,
+                [
+                    goal3_anchor("proof-obligation", "control\\proof.md", proof_hash, affects=["proof_receipt"], backtrack_target="development_review", reason="proof obligation changed", evidence_refs=[evidence_ref]),
+                    goal3_anchor("proof-tests", "tests\\test_harness_v2.py", tests_hash, affects=["proof_receipt"], backtrack_target="development_review", reason="proof test changed", evidence_refs=[evidence_ref]),
+                ],
+            )
+            proof_path.write_text("# Proof\nchanged predicate\n", encoding="utf-8")
+            tests_path.write_text("# proof test changed\n", encoding="utf-8")
+            result = evaluate_freshness_map(root)
+
+        self.assertFalse(result.ok)
+        self.assertEqual({item["anchor_id"] for item in result.stale}, {"proof-obligation", "proof-tests"})
+        self.assertTrue(all(item["backtrack_target"] == "development_review" for item in result.stale))
+
+    def test_goal3_artifact_registry_stale_survives_metadata_only_edits(self):
+        from harness_v2.freshness import evaluate_freshness_map
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            write_goal2_task(root, stage="development_review")
+            registry_path = root / "artifacts" / "registry.md"
+            registry_path.parent.mkdir(parents=True)
+            registry_path.write_text("# Artifact Registry\ninitial\n", encoding="utf-8")
+            registry_hash = sha256_file(registry_path)
+            evidence_ref = write_goal3_evidence(root, "records\\stages\\development-review.md", registry_hash)
+            map_path = write_goal3_freshness_map(
+                root,
+                [
+                    goal3_anchor(
+                        "artifact-registry",
+                        "artifacts\\registry.md",
+                        registry_hash,
+                        affects=["artifact_freshness_refs"],
+                        backtrack_target="development_review",
+                        reason="artifact registry changed",
+                        evidence_refs=[evidence_ref],
+                    )
+                ],
+            )
+            registry_path.write_text("# Artifact Registry\nchanged\n", encoding="utf-8")
+            first = evaluate_freshness_map(root)
+            payload = json.loads(map_path.read_text(encoding="utf-8"))
+            payload["anchors"][0]["source_sha256"] = sha256_file(registry_path)
+            payload["anchors"][0]["reason"] = "metadata-only attempted clear"
+            map_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+            second = evaluate_freshness_map(root)
+
+        self.assertFalse(first.ok)
+        self.assertFalse(second.ok)
+        self.assertEqual(second.stale[0]["anchor_id"], "artifact-registry")
+        self.assertEqual(second.stale[0]["backtrack_target"], "development_review")
+        self.assertIn("evidence_ref does not bind source_sha256", "\n".join(second.stale[0]["evidence_errors"]))
+
+    def test_goal3_rejects_invalid_backtrack_target_and_directory_anchor_without_crash(self):
+        from harness_v2.freshness import evaluate_freshness_map
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            write_goal2_task(root, stage="development_review")
+            directory_anchor = root / "records" / "stages"
+            evidence_ref = write_goal3_evidence(root, "records\\stages\\development-review.md", "0" * 64)
+            write_goal3_freshness_map(
+                root,
+                [
+                    goal3_anchor(
+                        "bad-target",
+                        "records\\stages",
+                        "0" * 64,
+                        affects=["proof_receipt"],
+                        backtrack_target="nonsense",
+                        reason="bad target must not pass",
+                        evidence_refs=[evidence_ref],
+                    )
+                ],
+            )
+            self.assertTrue(directory_anchor.is_dir())
+            result = evaluate_freshness_map(root)
+
+        self.assertFalse(result.ok)
+        joined_errors = "\n".join(result.errors)
+        self.assertIn("backtrack_target 'nonsense' is not allowed", joined_errors)
+        self.assertIn("path must reference a file: records\\stages", joined_errors)
+
+    def test_goal3_cli_verify_failure_outputs_stale_reason_and_freshness_payload(self):
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            task_path = write_goal2_task(root, stage="plan_review")
+            plan_path = root / "records" / "stages" / "plan.md"
+            plan_hash = sha256_file(plan_path)
+            evidence_ref = write_goal3_evidence(root, "records\\stages\\plan-review.md", plan_hash)
+            write_goal3_freshness_map(
+                root,
+                [
+                    goal3_anchor(
+                        "plan-source",
+                        "records\\stages\\plan.md",
+                        plan_hash,
+                        affects=["plan_review", "plan_approval"],
+                        backtrack_target="plan",
+                        reason="plan source changed",
+                        evidence_refs=[evidence_ref],
+                    )
+                ],
+            )
+            plan_path.write_text("# Plan Stage Record\nchanged\n", encoding="utf-8")
+            completed = subprocess.run(
+                [sys.executable, "-m", "harness_v2", "verify", str(task_path)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+        self.assertEqual(completed.returncode, 1)
+        payload = json.loads(completed.stdout)
+        self.assertFalse(payload["ok"])
+        self.assertEqual(payload["freshness"]["stale"][0]["backtrack_target"], "plan")
+        self.assertEqual(payload["freshness"]["stale"][0]["reason"], "plan source changed")
+        self.assertIn("freshness stale: plan-source -> plan: plan source changed", completed.stderr)
+
+    def test_goal3_mcp_verify_reports_stale_freshness_details(self):
+        from harness_v2.mcp import handle_message
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            task_path = write_goal2_task(root, stage="development")
+            permission_path = root / "control" / "permission.md"
+            permission_hash = sha256_file(permission_path)
+            evidence_ref = write_goal3_evidence(root, "records\\stages\\development.md", permission_hash)
+            write_goal3_freshness_map(
+                root,
+                [
+                    goal3_anchor(
+                        "permission-side-effect-scope",
+                        "control\\permission.md",
+                        permission_hash,
+                        affects=["permission", "development_transition"],
+                        backtrack_target="development",
+                        reason="permission side-effect scope changed after development started",
+                        evidence_refs=[evidence_ref],
+                    )
+                ],
+            )
+            permission_path.write_text("# Permission\nchanged side effect scope\n", encoding="utf-8")
+            response = handle_message(
+                json.dumps(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": 1,
+                        "method": "tools/call",
+                        "params": {"name": "harness_verify", "arguments": {"task": str(task_path)}},
+                    }
+                )
+            )
+
+        payload = response["result"]["structuredContent"]
+        self.assertFalse(payload["ok"])
+        self.assertEqual(payload["freshness"]["stale"][0]["anchor_id"], "permission-side-effect-scope")
+        self.assertEqual(payload["freshness"]["stale"][0]["reason"], "permission side-effect scope changed after development started")
+
     def test_verifier_accepts_all_known_workflow_stages(self):
         from harness_v2.core import validate_task
 
@@ -2177,9 +2485,11 @@ def write_goal2_task(root: Path, *, stage: str) -> Path:
     for relative_path in (
         "control\\approval.md",
         "control\\permission.md",
+        "control\\proof.md",
         "records\\proof.md",
         "records\\stages\\spec.md",
         "records\\stages\\spec-review.md",
+        "records\\stages\\plan.md",
         "records\\stages\\plan-review.md",
         "records\\stages\\plan-approval.md",
         "records\\stages\\development-review.md",
@@ -2190,6 +2500,49 @@ def write_goal2_task(root: Path, *, stage: str) -> Path:
     task_path = root / "contracts" / "harness-task.json"
     task_path.write_text(json.dumps(goal2_task_payload(stage), indent=2, sort_keys=True), encoding="utf-8")
     return task_path
+
+
+def write_goal3_freshness_map(root: Path, anchors: list[dict]) -> Path:
+    map_path = root / "records" / "freshness-map.json"
+    map_path.parent.mkdir(parents=True, exist_ok=True)
+    map_path.write_text(
+        json.dumps({"schema_version": "0.1.8", "anchors": anchors}, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    return map_path
+
+
+def goal3_anchor(
+    anchor_id: str,
+    path: str,
+    source_sha256: str,
+    *,
+    affects: list[str],
+    backtrack_target: str,
+    reason: str,
+    evidence_refs: list[dict[str, str]],
+) -> dict:
+    return {
+        "id": anchor_id,
+        "path": path,
+        "source_sha256": source_sha256,
+        "affects": affects,
+        "backtrack_target": backtrack_target,
+        "reason": reason,
+        "evidence_refs": evidence_refs,
+    }
+
+
+def write_goal3_evidence(root: Path, relative_path: str, *source_hashes: str) -> dict[str, str]:
+    path = root / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = ["# Freshness Evidence", *[f"source_sha256: {source_hash}" for source_hash in source_hashes]]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return {"path": relative_path, "sha256": sha256_file(path)}
+
+
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def valid_task_payload() -> dict:

@@ -1,0 +1,21 @@
+{
+  "schema_version": "0.1.8",
+  "anchors": [
+    {
+      "id": "proof-obligation",
+      "path": "control\\proof.md",
+      "source_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "affects": [
+        "proof_receipt"
+      ],
+      "backtrack_target": "development_review",
+      "reason": "proof obligation changed after proof receipt evidence",
+      "evidence_refs": [
+        {
+          "path": "records\\proof.md",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    }
+  ]
+}

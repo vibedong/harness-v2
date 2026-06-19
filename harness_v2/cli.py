@@ -68,6 +68,7 @@ def main(argv: list[str] | None = None) -> int:
         if result.ok:
             print(json.dumps(_verify_payload(result), sort_keys=True))
             return 0
+        print(json.dumps(_verify_payload(result), sort_keys=True))
         print("\n".join(result.errors), file=sys.stderr)
         return 1
 
@@ -113,12 +114,14 @@ def main(argv: list[str] | None = None) -> int:
 
 def _verify_payload(result) -> dict:
     return {
-        "ok": True,
+        "ok": result.ok,
         "task_id": result.task_id,
+        "errors": list(result.errors),
         "current_gate": result.current_gate,
         "task_mode": result.task_mode,
         "record_strength": result.record_strength,
         "effective_record_strength": result.effective_record_strength,
         "compatibility_mode": result.compatibility_mode,
         "gate_state": result.gate_state,
+        "freshness": result.freshness,
     }

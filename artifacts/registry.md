@@ -41,6 +41,8 @@ Do not build a full transcript registry or register every temporary note.
 | mcp-stdio-adapter | `harness_v2\mcp.py`, `harness_v2\cli.py`, `tests\test_harness_v2.py` | local stdio JSON-RPC adapter exposing status, verify, preflight, init, and apply | not source authority, shell-level blocking, or remote MCP hosting |
 | hook-equivalent-gate | `harness_v2\gate.py`, `harness_v2\cli.py`, `harness_v2\mcp.py`, `tests\test_harness_v2.py` | explicit local gate over status, verify, and optional preflight exposed through CLI and MCP `harness_gate` | not a real Codex app hook, shell blocker, editor blocker, or proof receipt |
 | integration-doctor | `harness_v2\doctor.py`, `harness_v2\cli.py`, `tests\test_harness_v2.py` | read-only integration report for local surfaces and closed release boundary | not release readiness, proof receipt, or lifecycle transition |
+| transition-ledger | `contracts\transition.schema.json`, `templates\transition-log.md`, `harness_v2\lifecycle.py` | transition ledger parsing and lifecycle transition evaluation | not approval, permission, proof receipt, or automatic lifecycle movement by log line |
+| freshness-map | `contracts\freshness.schema.json`, `templates\freshness-map.json`, `harness_v2\freshness.py` | optional hash-bound freshness anchors with stale reasons and backtrack targets | not source authority, not metadata-only stale clearing, and not silent project overwrite |
 
 ## Stale Triggers
 

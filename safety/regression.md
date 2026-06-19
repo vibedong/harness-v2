@@ -22,11 +22,17 @@ This file maps HARNESS V2 boundary risks to regression guard candidates. It does
 | author-local paths copied into GitHub-facing commands | require `<repo root>` or current-directory examples for portable docs |
 | generated scaffold mistaken for automatic enforcement completion | require generated AGENTS/RULES/CURRENT to say scaffold + task-contract validator + CLI helper, not automatic enforcement sandbox or completion layer |
 | workflow area documented but not executable | require `workflow_stage` enum, verifier stage predicates, valid examples for all stages, and representative rejection tests |
+| control surface mixed into workflow stage | reject `artifact_observation`, `routing`, `safety_improvement`, and `release_boundary` as `workflow_stage`; keep them as control or observability surfaces |
+| spec-stage work disappears from records | generate `records\stages\spec.md` and companion stage record files during init/apply |
 | preflight adapter mistaken for shell-level blocking | require README/control wording that preflight checks proposed actions but does not execute or automatically block external tools |
 | MCP stdio adapter mistaken for source of truth | require README/routing/control wording that MCP wraps existing HARNESS V2 core behavior and does not replace source, approval, permission, proof, lifecycle, or release boundaries |
 | MCP stdio adapter mistaken for remote MCP hosting or shell-level blocking | require README/routing/control wording that this is local stdio only and not a hook, HTTP server, editor blocker, or shell blocker |
 | hook-equivalent gate mistaken for a real shell/editor blocker | require CLI/MCP tests plus README/routing/control wording that `gate` is explicit and does not automatically block external tools |
 | integration doctor mistaken for release readiness | require doctor output and release/control wording that release boundary remains closed |
+| transition log treated as lifecycle movement by itself | require lifecycle evaluator tests and wording that lifecycle movement is evaluated, not a log line |
+| stale approval, permission, proof, source, artifact, or transition evidence reused silently | require freshness anchors with source hashes, stale reasons, and explicit backtrack targets |
+| metadata-only freshness map edit treated as stale clearance | require hash comparison against source files, not reason/status text alone |
+| absent freshness map breaks existing projects | require compatibility diagnostic and no silent overwrite |
 
 ## Guard Evidence
 

@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1.8",
+  "anchors": [
+    {
+      "id": "approval-scope",
+      "path": "control\\approval.md",
+      "source_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "affects": [
+        "permission",
+        "development_transition"
+      ],
+      "backtrack_target": "plan_approval",
+      "reason": "approval scope changed after dependent permission or transition evidence",
+      "evidence_refs": [
+        {
+          "path": "control\\permission.md",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    }
+  ]
+}

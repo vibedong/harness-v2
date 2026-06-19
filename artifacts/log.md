@@ -21,11 +21,15 @@ Do not use this file as a transcript, scratchpad, or complete audit database.
 | docs/control sync | root rules, route, artifact, safety, README, CURRENT, and tests | current stale-surface reconciliation scope |
 | generated scaffold hardening | `harness_v2\core.py`, generated project-root scaffold, fixtures, tests, and current control surfaces | completed remaining completion program slice |
 | executable 8-stage workflow enforcement | `workflow_stage`, verifier stage predicates, schema/template updates, fixtures, tests, and workflow rules | completed remaining completion program slice |
+| canonical workflow stage realignment | `spec`, `spec_review`, `planning`, `plan_review`, `approval`, `development`, `development_review`, `improvement`; control surfaces removed from `workflow_stage` | unreleased local workflow realignment slice |
 | side-effect preflight adapter | `harness_v2\preflight.py`, `harness_v2\cli.py`, tests, README usage, and control surfaces | completed remaining completion program slice |
 | MCP feasibility/design and final audit | README, README.ko, routing, control, artifact, safety, improvement, release, tests, and verification output | completed remaining completion program closeout slice |
 | MCP stdio adapter implementation | `harness_v2\mcp.py`, CLI `mcp` command, tests, README usage, routing, control, artifact, and safety surfaces | completed Goal G slice |
 | hook-equivalent gate hardening | `harness_v2\gate.py`, CLI `gate` command, MCP `harness_gate`, generated scaffold, tests, README usage, routing, control, artifact, and safety surfaces | completed Goal H slice |
 | integration hardening and release preparation | `harness_v2\doctor.py`, CLI `doctor` output, tests, README usage, routing, control, artifact, safety, and release surfaces | completed Goal I slice without release execution |
+| current gate read-model | `contracts\gate-state.schema.json`, `templates\gate-state.json`, `harness_v2\core.py`, CLI/MCP verify output, tests, README, lifecycle, and routing | completed Goal 1 slice |
+| transition ledger lifecycle guard | `contracts\transition.schema.json`, `templates\transition-log.md`, `harness_v2\lifecycle.py`, tests, workflow, routing, and control surfaces | completed Goal 2 slice |
+| stale/backtrack freshness engine | `contracts\freshness.schema.json`, `templates\freshness-map.json`, `harness_v2\freshness.py`, verify/MCP freshness output, tests, artifact, safety, and control surfaces | active Goal 3 slice |
 
 ## Freshness
 

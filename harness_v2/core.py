@@ -196,6 +196,7 @@ class ValidationResult:
     effective_record_strength: str | None = None
     compatibility_mode: bool = True
     gate_state: dict[str, Any] | None = None
+    freshness: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -290,6 +291,7 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None, task_pat
     compatibility_mode = not _is_strict_task_contract(data)
     workflow_stage = data.get("workflow_stage")
     gate_state = _validate_gate_state(root_path, validated_task_path, data, errors)
+    freshness = _validate_freshness(root_path, errors)
     current_gate = _derive_current_gate(data, gate_state)
     task_mode = _task_mode_value(data)
     record_strength = _record_strength_value(data)
@@ -355,6 +357,7 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None, task_pat
         effective_record_strength=effective_record_strength,
         compatibility_mode=compatibility_mode,
         gate_state=gate_state,
+        freshness=freshness,
     )
 
 
@@ -437,6 +440,27 @@ def _derive_current_gate(data: dict[str, Any], gate_state: dict[str, Any] | None
     if isinstance(workflow_stage, str) and workflow_stage.strip():
         return workflow_stage
     return None
+
+
+def _validate_freshness(root: Path | None, errors: list[str]) -> dict[str, Any]:
+    if root is None:
+        return {
+            "ok": True,
+            "present": False,
+            "stale": [],
+            "errors": [],
+            "compatibility_diagnostic": "freshness map is absent; compatibility mode keeps verification read-only and does not overwrite existing projects",
+        }
+    from .freshness import evaluate_freshness_map
+
+    result = evaluate_freshness_map(root)
+    for item in result.stale:
+        errors.append(f"freshness stale: {item['anchor_id']} -> {item['backtrack_target']}: {item['reason']}")
+        for evidence_error in item.get("evidence_errors", []):
+            errors.append(f"freshness stale evidence: {item['anchor_id']}: {evidence_error}")
+    for error in result.errors:
+        errors.append(f"freshness: {error}")
+    return result.to_json()
 
 
 def _validate_gate_state(root: Path | None, task_path: Path | None, data: dict[str, Any], errors: list[str]) -> dict[str, Any]:
