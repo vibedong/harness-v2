@@ -113,6 +113,8 @@ improvement
 
 task contract에서는 `workflow_stage`가 현재 writable compatibility owner입니다. `current_gate`는 별도 migration이 승인되기 전까지 `workflow_stage`에서 파생되는 read-model 값입니다. `current_gate`, `task_mode`, `record_strength`가 없는 기존 `0.1.7` task contract는 compatibility mode로 유지하고, strict contract는 새 필드를 제공하지 않으면 migration diagnostic으로 실패합니다. Compatibility mode에서 빠진 `task_mode`는 `planned_change`, 빠진 `record_strength`는 `minimal`로 기본 처리하고, `effective_record_strength`는 stage와 task-mode 규칙에 따라 더 엄격하게 올라갑니다.
 
+`records\gate-state.json`이 있으면 HARNESS V2는 그것을 생성된 read-model로 취급합니다. 이 파일은 source task를 가리키고, 그 task의 SHA-256 hash와 맞아야 하며, `workflow_stage`에서 파생되고 source task의 `workflow_stage`와 일치해야 합니다. `0.1.7` compatibility task에서는 없어도 되며, approval, permission, proof, lifecycle transition, release readiness를 만들 수 없습니다.
+
 `artifact_observation`, `routing`, `safety_improvement`, `release_boundary`는 workflow stage가 아닙니다. 이들은 control 또는 observability surface로 남습니다.
 
 이 로컬 realignment 자체는 npm publish, GitHub release, release tag가 아닙니다.
@@ -295,6 +297,8 @@ harness-v2 gate contracts\harness-task.json --root . --side-effect "python -m un
 ```
 
 `gate`는 제안된 명령을 실행하지 않습니다. `CURRENT.md`를 읽고, task contract를 검증하고, 필요한 경우 side effect나 write path에 대해 `preflight`를 실행합니다. 이것은 hook-equivalent gate이지 실제 Codex app hook, shell blocker, editor blocker가 아닙니다.
+
+`verify`는 파생된 `current_gate` read-model도 출력합니다. 생성된 `records\gate-state.json`이 있으면, 검증은 이 파일의 source task reference와 hash를 확인한 뒤에만 받아들입니다.
 
 실행하려는 side effect나 write path가 contract 안에 있는지 먼저 확인합니다.
 

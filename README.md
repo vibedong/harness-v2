@@ -113,6 +113,8 @@ improvement
 
 `workflow_stage` remains the writable compatibility owner in task contracts. `current_gate` is a derived read-model value unless a later explicit migration changes ownership. Existing `0.1.7` task contracts that omit `current_gate`, `task_mode`, or `record_strength` remain compatibility-mode contracts; strict contracts must provide the new fields or receive migration diagnostics. In compatibility mode, missing `task_mode` defaults to `planned_change`, missing `record_strength` defaults to `minimal`, and `effective_record_strength` is raised by stage and task-mode rules.
 
+When `records\gate-state.json` exists, HARNESS V2 treats it as a generated read-model. It must point to a source task, match that task's SHA-256 hash, derive from `workflow_stage`, and agree with the source task's `workflow_stage`. The file is optional for 0.1.7-compatible tasks and cannot grant approval, permission, proof, lifecycle transition, or release readiness.
+
 `artifact_observation`, `routing`, `safety_improvement`, and `release_boundary` are not workflow stages. They remain control or observability surfaces.
 
 This local realignment is not an npm publish, GitHub release, or release tag by itself.
@@ -295,6 +297,8 @@ harness-v2 gate contracts\harness-task.json --root . --side-effect "python -m un
 ```
 
 `gate` does not execute the proposed command. It reads `CURRENT.md`, verifies the task contract, and runs optional `preflight` checks for proposed side effects or write paths. It is a hook-equivalent gate, not a real Codex app hook, shell blocker, or editor blocker.
+
+`verify` also reports the derived `current_gate` read-model. If a generated `records\gate-state.json` is present, verification checks its source task reference and hash before accepting it.
 
 Check a proposed side effect or write path before running it:
 

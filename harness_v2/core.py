@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -194,6 +195,7 @@ class ValidationResult:
     record_strength: str | None = None
     effective_record_strength: str | None = None
     compatibility_mode: bool = True
+    gate_state: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -241,7 +243,7 @@ def validate_task_file(path: str | Path) -> ValidationResult:
         data = load_json(payload_path)
     except Exception as exc:  # pragma: no cover - exact parser messages vary.
         return ValidationResult(False, None, (f"json: {exc}",))
-    return validate_task(data, root=_find_project_root(payload_path))
+    return validate_task(data, root=_find_project_root(payload_path), task_path=payload_path)
 
 
 def initialize_project(root: str | Path, force: bool = False) -> InitResult:
@@ -280,13 +282,15 @@ def initialize_project(root: str | Path, force: bool = False) -> InitResult:
     )
 
 
-def validate_task(data: dict[str, Any], root: str | Path | None = None) -> ValidationResult:
+def validate_task(data: dict[str, Any], root: str | Path | None = None, task_path: str | Path | None = None) -> ValidationResult:
     errors: list[str] = []
     task_id = data.get("task_id")
     root_path = Path(root) if root is not None else None
+    validated_task_path = Path(task_path) if task_path is not None else None
     compatibility_mode = not _is_strict_task_contract(data)
     workflow_stage = data.get("workflow_stage")
-    current_gate = _derive_current_gate(data)
+    gate_state = _validate_gate_state(root_path, validated_task_path, data, errors)
+    current_gate = _derive_current_gate(data, gate_state)
     task_mode = _task_mode_value(data)
     record_strength = _record_strength_value(data)
     effective_record_strength = _effective_record_strength(
@@ -350,6 +354,7 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None) -> Valid
         record_strength=record_strength,
         effective_record_strength=effective_record_strength,
         compatibility_mode=compatibility_mode,
+        gate_state=gate_state,
     )
 
 
@@ -422,14 +427,101 @@ def _is_strict_task_contract(data: dict[str, Any]) -> bool:
     return isinstance(version, str) and version.strip() not in {"", "0.1.7"}
 
 
-def _derive_current_gate(data: dict[str, Any]) -> str | None:
+def _derive_current_gate(data: dict[str, Any], gate_state: dict[str, Any] | None = None) -> str | None:
     current_gate = data.get("current_gate")
     if isinstance(current_gate, str) and current_gate.strip():
         return current_gate
+    if gate_state and gate_state.get("present") and isinstance(gate_state.get("derived_current_gate"), str):
+        return gate_state["derived_current_gate"]
     workflow_stage = data.get("workflow_stage")
     if isinstance(workflow_stage, str) and workflow_stage.strip():
         return workflow_stage
     return None
+
+
+def _validate_gate_state(root: Path | None, task_path: Path | None, data: dict[str, Any], errors: list[str]) -> dict[str, Any]:
+    status: dict[str, Any] = {"present": False, "derived_from": "workflow_stage"}
+    if root is None:
+        return status
+
+    gate_state_path = root / "records" / "gate-state.json"
+    if not gate_state_path.exists():
+        return status
+
+    status["present"] = True
+    try:
+        payload = load_json(gate_state_path)
+    except Exception as exc:
+        errors.append(f"gate-state json: {exc}")
+        return status
+
+    status.update(
+        {
+            "schema_version": payload.get("schema_version"),
+            "source_task_ref": payload.get("source_task_ref"),
+            "derived_current_gate": payload.get("derived_current_gate"),
+            "derived_from": payload.get("derived_from"),
+            "generated_at": payload.get("generated_at"),
+        }
+    )
+
+    for key in ("schema_version", "source_task_ref", "source_sha256", "derived_current_gate", "derived_from", "generated_at"):
+        if not _non_empty_string(payload.get(key)):
+            errors.append(f"gate-state {key} must be a non-empty string")
+
+    derived_from = payload.get("derived_from")
+    if isinstance(derived_from, str) and derived_from != "workflow_stage":
+        errors.append("gate-state derived_from must be workflow_stage")
+
+    derived_current_gate = payload.get("derived_current_gate")
+    workflow_stage = data.get("workflow_stage")
+    if isinstance(derived_current_gate, str):
+        if derived_current_gate in LEGACY_STAGE_ALIASES:
+            errors.append(
+                f"gate-state derived_current_gate uses legacy alias {derived_current_gate!r}; use {LEGACY_STAGE_ALIASES[derived_current_gate]!r}"
+            )
+        elif derived_current_gate not in WORKFLOW_STAGES:
+            errors.append(f"gate-state derived_current_gate is not a known stage: {derived_current_gate}")
+        elif workflow_stage in WORKFLOW_STAGES and derived_current_gate != workflow_stage:
+            errors.append("gate-state derived_current_gate must match workflow_stage")
+
+    source_task_ref = payload.get("source_task_ref")
+    source_sha256 = payload.get("source_sha256")
+    if isinstance(source_task_ref, str) and source_task_ref.strip():
+        source_path = _resolve_project_relative_path(root, source_task_ref, "gate-state source_task_ref", errors)
+        if source_path is not None and source_path.exists():
+            if task_path is None:
+                errors.append("gate-state source_task_ref cannot be verified without validated task path")
+            elif source_path.resolve() != task_path.resolve():
+                errors.append("gate-state source_task_ref must match validated task path")
+            try:
+                source_task = load_json(source_path)
+            except Exception as exc:
+                errors.append(f"gate-state source_task_ref json: {exc}")
+                source_task = {}
+            source_workflow_stage = source_task.get("workflow_stage")
+            status["source_workflow_stage"] = source_workflow_stage
+            if isinstance(derived_current_gate, str) and isinstance(source_workflow_stage, str) and derived_current_gate != source_workflow_stage:
+                errors.append("gate-state derived_current_gate must match source_task_ref workflow_stage")
+            actual_hash = hashlib.sha256(source_path.read_bytes()).hexdigest()
+            status["source_sha256"] = source_sha256
+            if isinstance(source_sha256, str) and source_sha256 != actual_hash:
+                errors.append("gate-state source_sha256 does not match source_task_ref")
+        elif source_path is not None:
+            errors.append("gate-state source_task_ref does not exist")
+
+    return status
+
+
+def _resolve_project_relative_path(root: Path, value: str, label: str, errors: list[str]) -> Path | None:
+    candidate = (root / value).resolve()
+    root_resolved = root.resolve()
+    try:
+        candidate.relative_to(root_resolved)
+    except ValueError:
+        errors.append(f"{label} must stay under project root")
+        return None
+    return candidate
 
 
 def _task_mode_value(data: dict[str, Any]) -> str:

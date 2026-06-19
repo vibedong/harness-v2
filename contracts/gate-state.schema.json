@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "harness-v2://contracts/gate-state.schema.json",
+  "title": "HARNESS V2 Gate State",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_task_ref",
+    "source_sha256",
+    "derived_current_gate",
+    "derived_from",
+    "generated_at"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "minLength": 1 },
+    "source_task_ref": { "type": "string", "minLength": 1 },
+    "source_sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "derived_current_gate": {
+      "type": "string",
+      "enum": [
+        "spec",
+        "spec_review",
+        "plan",
+        "plan_review",
+        "plan_approval",
+        "development",
+        "development_review",
+        "improvement"
+      ]
+    },
+    "derived_from": { "type": "string", "const": "workflow_stage" },
+    "generated_at": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

@@ -1,4 +1,5 @@
 import json
+import hashlib
 import subprocess
 import sys
 import tempfile
@@ -10,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 VALID_TASK = ROOT / "tests" / "fixtures" / "valid-task.json"
 INVALID_TASK = ROOT / "tests" / "fixtures" / "invalid-missing-approval.json"
+INVALID_GATE_MISMATCH = ROOT / "tests" / "fixtures" / "invalid-gate-mismatch.json"
 APPROVED_SOURCE_FILES = {
     ".gitattributes",
     ".gitignore",
@@ -37,6 +39,7 @@ APPROVED_SOURCE_FILES = {
     "safety/regression.md",
     "safety/improvement.md",
     "release/transaction.md",
+    "contracts/gate-state.schema.json",
     "contracts/task.schema.json",
     "contracts/approval.schema.json",
     "contracts/permission.schema.json",
@@ -44,6 +47,7 @@ APPROVED_SOURCE_FILES = {
     "contracts/lifecycle.schema.json",
     "contracts/artifact.schema.json",
     "templates/task.json",
+    "templates/gate-state.json",
     "templates/gate-manifest.md",
     "templates/approval-request.md",
     "templates/proof-report.md",
@@ -59,6 +63,7 @@ APPROVED_SOURCE_FILES = {
     "tests/test_harness_v2.py",
     "tests/fixtures/valid-task.json",
     "tests/fixtures/invalid-missing-approval.json",
+    "tests/fixtures/invalid-gate-mismatch.json",
 }
 ALLOWED_COMMANDS = {
     "python -m compileall harness_v2",
@@ -527,7 +532,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                 "preflight",
                 str(VALID_TASK),
                 "--path",
-                "harness_v2\\preflight.py",
+                "harness_v2\\core.py",
                 "--mode",
                 "write",
             ],
@@ -630,7 +635,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                 "--side-effect",
                 "python -m unittest discover tests",
                 "--path",
-                "harness_v2\\gate.py",
+                "harness_v2\\core.py",
                 "--mode",
                 "write",
             ],
@@ -941,23 +946,22 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertEqual(invalid["workflow_stage"], "development")
         self.assertEqual(invalid["lifecycle"]["current_state"], "workflow_realignment_review")
         self.assertEqual(invalid["lifecycle"]["target_state"], "workflow_realignment_review")
-        self.assertIn("rules\\workflows.md", valid["approval"]["approved_paths"])
-        self.assertIn("contracts\\task.schema.json", valid["approval"]["approved_paths"])
-        self.assertIn("templates\\task.json", valid["approval"]["approved_paths"])
+        self.assertIn("contracts\\gate-state.schema.json", valid["approval"]["approved_paths"])
+        self.assertIn("templates\\gate-state.json", valid["approval"]["approved_paths"])
         self.assertIn("harness_v2\\core.py", valid["approval"]["approved_paths"])
-        self.assertIn("harness_v2\\preflight.py", valid["approval"]["approved_paths"])
-        self.assertIn("records\\README.md", valid["approval"]["approved_paths"])
+        self.assertIn("harness_v2\\cli.py", valid["approval"]["approved_paths"])
+        self.assertIn("harness_v2\\mcp.py", valid["approval"]["approved_paths"])
+        self.assertIn("tests\\fixtures\\invalid-gate-mismatch.json", valid["approval"]["approved_paths"])
         self.assertIn("node bin\\harness-v2.js status --root .", valid["permission"]["allowed_side_effects"])
-        self.assertIn("node bin\\harness-v2.js gate tests\\fixtures\\valid-task.json --root . --side-effect \"python -m compileall harness_v2\"", valid["permission"]["allowed_side_effects"])
-        self.assertIn("node bin\\harness-v2.js mcp < JSON-RPC smoke input", valid["permission"]["allowed_side_effects"])
-        self.assertIn("python -m harness_v2 gate tests\\fixtures\\valid-task.json --root . --side-effect \"python -m unittest discover tests\"", valid["permission"]["allowed_side_effects"])
-        self.assertIn("python -m harness_v2 mcp < JSON-RPC smoke input", valid["permission"]["allowed_side_effects"])
-        self.assertIn("npm pack --dry-run", valid["permission"]["allowed_side_effects"])
+        self.assertIn("node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json", valid["permission"]["allowed_side_effects"])
+        self.assertIn("node bin\\harness-v2.js gate tests\\fixtures\\valid-task.json --root .", valid["permission"]["allowed_side_effects"])
+        self.assertIn("python -m harness_v2 status --root .", valid["permission"]["allowed_side_effects"])
+        self.assertIn("python -m harness_v2 verify tests\\fixtures\\valid-task.json", valid["permission"]["allowed_side_effects"])
+        self.assertIn("python -m harness_v2 gate tests\\fixtures\\valid-task.json --root .", valid["permission"]["allowed_side_effects"])
         self.assertNotIn("npm publish", valid["permission"]["allowed_side_effects"])
         self.assertIn("npm publish", valid["permission"]["denied_side_effects"])
         self.assertIn("Python package registry publish", valid["permission"]["denied_side_effects"])
-        self.assertIn("remote MCP hosting", valid["permission"]["denied_side_effects"])
-        self.assertIn("MCP client configuration mutation", valid["permission"]["denied_side_effects"])
+        self.assertIn("release execution", valid["permission"]["denied_side_effects"])
 
     def test_artifact_surfaces_include_package_github_scope(self):
         registry = (ROOT / "artifacts" / "registry.md").read_text()
@@ -1148,6 +1152,129 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         errors = "\n".join(result.errors)
         self.assertIn("strict task contracts require task_mode", errors)
         self.assertIn("strict task contracts require record_strength", errors)
+
+    def test_goal1_gate_state_schema_and_template_are_product_surfaces(self):
+        schema = json.loads((ROOT / "contracts" / "gate-state.schema.json").read_text(encoding="utf-8"))
+        template = json.loads((ROOT / "templates" / "gate-state.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(schema["title"], "HARNESS V2 Gate State")
+        self.assertEqual(
+            schema["required"],
+            [
+                "schema_version",
+                "source_task_ref",
+                "source_sha256",
+                "derived_current_gate",
+                "derived_from",
+                "generated_at",
+            ],
+        )
+        self.assertEqual(template["derived_from"], "workflow_stage")
+        self.assertEqual(template["derived_current_gate"], "<derived from source task workflow_stage>")
+        self.assertIn("source_sha256", template)
+
+    def test_goal1_strict_matching_gate_state_passes(self):
+        from harness_v2.core import validate_task_file
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            task_path = write_goal1_project(
+                Path(temp_root),
+                contract_version="0.1.8",
+                gate="development",
+            )
+
+            result = validate_task_file(task_path)
+
+        self.assertTrue(result.ok, result.errors)
+        self.assertEqual(result.current_gate, "development")
+        self.assertEqual(result.gate_state["present"], True)
+        self.assertEqual(result.gate_state["derived_from"], "workflow_stage")
+
+    def test_goal1_rejects_mismatched_gate_state(self):
+        from harness_v2.core import validate_task_file
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            task_path = write_goal1_project(
+                Path(temp_root),
+                contract_version="0.1.8",
+                gate="plan",
+            )
+
+            result = validate_task_file(task_path)
+
+        self.assertFalse(result.ok)
+        self.assertIn("gate-state derived_current_gate must match workflow_stage", "\n".join(result.errors))
+
+    def test_goal1_rejects_stale_gate_state_source_hash(self):
+        from harness_v2.core import validate_task_file
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            task_path = write_goal1_project(
+                Path(temp_root),
+                contract_version="0.1.8",
+                gate="development",
+                source_sha256="0" * 64,
+            )
+
+            result = validate_task_file(task_path)
+
+        self.assertFalse(result.ok)
+        self.assertIn("gate-state source_sha256 does not match source_task_ref", "\n".join(result.errors))
+
+    def test_goal1_rejects_gate_state_bound_to_other_task_file(self):
+        from harness_v2.core import validate_task_file
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            task_path = write_goal1_project(
+                Path(temp_root),
+                contract_version="0.1.8",
+                gate="development",
+                source_task_ref="contracts\\other-task.json",
+                duplicate_source_task=True,
+            )
+
+            result = validate_task_file(task_path)
+
+        self.assertFalse(result.ok)
+        self.assertIn("gate-state source_task_ref must match validated task path", "\n".join(result.errors))
+
+    def test_goal1_rejects_gate_state_derived_from_stale_in_memory_task_data(self):
+        from harness_v2.core import validate_task
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            task_path = write_goal1_project(
+                root,
+                contract_version="0.1.8",
+                gate="plan",
+            )
+            stale_data = json.loads(task_path.read_text(encoding="utf-8"))
+            stale_data["workflow_stage"] = "plan"
+            stale_data["approval"]["approved_paths"] = ["records\\stages\\plan.md"]
+            stale_data["permission"]["allowed_side_effects"] = ["local file writes to stage record files"]
+
+            result = validate_task(stale_data, root=root, task_path=task_path)
+
+        self.assertFalse(result.ok)
+        self.assertIn("gate-state derived_current_gate must match source_task_ref workflow_stage", "\n".join(result.errors))
+
+    def test_cli_verify_reports_current_gate_read_model_without_authority_claims(self):
+        completed = subprocess.run(
+            [sys.executable, "-m", "harness_v2", "verify", str(VALID_TASK)],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["current_gate"], "development")
+        self.assertEqual(payload["gate_state"]["present"], False)
+        self.assertNotIn("approval", payload["gate_state"])
+        self.assertNotIn("proof", payload["gate_state"])
+        self.assertNotIn("permission", payload["gate_state"])
+        self.assertNotIn("lifecycle_transition", payload["gate_state"])
 
     def test_verifier_accepts_all_known_workflow_stages(self):
         from harness_v2.core import validate_task
@@ -1653,6 +1780,58 @@ def _json_block_after(content: str, marker: str) -> str:
 
 def mcp_input(*messages: dict) -> str:
     return "\n".join(json.dumps(message, separators=(",", ":")) for message in messages) + "\n"
+
+
+def write_goal1_project(
+    root: Path,
+    *,
+    contract_version: str,
+    gate: str,
+    source_sha256: str | None = None,
+    source_task_ref: str = "contracts\\harness-task.json",
+    duplicate_source_task: bool = False,
+) -> Path:
+    (root / "contracts").mkdir(parents=True)
+    (root / "records").mkdir()
+    (root / "CURRENT.md").write_text(
+        "\n".join(
+            [
+                "workflow: `remaining_completion_program`",
+                "state: `workflow_realignment_review`",
+                "substate: `goal1-test`",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    payload = valid_task_payload()
+    payload["contract_version"] = contract_version
+    payload["task_mode"] = "planned_change"
+    payload["record_strength"] = "strict"
+    payload.pop("current_gate", None)
+    task_path = root / "contracts" / "harness-task.json"
+    task_bytes = json.dumps(payload, indent=2, sort_keys=True).encode("utf-8")
+    task_path.write_bytes(task_bytes)
+    if duplicate_source_task:
+        duplicate_path = root / source_task_ref
+        duplicate_path.parent.mkdir(parents=True, exist_ok=True)
+        duplicate_path.write_bytes(task_bytes)
+    actual_hash = hashlib.sha256(task_bytes).hexdigest()
+    (root / "records" / "gate-state.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "0.1.8",
+                "source_task_ref": source_task_ref,
+                "source_sha256": source_sha256 or actual_hash,
+                "derived_current_gate": gate,
+                "derived_from": "workflow_stage",
+                "generated_at": "2026-06-19T00:00:00Z",
+            },
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    return task_path
 
 
 def valid_task_payload() -> dict:

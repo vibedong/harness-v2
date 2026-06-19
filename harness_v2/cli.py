@@ -120,4 +120,5 @@ def _verify_payload(result) -> dict:
         "record_strength": result.record_strength,
         "effective_record_strength": result.effective_record_strength,
         "compatibility_mode": result.compatibility_mode,
+        "gate_state": result.gate_state,
     }

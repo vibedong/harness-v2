@@ -1,6 +1,8 @@
 # HARNESS V2 Lifecycle Control
 
-status: package_github_surface / remaining_completion_program / lifecycle_control
+status: package_github_surface / workflow_stage_realignment / lifecycle_control
+
+workflow: `remaining_completion_program`
 
 This file separates current pointer, progress note, and lifecycle state movement.
 
@@ -18,6 +20,8 @@ Known local states:
 - `package_publish_review`
 - `npm_wrapper_authoring`
 - `npm_wrapper_review`
+- `workflow_realignment_authoring`
+- `workflow_realignment_review`
 - `public_release_candidate`
 - `public_release_published`
 - `package_candidate_ready`
@@ -27,38 +31,32 @@ Known local states:
 
 ## Current Entry
 
-The current remaining completion program entry is:
+The current local lifecycle entry is:
 
 ```text
-package_publish_review -> public_release_published
+public_release_published -> workflow_realignment_review
 ```
 
 Active slice:
 
 ```text
-npm_release_v0.1.7 / release_closed
+canonical_8_stage_realign / unreleased_local / release_closed
 ```
 
 Scope:
 
 - product writes only under `F:\Folder\harness-v2`;
-- generated scaffold hardening is complete;
-- executable 8-stage workflow enforcement is complete;
-- side-effect preflight adapter work is complete;
-- MCP feasibility/design and final quality audit/docs-control sync is complete;
-- local MCP stdio adapter implementation, final quality audit, documentation sync, and GitHub push are complete for Goal G;
-- hook-equivalent gate hardening is complete for Goal H;
-- the gate is an explicit executable check over status, verify, and optional preflight, not a real Codex app hook, shell blocker, or editor blocker;
-- integration hardening and release preparation are complete for Goal I;
-- the current release path authorizes npm publish for `harness-v2@0.1.7`, Git tag `v0.1.7`, GitHub release creation, release docs/control sync, and the `pyproject.toml` version-consistency amendment;
-- `doctor` reports integrated local surfaces and keeps the repeat-release boundary closed;
-- no remote MCP hosting, MCP client configuration mutation, Python package registry publish, dependency install, secret access, or destructive operation is part of this lifecycle entry;
-- local verification commands named in `control\permission.md`;
-- read-only subagent review with `vowline`;
-- git add, commit, and push after completed slices pass verification and review;
-- no repeat npm publish, Python package registry publish, GitHub release or tag mutation outside the approved `v0.1.7` transaction, dependency install from network, secret access, external network mutation outside allowed git/GitHub release operations, or destructive operation outside generated temporary verification artifacts.
+- published `harness-v2@0.1.7` / `v0.1.7` is closed release history;
+- executable `workflow_stage` now follows the canonical task flow from the brainstorming/stage-plan records;
+- `artifact_observation`, `routing`, `safety_improvement`, and `release_boundary` are no longer lifecycle workflow stages;
+- artifact, routing, safety/regression, and release transaction remain control surfaces;
+- generated downstream project scaffold now includes task-local stage records under `records\`;
+- generated `records\gate-state.json`, when present, is a validated read-model derived from a source task `workflow_stage` and source hash;
+- the hook-equivalent gate remains an explicit status/verify/preflight command, not a real shell/editor hook;
+- local verification commands are named in `control\permission.md`;
+- no npm publish, Python package registry publish, GitHub release or tag mutation, git push, dependency install, secret access, external mutation, or destructive operation is part of this lifecycle entry.
 
-This entry moves from `package_publish_review` to `public_release_published` for the exact npm/GitHub release `harness-v2@0.1.7` / `v0.1.7`. It is not repeat npm publish, Python package registry publish, future release authority, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, or MCP client configuration.
+This entry is not a public release, repeat npm publish, Python package registry publish, future release authority, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, MCP client configuration, ApprovalDecision, PermissionDecision, ProofReceipt, or LifecycleTransition.
 
 ## Transition Requirements
 
@@ -75,6 +73,6 @@ A later state movement must name:
 
 ## Backtrack Rule
 
-Backtrack to `package_publish_review`, `package_publish_authoring`, `npm_wrapper_authoring`, or `public_release_candidate` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, npm wrapper surface, GitHub target, npm target, generated scaffold behavior, automatic-enforcement wording, or target surface becomes stale or conflicting.
+Backtrack to `workflow_realignment_authoring`, `package_publish_review`, or `public_release_published` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, npm wrapper surface, generated scaffold behavior, workflow stage enum, or target surface becomes stale or conflicting.
 
 This file does not produce proof, approval, npm publish state, Python package registry publish state, release state, route permission, regression pass, improvement execution, or permission for future slices.

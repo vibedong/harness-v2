@@ -1,0 +1,8 @@
+{
+  "schema_version": "0.1.8",
+  "source_task_ref": "contracts\\harness-task.json",
+  "source_sha256": "<sha256-of-source-task>",
+  "derived_current_gate": "<derived from source task workflow_stage>",
+  "derived_from": "workflow_stage",
+  "generated_at": "<iso8601-utc>"
+}
