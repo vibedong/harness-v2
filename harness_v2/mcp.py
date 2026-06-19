@@ -204,7 +204,16 @@ def _call_tool(params: Any) -> dict[str, Any]:
         payload = {"ok": True, "status": read_current_status(Path(_string_arg(arguments, "root", ".")))}
     elif name == "harness_verify":
         result = verify_task(Path(_required_string_arg(arguments, "task")))
-        payload = {"ok": result.ok, "task_id": result.task_id, "errors": list(result.errors)}
+        payload = {
+            "ok": result.ok,
+            "task_id": result.task_id,
+            "errors": list(result.errors),
+            "current_gate": result.current_gate,
+            "task_mode": result.task_mode,
+            "record_strength": result.record_strength,
+            "effective_record_strength": result.effective_record_strength,
+            "compatibility_mode": result.compatibility_mode,
+        }
     elif name == "harness_preflight":
         result = evaluate_preflight(
             Path(_required_string_arg(arguments, "task")),

@@ -1,6 +1,6 @@
 # HARNESS V2 Current State
 
-status: package_github_surface / remaining_completion_program / current_pointer
+status: package_github_surface / workflow_stage_realignment / current_pointer
 
 This file is the visible current pointer for the local HARNESS V2 product surface.
 
@@ -8,54 +8,58 @@ This file is the visible current pointer for the local HARNESS V2 product surfac
 
 workflow: `remaining_completion_program`
 
-state: `public_release_published`
+state: `workflow_realignment_review`
 
-substate: `npm_release_v0.1.7 / release_closed`
+substate: `canonical_8_stage_realign / unreleased_local / release_closed`
 
 source basis:
 
 - Stage 00~05 confirmed planning artifacts.
-- Product Implementation Entry Gate package/GitHub/npm-wrapper history.
-- Prior published npm package state for `harness-v2@0.1.5`.
-- Current npm and GitHub release target `harness-v2@0.1.7` / `v0.1.7`.
-- User correction that `F:\Folder\harness-v2` is the completed product repository, not the user's downstream working project.
-- User requirement that Codex-app users should install/apply HARNESS V2 into their project root, with README as user documentation and AI-facing rules in generated project-root files.
-- Exact remaining completion program approval for generated scaffold hardening, executable workflow enforcement, side-effect preflight adapter work if locally feasible, MCP feasibility/design only unless separately approved, final audit, documentation sync, and GitHub push.
-- User approval to proceed with Goal G after the three-step MCP, hook, and integration hardening plan.
-- Goal G approval supersedes the prior MCP design-only boundary only for local stdio MCP adapter implementation; hook work, integration hardening, package registry publish, release, dependency, secret, external mutation, and destructive work remain outside this slice.
-- User approval to proceed with Goal H hook / hook-equivalent hardening under the remaining completion program.
-- Local evidence did not expose a direct Codex app pre-command or pre-write hook surface for this repo, so Goal H implements an executable hook-equivalent gate instead of mutating Codex app configuration.
-- User request to proceed with Goal I after Goal H, bound to integration hardening and release preparation without npm publish, Python registry publish, GitHub release, or release tag execution.
-- User-approved public release and npm publish slice for `harness-v2@0.1.7`, including npm publish, Git tag `v0.1.7`, GitHub release creation, release docs/control sync, and the `pyproject.toml` version-consistency amendment.
-- User resumed npm publish after login as `donghyeonlee`.
+- Whole-plan and stage-plan records that define the canonical task flow as spec, spec review, plan, plan review, plan approval, development, development review, and improvement.
+- Published npm/GitHub state `harness-v2@0.1.7` / `v0.1.7`, now treated as closed release history.
+- User correction that workflow stages must follow the brainstorming/stage-plan flow and must not mix control surfaces into `workflow_stage`.
+- User direction to use the recommended clean-break direction because the package is currently used mainly by the owner.
 
 ## Current Program
 
-The remaining completion program is complete for the 0.1.7 npm and GitHub release transaction.
+The local worktree is in a post-0.1.7 workflow realignment slice.
 
-Completed slices:
+Completed release history:
 
 - generated scaffold hardening
-- executable 8-stage workflow engine enforcement
 - side-effect preflight adapter
-- MCP feasibility/design and final quality audit/docs-control sync
 - MCP stdio adapter implementation
 - hook-equivalent gate hardening
-- integration hardening and release preparation
-- npm package release `harness-v2@0.1.7`
-- GitHub release `v0.1.7`
+- closed `harness-v2@0.1.7` npm package history reference
+- closed `v0.1.7` GitHub release history reference
 
 Current active slice:
 
-- no active implementation slice; npm package release `harness-v2@0.1.7` and GitHub release `v0.1.7` are closed after publish/tag/release proof
+- realign executable `workflow_stage` to the canonical task flow:
+  - `spec`
+  - `spec_review`
+  - `plan`
+  - `plan_review`
+  - `plan_approval`
+  - `development`
+  - `development_review`
+  - `improvement`
+- keep `workflow_stage` as the writable compatibility owner and derive `current_gate` from it unless a later explicit migration changes ownership;
+- keep existing `0.1.7` task contracts compatible when they omit `current_gate`, `task_mode`, or `record_strength`, deriving `current_gate`, defaulting missing `task_mode` to `planned_change`, defaulting missing `record_strength` to `minimal`, and computing `effective_record_strength` from stage and task-mode rules;
+- keep strict contracts failing with migration diagnostics if required Goal 0 fields are absent;
+- remove `artifact_observation`, `routing`, `safety_improvement`, and `release_boundary` as workflow stages;
+- keep artifact, routing, safety/regression, and release transaction as control surfaces;
+- add generated task-local records scaffold under `records\`;
+- verify locally without npm publish, GitHub release, release tag, dependency install, secret access, or destructive work.
+- do not treat this local Goal 0 slice as a new npm publish, GitHub release, or release tag.
 
-Future slices in this program:
+Future release path:
 
-- repeat npm publish, a later GitHub release/tag change, dependency installation, secret access, or destructive work require a later exact approval packet and release transaction after closeout
+- npm publish, GitHub release/tag mutation, Python package registry publish, dependency installation, secret access, destructive work, or external mutation require a later exact approval packet and release transaction.
 
 ## Current Surface
 
-Active package, GitHub, npm wrapper, scaffold, workflow, preflight, local MCP stdio adapter, and audit files may include:
+Active package, npm wrapper, scaffold, workflow, preflight, local MCP stdio adapter, and audit files may include:
 
 - `.gitattributes`
 - `.gitignore`
@@ -90,7 +94,7 @@ Active package, GitHub, npm wrapper, scaffold, workflow, preflight, local MCP st
 - `tests\*.py`
 - `tests\fixtures\*.json`
 
-New files are allowed only when directly required for workflow engine enforcement, lifecycle ledger/read-set/preflight implementation, generated scaffold templates, tests/fixtures, hook or equivalent local preflight adapter, local MCP stdio adapter implementation, or documentation needed to explain implemented surfaces.
+Generated downstream project scaffold may include `records\current-task.md`, `records\stages\*.md`, `records\decisions.md`, `records\proof.md`, and `records\handoff.md`.
 
 ## Current Allowed Local Verification Commands
 
@@ -113,23 +117,12 @@ New files are allowed only when directly required for workflow engine enforcemen
 - `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
 - `npm pack --dry-run`
 
-## Current Allowed Git/GitHub Commands
-
-- `git add <intended HARNESS V2 product files>`
-- `git commit`
-- `git push`
-- `git push --tags`
-- `npm publish`
-- `gh release create v0.1.7 --repo vibedong/harness-v2 --title "HARNESS V2 0.1.7" --notes-file RELEASE_NOTES.md`
-
 ## Stop Conditions
 
 Stop if a requested action needs files outside `F:\Folder\harness-v2`.
 
-Stop if a requested action needs files or new surfaces not directly required by the active remaining completion program.
+Stop if a requested action needs npm publish, Python package registry publish, GitHub release or tag mutation, git push, dependency installation from network, secret access, external network mutation, or destructive operation outside generated temporary verification artifacts.
 
 Stop if a pointer, source, approval, permission, proof obligation, lifecycle requirement, route, registry/log row, safety boundary, improvement classification, or release boundary is missing, stale, or conflicting.
 
-Stop before repeat npm publish, Python package registry publish, GitHub release or tag mutation outside the approved `v0.1.7` release transaction, dependency installation from network, secret access, external network mutation outside allowed git push and the approved GitHub release transaction, or destructive operation outside generated temporary verification artifacts.
-
-This file is a current pointer. It does not claim shell-level automatic enforcement, Python package registry publish state, future release authority, real Codex app hook installation, remote MCP hosting, MCP client installation, or MCP client configuration state.
+This file is a current pointer. It does not claim shell-level automatic enforcement, future release authority, real Codex app hook installation, remote MCP hosting, MCP client installation, or MCP client configuration state.

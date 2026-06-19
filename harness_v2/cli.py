@@ -66,7 +66,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "verify":
         result = verify_task(Path(args.task))
         if result.ok:
-            print(json.dumps({"ok": True, "task_id": result.task_id}, sort_keys=True))
+            print(json.dumps(_verify_payload(result), sort_keys=True))
             return 0
         print("\n".join(result.errors), file=sys.stderr)
         return 1
@@ -109,3 +109,15 @@ def main(argv: list[str] | None = None) -> int:
 
     parser.error(f"unknown command: {args.command}")
     return 2
+
+
+def _verify_payload(result) -> dict:
+    return {
+        "ok": True,
+        "task_id": result.task_id,
+        "current_gate": result.current_gate,
+        "task_mode": result.task_mode,
+        "record_strength": result.record_strength,
+        "effective_record_strength": result.effective_record_strength,
+        "compatibility_mode": result.compatibility_mode,
+    }

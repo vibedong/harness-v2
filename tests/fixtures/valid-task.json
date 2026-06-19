@@ -1,6 +1,6 @@
 {
   "task_id": "harness-v2-valid-task",
-  "title": "Validate HARNESS V2 0.1.7 local release verification fixture",
+  "title": "Validate HARNESS V2 workflow realignment local verification fixture",
   "workflow": "remaining_completion_program",
   "workflow_stage": "development",
   "source": {
@@ -14,53 +14,27 @@
     "current_pointer": "CURRENT.md"
   },
   "approval": {
-    "packet": "Approve HARNESS V2 remaining completion program local verification fixture; release execution is authorized only by the separate 0.1.7 release transaction",
+    "packet": "Approve HARNESS V2 workflow stage realignment local verification fixture; release execution is denied for this local slice",
     "approved_paths": [
       "AGENTS.md",
       "RULES.md",
       "CURRENT.md",
       "README.md",
       "README.ko.md",
-      "LICENSE",
       "RELEASE_NOTES.md",
-      ".gitignore",
-      ".gitattributes",
-      "package.json",
-      "pyproject.toml",
-      "_build_backend\\harness_backend.py",
-      "bin\\harness-v2.js",
       "rules\\workflows.md",
-      "control\\source.md",
       "control\\approval.md",
       "control\\permission.md",
       "control\\proof.md",
       "control\\lifecycle.md",
       "records\\README.md",
-      "routing\\manifest.md",
-      "artifacts\\registry.md",
       "artifacts\\log.md",
       "safety\\regression.md",
-      "safety\\improvement.md",
-      "release\\transaction.md",
       "contracts\\task.schema.json",
-      "contracts\\approval.schema.json",
-      "contracts\\permission.schema.json",
-      "contracts\\proof.schema.json",
-      "contracts\\lifecycle.schema.json",
-      "contracts\\artifact.schema.json",
       "templates\\task.json",
-      "templates\\gate-manifest.md",
-      "templates\\approval-request.md",
-      "templates\\proof-report.md",
-      "harness_v2\\__init__.py",
-      "harness_v2\\__main__.py",
-      "harness_v2\\cli.py",
       "harness_v2\\core.py",
-      "harness_v2\\verify.py",
-      "harness_v2\\doctor.py",
       "harness_v2\\preflight.py",
       "harness_v2\\gate.py",
-      "harness_v2\\mcp.py",
       "tests\\test_harness_v2.py",
       "tests\\fixtures\\valid-task.json",
       "tests\\fixtures\\invalid-missing-approval.json"
@@ -72,7 +46,8 @@
       "release tag creation",
       "dependency install from network",
       "secret access",
-      "external network mutation outside allowed git push",
+      "external network mutation",
+      "git push",
       "remote MCP hosting",
       "MCP client configuration mutation",
       "destructive operation outside generated verification artifacts"
@@ -97,10 +72,7 @@
       "python -m harness_v2 doctor --root <repo root>",
       "python -m harness_v2 init --root <temporary project>",
       "python -m harness_v2 verify <temporary project>\\contracts\\harness-task.json",
-      "npm pack --dry-run",
-      "git add <intended HARNESS V2 product files>",
-      "git commit",
-      "git push"
+      "npm pack --dry-run"
     ],
     "denied_side_effects": [
       "npm publish",
@@ -109,7 +81,8 @@
       "release tag creation",
       "dependency install from network",
       "secret access",
-      "external network mutation outside allowed git push",
+      "external network mutation",
+      "git push",
       "remote MCP hosting",
       "MCP client configuration mutation",
       "destructive operation outside generated verification artifacts"
@@ -130,15 +103,18 @@
       "python init creates a valid temporary project harness",
       "node wrapper init creates a valid temporary project harness",
       "npm pack dry-run exits 0 without publishing or generated pycache files",
+      "workflow_stage enum is canonical spec through improvement",
+      "control surface names are rejected as workflow_stage",
+      "generated records/stages scaffold tracks spec through improvement",
       "generated AGENTS/RULES/CURRENT bind AI agents without relying on README authority",
       "generated scaffold is not described as automatic enforcement completion",
       "valid fixture accepted",
       "invalid fixture rejected",
-      "fixture does not authorize npm publish, Python package registry publish, dependency install, secret access, external mutation outside allowed git push, remote MCP hosting, MCP client configuration mutation, release tag creation, GitHub release creation, or destructive operation outside generated verification artifacts"
+      "fixture does not authorize npm publish, Python package registry publish, dependency install, secret access, external mutation, git push, remote MCP hosting, MCP client configuration mutation, release tag creation, GitHub release creation, or destructive operation outside generated verification artifacts"
     ]
   },
   "lifecycle": {
-    "current_state": "public_release_published",
-    "target_state": "public_release_published"
+    "current_state": "workflow_realignment_review",
+    "target_state": "workflow_realignment_review"
   }
 }

@@ -2,7 +2,11 @@
   "task_id": "<task-id>",
   "title": "<task title>",
   "workflow": "<workflow>",
-  "workflow_stage": "<planning|approval|development|development_review|artifact_observation|routing|safety_improvement|release_boundary>",
+  "contract_version": "0.1.7",
+  "workflow_stage": "<spec|spec_review|plan|plan_review|plan_approval|development|development_review|improvement>",
+  "current_gate": "<derived from workflow_stage unless strict migration changes ownership>",
+  "task_mode": "<setup_only|read_only_analysis|scaffold_only|planned_change|defect_repair|continuity_only>",
+  "record_strength": "<minimal|light|strict>",
   "source": {
     "basis": ["<source path>"],
     "current_pointer": "CURRENT.md"

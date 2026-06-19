@@ -35,6 +35,8 @@ DEFAULT_KNOWN_STATES = frozenset(
         "package_publish_authoring",
         "package_publish_review",
         "package_candidate_ready",
+        "workflow_realignment_authoring",
+        "workflow_realignment_review",
         "blocked",
         "deferred",
     }
@@ -48,21 +50,45 @@ REQUIRED_TASK_OBJECTS = (
 )
 WORKFLOW_STAGES = frozenset(
     {
-        "planning",
-        "approval",
+        "spec",
+        "spec_review",
+        "plan",
+        "plan_review",
+        "plan_approval",
         "development",
         "development_review",
-        "artifact_observation",
-        "routing",
-        "safety_improvement",
-        "release_boundary",
+        "improvement",
     }
 )
-PLANNING_PATH_PREFIXES = ("stage-plans\\", "plans\\", "records\\", "docs\\planning\\")
-ARTIFACT_PATHS = {"artifacts\\registry.md", "artifacts\\log.md"}
-ROUTING_PATHS = {"routing\\manifest.md"}
-SAFETY_PATHS = {"safety\\regression.md", "safety\\improvement.md"}
-RELEASE_PATHS = {"release\\transaction.md"}
+LEGACY_STAGE_ALIASES = {
+    "planning": "plan",
+    "approval": "plan_approval",
+}
+TASK_MODES = frozenset(
+    {
+        "setup_only",
+        "read_only_analysis",
+        "scaffold_only",
+        "planned_change",
+        "defect_repair",
+        "continuity_only",
+    }
+)
+RECORD_STRENGTHS = frozenset({"minimal", "light", "strict"})
+STRENGTH_RANK = {"minimal": 0, "light": 1, "strict": 2}
+SPEC_PATHS = {"records\\current-task.md", "records\\stages\\spec.md", "records\\decisions.md"}
+SPEC_REVIEW_PATHS = {"records\\stages\\spec-review.md", "records\\decisions.md"}
+PLAN_PATHS = {"records\\stages\\plan.md", "records\\decisions.md"}
+PLAN_REVIEW_PATHS = {"records\\stages\\plan-review.md", "records\\decisions.md"}
+PLAN_APPROVAL_PATHS = {"control\\approval.md", "records\\stages\\plan-approval.md", "records\\decisions.md"}
+DEVELOPMENT_REVIEW_PATHS = {"records\\stages\\development-review.md", "records\\proof.md", "records\\decisions.md"}
+IMPROVEMENT_PATHS = {
+    "records\\stages\\improvement.md",
+    "records\\decisions.md",
+    "records\\handoff.md",
+    "safety\\regression.md",
+    "safety\\improvement.md",
+}
 PRODUCT_IMPLEMENTATION_PREFIXES = (
     "harness_v2\\",
     "contracts\\",
@@ -97,6 +123,12 @@ MUTATING_SIDE_EFFECT_FRAGMENTS = (
     "external network mutation",
     "destructive",
     "npm pack",
+)
+RECORD_SIDE_EFFECT_FRAGMENTS = (
+    "stage record",
+    "record file",
+    "records\\",
+    "records/",
 )
 RELEASE_EXECUTION_FRAGMENTS = (
     "npm publish",
@@ -134,6 +166,19 @@ def _scaffold_files() -> tuple[tuple[tuple[str, ...], str], ...]:
         (("control", "permission.md"), _permission_md()),
         (("control", "proof.md"), _proof_md()),
         (("control", "lifecycle.md"), _lifecycle_md()),
+        (("records", "README.md"), _records_readme_md()),
+        (("records", "current-task.md"), _current_task_md()),
+        (("records", "stages", "spec.md"), _stage_record_md("Spec")),
+        (("records", "stages", "spec-review.md"), _stage_record_md("Spec Review")),
+        (("records", "stages", "plan.md"), _stage_record_md("Plan")),
+        (("records", "stages", "plan-review.md"), _stage_record_md("Plan Review")),
+        (("records", "stages", "plan-approval.md"), _stage_record_md("Plan Approval")),
+        (("records", "stages", "development.md"), _stage_record_md("Development")),
+        (("records", "stages", "development-review.md"), _stage_record_md("Development Review")),
+        (("records", "stages", "improvement.md"), _stage_record_md("Improvement")),
+        (("records", "decisions.md"), _decisions_md()),
+        (("records", "proof.md"), _records_proof_md()),
+        (("records", "handoff.md"), _handoff_md()),
         (("contracts", "harness-task.json"), _initial_task_json()),
         (("templates", "task.json"), _task_template_json()),
     )
@@ -144,6 +189,11 @@ class ValidationResult:
     ok: bool
     task_id: str | None
     errors: tuple[str, ...]
+    current_gate: str | None = None
+    task_mode: str | None = None
+    record_strength: str | None = None
+    effective_record_strength: str | None = None
+    compatibility_mode: bool = True
 
 
 @dataclass(frozen=True)
@@ -234,6 +284,16 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None) -> Valid
     errors: list[str] = []
     task_id = data.get("task_id")
     root_path = Path(root) if root is not None else None
+    compatibility_mode = not _is_strict_task_contract(data)
+    workflow_stage = data.get("workflow_stage")
+    current_gate = _derive_current_gate(data)
+    task_mode = _task_mode_value(data)
+    record_strength = _record_strength_value(data)
+    effective_record_strength = _effective_record_strength(
+        workflow_stage if isinstance(workflow_stage, str) else None,
+        task_mode,
+        record_strength,
+    )
 
     for key in ("task_id", "title", "workflow"):
         if not _non_empty_string(data.get(key)):
@@ -278,12 +338,18 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None) -> Valid
         errors.append("lifecycle.target_state must be a non-empty string")
 
     _validate_current_context(data, root_path, errors)
+    _validate_goal0_compatibility_fields(data, compatibility_mode, errors)
     _validate_workflow_stage(data, errors)
 
     return ValidationResult(
         ok=not errors,
         task_id=task_id if isinstance(task_id, str) else None,
         errors=tuple(errors),
+        current_gate=current_gate,
+        task_mode=task_mode,
+        record_strength=record_strength,
+        effective_record_strength=effective_record_strength,
+        compatibility_mode=compatibility_mode,
     )
 
 
@@ -351,6 +417,85 @@ def _non_empty_list(value: Any) -> bool:
     return isinstance(value, list) and bool(value)
 
 
+def _is_strict_task_contract(data: dict[str, Any]) -> bool:
+    version = data.get("contract_version")
+    return isinstance(version, str) and version.strip() not in {"", "0.1.7"}
+
+
+def _derive_current_gate(data: dict[str, Any]) -> str | None:
+    current_gate = data.get("current_gate")
+    if isinstance(current_gate, str) and current_gate.strip():
+        return current_gate
+    workflow_stage = data.get("workflow_stage")
+    if isinstance(workflow_stage, str) and workflow_stage.strip():
+        return workflow_stage
+    return None
+
+
+def _task_mode_value(data: dict[str, Any]) -> str:
+    value = data.get("task_mode")
+    return value if isinstance(value, str) and value.strip() else "planned_change"
+
+
+def _record_strength_value(data: dict[str, Any]) -> str:
+    value = data.get("record_strength")
+    return value if isinstance(value, str) and value.strip() else "minimal"
+
+
+def _effective_record_strength(stage: str | None, task_mode: str, record_strength: str) -> str:
+    stage_default = {
+        "spec": "light",
+        "spec_review": "light",
+        "plan": "strict",
+        "plan_review": "strict",
+        "plan_approval": "strict",
+        "development": "light",
+        "development_review": "strict",
+        "improvement": "light",
+    }.get(stage or "", "light")
+    task_mode_default = {
+        "setup_only": "minimal",
+        "read_only_analysis": "minimal",
+        "scaffold_only": "light",
+        "planned_change": "strict",
+        "defect_repair": "strict",
+        "continuity_only": "minimal",
+    }.get(task_mode, "light")
+    candidates = tuple(value if value in STRENGTH_RANK else "strict" for value in (stage_default, task_mode_default, record_strength))
+    return max(candidates, key=lambda value: STRENGTH_RANK.get(value, STRENGTH_RANK["strict"]))
+
+
+def _validate_goal0_compatibility_fields(data: dict[str, Any], compatibility_mode: bool, errors: list[str]) -> None:
+    workflow_stage = data.get("workflow_stage")
+    current_gate = data.get("current_gate")
+    task_mode = data.get("task_mode")
+    record_strength = data.get("record_strength")
+
+    if current_gate is not None:
+        if not _non_empty_string(current_gate):
+            errors.append("current_gate must be a non-empty string when present")
+        elif current_gate in LEGACY_STAGE_ALIASES:
+            errors.append(
+                f"current_gate uses legacy alias {current_gate!r}; use {LEGACY_STAGE_ALIASES[current_gate]!r}"
+            )
+        elif current_gate not in WORKFLOW_STAGES:
+            errors.append(f"current_gate is not a known stage: {current_gate}")
+        elif workflow_stage in WORKFLOW_STAGES and current_gate != workflow_stage:
+            errors.append("current_gate must match workflow_stage when present")
+
+    if task_mode is None:
+        if not compatibility_mode:
+            errors.append("strict task contracts require task_mode")
+    elif task_mode not in TASK_MODES:
+        errors.append(f"task_mode is not known: {task_mode}")
+
+    if record_strength is None:
+        if not compatibility_mode:
+            errors.append("strict task contracts require record_strength")
+    elif record_strength not in RECORD_STRENGTHS:
+        errors.append(f"record_strength is not known: {record_strength}")
+
+
 def _validate_current_context(data: dict[str, Any], root: Path | None, errors: list[str]) -> None:
     approval = data.get("approval") if isinstance(data.get("approval"), dict) else {}
     permission = data.get("permission") if isinstance(data.get("permission"), dict) else {}
@@ -406,18 +551,19 @@ def _validate_workflow_stage(data: dict[str, Any], errors: list[str]) -> None:
     stage = data.get("workflow_stage")
     if not isinstance(stage, str) or not stage.strip():
         return
+    if stage in LEGACY_STAGE_ALIASES:
+        errors.append(f"workflow_stage uses legacy alias {stage!r}; use {LEGACY_STAGE_ALIASES[stage]!r}")
+        return
     if stage not in WORKFLOW_STAGES:
         errors.append(f"workflow_stage is not a known stage: {stage}")
         return
 
-    source = data.get("source") if isinstance(data.get("source"), dict) else {}
     approval = data.get("approval") if isinstance(data.get("approval"), dict) else {}
     permission = data.get("permission") if isinstance(data.get("permission"), dict) else {}
     proof = data.get("proof") if isinstance(data.get("proof"), dict) else {}
     lifecycle = data.get("lifecycle") if isinstance(data.get("lifecycle"), dict) else {}
 
     approved_paths = _string_list(approval.get("approved_paths"))
-    source_basis = _string_list(source.get("basis"))
     allowed_side_effects = _string_list(permission.get("allowed_side_effects"))
     denied_side_effects = _string_list(permission.get("denied_side_effects"))
     proof_obligations = _string_list(proof.get("obligations"))
@@ -425,44 +571,46 @@ def _validate_workflow_stage(data: dict[str, Any], errors: list[str]) -> None:
     _reject_broad_approved_paths(approved_paths, errors)
     _reject_missing_core_denials(denied_side_effects, errors)
 
-    if stage == "planning":
-        _reject_paths_outside("planning", approved_paths, PLANNING_PATH_PREFIXES, errors)
-        _reject_mutating_stage_side_effects(stage, allowed_side_effects, errors)
-    elif stage == "approval":
+    if stage == "spec":
+        _reject_path_set_outside("spec", approved_paths, SPEC_PATHS, errors)
+        _reject_non_record_side_effects(stage, allowed_side_effects, errors)
+    elif stage == "spec_review":
+        _reject_path_set_outside("spec_review", approved_paths, SPEC_REVIEW_PATHS, errors)
+        _reject_non_record_side_effects(stage, allowed_side_effects, errors)
+        if lifecycle.get("current_state") != lifecycle.get("target_state"):
+            errors.append("spec_review stage cannot move lifecycle state")
+        _reject_claimed_authority(stage, proof_obligations, ("approval", "permission", "lifecycle transition"), errors)
+    elif stage == "plan":
+        _reject_path_set_outside("plan", approved_paths, PLAN_PATHS, errors)
+        _reject_non_record_side_effects(stage, allowed_side_effects, errors)
+    elif stage == "plan_review":
+        _reject_path_set_outside("plan_review", approved_paths, PLAN_REVIEW_PATHS, errors)
+        _reject_non_record_side_effects(stage, allowed_side_effects, errors)
+        if lifecycle.get("current_state") != lifecycle.get("target_state"):
+            errors.append("plan_review stage cannot move lifecycle state")
+        _reject_claimed_authority(stage, proof_obligations, ("approval", "permission", "proof result", "lifecycle transition"), errors)
+    elif stage == "plan_approval":
+        _reject_path_set_outside("plan_approval", approved_paths, PLAN_APPROVAL_PATHS, errors)
         packet = approval.get("packet")
         if isinstance(packet, str) and _normalize_side_effect(packet) in BROAD_APPROVAL_PACKETS:
-            errors.append("approval stage requires an exact approval packet, not a broad approval phrase")
+            errors.append("plan_approval stage requires an exact approval packet, not a broad approval phrase")
         if not _non_empty_list(approval.get("excluded_side_effects")):
-            errors.append("approval stage requires approval.excluded_side_effects")
+            errors.append("plan_approval stage requires approval.excluded_side_effects")
     elif stage == "development":
         if not any(_contains_fragment(value, ("write", "modify", "create")) for value in allowed_side_effects):
             errors.append("development stage requires an explicit local write side effect")
         _reject_release_execution_side_effects(stage, allowed_side_effects, errors)
     elif stage == "development_review":
-        _reject_mutating_stage_side_effects(stage, allowed_side_effects, errors)
+        _reject_path_set_outside("development_review", approved_paths, DEVELOPMENT_REVIEW_PATHS, errors)
+        _reject_non_record_side_effects(stage, allowed_side_effects, errors)
         if lifecycle.get("current_state") != lifecycle.get("target_state"):
             errors.append("development_review stage cannot move lifecycle state")
         _reject_claimed_authority(stage, proof_obligations, ("proof result", "lifecycle transition", "release readiness"), errors)
-    elif stage == "artifact_observation":
-        _reject_path_set_outside("artifact_observation", approved_paths, ARTIFACT_PATHS, errors)
-        for basis in source_basis:
-            if _normalize_path(basis).startswith("artifacts\\"):
-                errors.append("artifact_observation stage cannot use artifact registry/log as source authority")
-        _reject_claimed_authority(stage, proof_obligations, ("artifact is proof", "registry is proof", "log is proof"), errors)
-    elif stage == "routing":
-        _reject_path_set_outside("routing", approved_paths, ROUTING_PATHS, errors)
-        _reject_mutating_stage_side_effects(stage, allowed_side_effects, errors)
-        _reject_claimed_authority(stage, proof_obligations, ("route permission", "tool permission"), errors)
-    elif stage == "safety_improvement":
-        _reject_path_set_outside("safety_improvement", approved_paths, SAFETY_PATHS, errors)
+    elif stage == "improvement":
+        _reject_path_set_outside("improvement", approved_paths, IMPROVEMENT_PATHS, errors)
         _reject_product_implementation_paths(stage, approved_paths, errors)
-        _reject_mutating_stage_side_effects(stage, allowed_side_effects, errors)
-    elif stage == "release_boundary":
-        _reject_path_set_outside("release_boundary", approved_paths, RELEASE_PATHS, errors)
+        _reject_non_record_side_effects(stage, allowed_side_effects, errors)
         _reject_release_execution_side_effects(stage, allowed_side_effects, errors)
-        for required in REQUIRED_RELEASE_DENIALS:
-            if not _contains_normalized(denied_side_effects, required):
-                errors.append(f"release_boundary stage requires denied side effect: {required}")
 
 
 def _reject_broad_approved_paths(paths: list[str], errors: list[str]) -> None:
@@ -511,6 +659,15 @@ def _reject_mutating_stage_side_effects(stage: str, side_effects: list[str], err
     for value in side_effects:
         if _contains_fragment(value, MUTATING_SIDE_EFFECT_FRAGMENTS):
             errors.append(f"{stage} stage cannot allow mutating side effect: {value}")
+
+
+def _reject_non_record_side_effects(stage: str, side_effects: list[str], errors: list[str]) -> None:
+    for value in side_effects:
+        if not _contains_fragment(value, MUTATING_SIDE_EFFECT_FRAGMENTS):
+            continue
+        if _contains_fragment(value, RECORD_SIDE_EFFECT_FRAGMENTS):
+            continue
+        errors.append(f"{stage} stage cannot allow non-record side effect: {value}")
 
 
 def _reject_release_execution_side_effects(stage: str, side_effects: list[str], errors: list[str]) -> None:
@@ -820,6 +977,73 @@ Do not mark work done, release-ready, published, migrated, or automatically enfo
 """
 
 
+def _records_readme_md() -> str:
+    return """# HARNESS V2 Records
+
+This folder keeps task-local records for the applied project.
+
+`records\\stages\\` follows the official HARNESS V2 workflow stages:
+
+1. `spec`
+2. `spec_review`
+3. `plan`
+4. `plan_review`
+5. `plan_approval`
+6. `development`
+7. `development_review`
+8. `improvement`
+
+These records support continuity. They are not source authority, approval, permission, proof, lifecycle transition, routing permission, or release readiness by themselves.
+"""
+
+
+def _current_task_md() -> str:
+    return """# Current Task Record
+
+Use this file to summarize the current task in human-readable form.
+
+Keep it aligned with `contracts\\harness-task.json`. If the task contract and this note disagree, the task contract and `CURRENT.md` win.
+"""
+
+
+def _stage_record_md(title: str) -> str:
+    return f"""# {title} Stage Record
+
+status: initialized / empty
+
+Use this file for task-local notes from the `{title.casefold().replace(" ", "_")}` workflow stage.
+
+Do not treat this record as approval, permission, proof, lifecycle transition, route authority, release readiness, or source of truth by itself.
+"""
+
+
+def _decisions_md() -> str:
+    return """# Decision Record
+
+Use this file to summarize task-local decisions and deferred items.
+
+Every decision must point back to the active task contract, current source basis, or user-approved packet before it can affect implementation.
+"""
+
+
+def _records_proof_md() -> str:
+    return """# Proof Record
+
+Use this file to summarize proof commands, outputs, blocked checks, and readback evidence for the active task.
+
+Proof is valid only when it matches the active task contract's `proof.obligations` and current consumer surface.
+"""
+
+
+def _handoff_md() -> str:
+    return """# Handoff Record
+
+Use this file only when continuity notes are needed for another agent or later session.
+
+Handoff notes are not approval, permission, proof, lifecycle transition, or source authority.
+"""
+
+
 def _initial_task_json() -> str:
     return """{
   "task_id": "harness-v2-initial-task",
@@ -845,6 +1069,19 @@ def _initial_task_json() -> str:
       "control\\\\permission.md",
       "control\\\\proof.md",
       "control\\\\lifecycle.md",
+      "records\\\\README.md",
+      "records\\\\current-task.md",
+      "records\\\\stages\\\\spec.md",
+      "records\\\\stages\\\\spec-review.md",
+      "records\\\\stages\\\\plan.md",
+      "records\\\\stages\\\\plan-review.md",
+      "records\\\\stages\\\\plan-approval.md",
+      "records\\\\stages\\\\development.md",
+      "records\\\\stages\\\\development-review.md",
+      "records\\\\stages\\\\improvement.md",
+      "records\\\\decisions.md",
+      "records\\\\proof.md",
+      "records\\\\handoff.md",
       "contracts\\\\harness-task.json",
       "templates\\\\task.json"
     ],
@@ -878,6 +1115,7 @@ def _initial_task_json() -> str:
   "proof": {
     "obligations": [
       "generated AGENTS/RULES/CURRENT bind AI agents without relying on README authority",
+      "generated records/stages scaffold tracks spec through improvement",
       "harness-v2 status --root .",
       "harness-v2 verify contracts\\\\harness-task.json",
       "harness-v2 gate contracts\\\\harness-task.json --root .",
@@ -897,7 +1135,11 @@ def _task_template_json() -> str:
   "task_id": "<task-id>",
   "title": "<task title>",
   "workflow": "default",
-  "workflow_stage": "<planning|approval|development|development_review|artifact_observation|routing|safety_improvement|release_boundary>",
+  "contract_version": "0.1.7",
+  "workflow_stage": "<spec|spec_review|plan|plan_review|plan_approval|development|development_review|improvement>",
+  "current_gate": "<derived from workflow_stage unless strict migration changes ownership>",
+  "task_mode": "<setup_only|read_only_analysis|scaffold_only|planned_change|defect_repair|continuity_only>",
+  "record_strength": "<minimal|light|strict>",
   "source": {
     "basis": ["CURRENT.md"],
     "current_pointer": "CURRENT.md"

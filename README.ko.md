@@ -31,6 +31,8 @@ CLI는 `harness-v2 init --root .`로 초기 scaffold를 적용하고, task contr
 - `status`로 current pointer 확인
 - `verify`로 task contract 검증
 - `workflow_stage`를 통한 stage-specific workflow 검사
+- 공식 workflow stage: `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`
+- 생성된 프로젝트의 `records\stages\`에 task-local 단계 기록 생성
 - `preflight`로 side effect와 write path 사전 확인
 - `gate`로 hook-equivalent boundary 확인
 - `doctor`로 read-only integration report 확인
@@ -86,13 +88,34 @@ npm 명령은 내부적으로 Python CLI에 위임합니다. HARNESS V2를 JavaS
 
 ## 0.1.7 업데이트 내용
 
-- 현재 Codex-app-focused HARNESS V2 source를 npm의 `harness-v2@0.1.7`로 배포합니다.
-- GitHub source release 경로도 `v0.1.7` tag 기준으로 맞춥니다.
+- `harness-v2@0.1.7` npm package와 `v0.1.7` GitHub tag는 닫힌 release history로 취급합니다.
+- 이번 Goal 0 로컬 workflow realignment는 npm publish, GitHub release, tag 작업과 분리합니다.
 - 적용된 project file은 대상 프로젝트 루트에 바로 있어야 하며, 프로젝트 안에 `harness-v2` 하위 폴더가 남는 구조가 정상 흐름이 아닙니다.
 - 생성되는 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\` scaffold가 더 강해졌습니다.
 - `status`, `verify`, 선택적 `preflight`를 한 번에 확인하는 hook-equivalent `gate` 명령을 포함합니다.
 - `status`, `verify`, `preflight`, `gate`, `init`, `apply` tool 접근을 위한 local stdio MCP adapter를 포함합니다.
 - `doctor`는 local surface와 닫힌 반복 release boundary를 읽는 read-only integration report로 유지됩니다.
+
+## 0.1.7 이후 현재 로컬 source 변경
+
+현재 로컬 source는 브레인스토밍/stage-plan 기록의 원래 작업 흐름에 맞게 `workflow_stage`를 다시 정렬합니다.
+
+```text
+spec
+spec_review
+plan
+plan_review
+plan_approval
+development
+development_review
+improvement
+```
+
+task contract에서는 `workflow_stage`가 현재 writable compatibility owner입니다. `current_gate`는 별도 migration이 승인되기 전까지 `workflow_stage`에서 파생되는 read-model 값입니다. `current_gate`, `task_mode`, `record_strength`가 없는 기존 `0.1.7` task contract는 compatibility mode로 유지하고, strict contract는 새 필드를 제공하지 않으면 migration diagnostic으로 실패합니다. Compatibility mode에서 빠진 `task_mode`는 `planned_change`, 빠진 `record_strength`는 `minimal`로 기본 처리하고, `effective_record_strength`는 stage와 task-mode 규칙에 따라 더 엄격하게 올라갑니다.
+
+`artifact_observation`, `routing`, `safety_improvement`, `release_boundary`는 workflow stage가 아닙니다. 이들은 control 또는 observability surface로 남습니다.
+
+이 로컬 realignment 자체는 npm publish, GitHub release, release tag가 아닙니다.
 
 ## HARNESS V2 업데이트 방법
 
@@ -148,7 +171,7 @@ harness-v2 gate contracts\harness-task.json --root .
 
 정상 동작:
 
-- `init`은 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `contracts\harness-task.json`, `templates\task.json`을 만듭니다.
+- `init`은 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `records\`, `contracts\harness-task.json`, `templates\task.json`을 만듭니다.
 - `status`는 `CURRENT.md`에서 읽은 JSON을 출력합니다.
 - `verify`는 초기 task contract를 통과시키고 `{"ok": true, ...}`를 출력합니다.
 - `gate`는 초기 task contract를 통과시키고 status/verify 결합 결과를 출력합니다.
@@ -161,7 +184,12 @@ harness-v2 gate contracts\harness-task.json --root .
 {
   "task_id": "readme-docs-update",
   "title": "Update public README",
-  "workflow": "package_publish_review",
+  "workflow": "remaining_completion_program",
+  "contract_version": "0.1.7",
+  "workflow_stage": "development",
+  "current_gate": "development",
+  "task_mode": "planned_change",
+  "record_strength": "strict",
   "source": {
     "basis": ["CURRENT.md", "control\\approval.md", "control\\permission.md"],
     "current_pointer": "CURRENT.md"
@@ -169,18 +197,32 @@ harness-v2 gate contracts\harness-task.json --root .
   "approval": {
     "packet": "User approved README documentation update",
     "approved_paths": ["README.md", "README.ko.md"],
-    "excluded_side_effects": ["package publish", "release execution"]
+    "excluded_side_effects": [
+      "package publish",
+      "release execution",
+      "dependency install from network",
+      "secret access",
+      "external network mutation",
+      "destructive operation"
+    ]
   },
   "permission": {
     "allowed_side_effects": ["local file writes to README.md and README.ko.md"],
-    "denied_side_effects": ["package publish", "release execution", "dependency install from network"]
+    "denied_side_effects": [
+      "package publish",
+      "release execution",
+      "dependency install from network",
+      "secret access",
+      "external network mutation",
+      "destructive operation"
+    ]
   },
   "proof": {
     "obligations": ["python -m unittest discover tests"]
   },
   "lifecycle": {
-    "current_state": "package_publish_review",
-    "target_state": "package_publish_review"
+    "current_state": "workflow_realignment_review",
+    "target_state": "workflow_realignment_review"
   }
 }
 ```
@@ -365,12 +407,15 @@ harness-v2 init --root F:\path\to\your-project
 | `package.json` | npm wrapper package manifest |
 | `bin\harness-v2.js` | Python CLI를 실행하는 Windows/macOS Node wrapper |
 | `control\` | source, approval, permission, proof, lifecycle 경계 |
+| `records\current-task.md` | 사람이 읽는 현재 task note |
+| `records\stages\*.md` | spec부터 improvement까지의 task-local 단계 기록 |
+| `records\decisions.md`, `records\proof.md`, `records\handoff.md` | 결정, proof, 이어받기 보조 기록 |
 | `contracts\harness-task.json` | `init`이 만드는 초기 project task contract |
 | `templates\task.json` | `init`이 만드는 재사용 task contract template |
 | `harness_v2\` | Python CLI와 helper |
 | `_build_backend\` | 외부 의존성 없는 로컬 PEP 517 build backend |
 | `tests\` | unittest와 fixture |
-| `records\`, `routing\`, `artifacts\`, `safety\`, `release\` | 경계와 관찰 기록 표면 |
+| `routing\`, `artifacts\`, `safety\`, `release\` | control, boundary, observability 표면이며 workflow stage가 아님 |
 
 npm 패키지 자체는 개발용 schema와 test fixture도 포함하지만, 새 사용자 프로젝트에는 위의 더 작은 scaffold부터 적용됩니다.
 

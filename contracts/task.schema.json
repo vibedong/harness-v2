@@ -8,18 +8,47 @@
     "task_id": { "type": "string", "minLength": 1 },
     "title": { "type": "string", "minLength": 1 },
     "workflow": { "type": "string", "minLength": 1 },
+    "contract_version": { "type": "string", "minLength": 1 },
     "workflow_stage": {
       "type": "string",
       "enum": [
-        "planning",
-        "approval",
+        "spec",
+        "spec_review",
+        "plan",
+        "plan_review",
+        "plan_approval",
         "development",
         "development_review",
-        "artifact_observation",
-        "routing",
-        "safety_improvement",
-        "release_boundary"
+        "improvement"
       ]
+    },
+    "current_gate": {
+      "type": "string",
+      "enum": [
+        "spec",
+        "spec_review",
+        "plan",
+        "plan_review",
+        "plan_approval",
+        "development",
+        "development_review",
+        "improvement"
+      ]
+    },
+    "task_mode": {
+      "type": "string",
+      "enum": [
+        "setup_only",
+        "read_only_analysis",
+        "scaffold_only",
+        "planned_change",
+        "defect_repair",
+        "continuity_only"
+      ]
+    },
+    "record_strength": {
+      "type": "string",
+      "enum": ["minimal", "light", "strict"]
     },
     "source": {
       "type": "object",

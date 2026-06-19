@@ -17,8 +17,8 @@ This file maps operation modes to suggested local routes. Routing is guidance, n
 | operation mode | suggested route | required boundary |
 | --- | --- | --- |
 | recovery | read `AGENTS.md`, `RULES.md`, `CURRENT.md`, then relevant surface | stop on stale or conflicting pointer |
-| planning | planning records and workflow rules | planning output is not execution |
-| approval analysis | `control\approval.md` plus current user packet | approval does not grant side effects |
+| plan | plan records and workflow rules | plan output is not execution |
+| plan approval analysis | `control\approval.md` plus current user packet | approval does not grant side effects |
 | local markdown authoring | `CURRENT.md`, `control\permission.md`, `control\proof.md` | write only approved markdown paths |
 | development review | source, approval, permission, proof, lifecycle, route, artifact, safety surfaces | findings are not proof |
 | proof check | `control\proof.md` plus readback/search/listing | artifact checks must match obligation |
@@ -32,7 +32,7 @@ This file maps operation modes to suggested local routes. Routing is guidance, n
 | artifact observation | `artifacts\registry.md` and `artifacts\log.md` | registry/log are not source or proof |
 | regression safety | `safety\regression.md` | mapping is not pass evidence |
 | improvement intake | `safety\improvement.md` | candidate is not product change |
-| release boundary | `release\transaction.md` | current published npm target is `harness-v2@0.1.5`; repeat npm publish, tag creation, GitHub release execution, Python package registry publish, and deploy require a future transaction |
+| release boundary | `release\transaction.md` | last recorded package version reference is `harness-v2@0.1.7`; npm publish, tag creation, GitHub release execution, Python package registry publish, and deploy require a future transaction |
 
 ## Specialist And Subagent Guardrail
 

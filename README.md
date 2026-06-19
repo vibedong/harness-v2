@@ -31,6 +31,8 @@ The executable surface currently covers:
 - current pointer readback with `status`;
 - task contract validation with `verify`;
 - stage-specific workflow checks through `workflow_stage`;
+- canonical workflow stages: `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`;
+- task-local stage records under `records\stages\` in generated project scaffolds;
 - side-effect and write-path preflight checks with `preflight`;
 - hook-equivalent gate checks with `gate`;
 - read-only integration reports with `doctor`;
@@ -86,13 +88,34 @@ The npm command delegates to the Python CLI. HARNESS V2 is not rewritten in Java
 
 ## What's New In 0.1.7
 
-- Publishes the current Codex-app-focused HARNESS V2 source as `harness-v2@0.1.7` on npm.
-- Keeps the GitHub source release path aligned with tag `v0.1.7`.
+- Treats the `harness-v2@0.1.7` npm package and `v0.1.7` GitHub tag as closed release history.
+- Keeps this Goal 0 local workflow realignment separate from npm publish, GitHub release, and tag work.
 - Keeps installed project files directly in the target project root, not inside a nested `harness-v2` folder.
 - Includes stronger generated `AGENTS.md`, `RULES.md`, `CURRENT.md`, and `control\` scaffold files.
 - Adds the hook-equivalent `gate` command for explicit status, verify, and optional preflight checks.
 - Includes the local stdio MCP adapter for status, verify, preflight, gate, init, and apply tool access.
 - Keeps `doctor` as a read-only integration report over local surfaces and the closed repeat-release boundary.
+
+## Current Local Source After 0.1.7
+
+The local source now realigns `workflow_stage` to the canonical HARNESS V2 task flow from the brainstorming/stage-plan records:
+
+```text
+spec
+spec_review
+plan
+plan_review
+plan_approval
+development
+development_review
+improvement
+```
+
+`workflow_stage` remains the writable compatibility owner in task contracts. `current_gate` is a derived read-model value unless a later explicit migration changes ownership. Existing `0.1.7` task contracts that omit `current_gate`, `task_mode`, or `record_strength` remain compatibility-mode contracts; strict contracts must provide the new fields or receive migration diagnostics. In compatibility mode, missing `task_mode` defaults to `planned_change`, missing `record_strength` defaults to `minimal`, and `effective_record_strength` is raised by stage and task-mode rules.
+
+`artifact_observation`, `routing`, `safety_improvement`, and `release_boundary` are not workflow stages. They remain control or observability surfaces.
+
+This local realignment is not an npm publish, GitHub release, or release tag by itself.
 
 ## Updating HARNESS V2
 
@@ -148,7 +171,7 @@ harness-v2 gate contracts\harness-task.json --root .
 
 Expected behavior:
 
-- `init` creates `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `contracts\harness-task.json`, and `templates\task.json`.
+- `init` creates `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `records\`, `contracts\harness-task.json`, and `templates\task.json`.
 - `status` prints JSON from `CURRENT.md`.
 - `verify` accepts the initial task contract and prints `{"ok": true, ...}`.
 - `gate` accepts the initial task contract and prints a combined status/verify result.
@@ -161,7 +184,12 @@ To start a new task contract, copy or adapt `templates\task.json` and fill in va
 {
   "task_id": "readme-docs-update",
   "title": "Update public README",
-  "workflow": "package_publish_review",
+  "workflow": "remaining_completion_program",
+  "contract_version": "0.1.7",
+  "workflow_stage": "development",
+  "current_gate": "development",
+  "task_mode": "planned_change",
+  "record_strength": "strict",
   "source": {
     "basis": ["CURRENT.md", "control\\approval.md", "control\\permission.md"],
     "current_pointer": "CURRENT.md"
@@ -169,18 +197,32 @@ To start a new task contract, copy or adapt `templates\task.json` and fill in va
   "approval": {
     "packet": "User approved README documentation update",
     "approved_paths": ["README.md", "README.ko.md"],
-    "excluded_side_effects": ["package publish", "release execution"]
+    "excluded_side_effects": [
+      "package publish",
+      "release execution",
+      "dependency install from network",
+      "secret access",
+      "external network mutation",
+      "destructive operation"
+    ]
   },
   "permission": {
     "allowed_side_effects": ["local file writes to README.md and README.ko.md"],
-    "denied_side_effects": ["package publish", "release execution", "dependency install from network"]
+    "denied_side_effects": [
+      "package publish",
+      "release execution",
+      "dependency install from network",
+      "secret access",
+      "external network mutation",
+      "destructive operation"
+    ]
   },
   "proof": {
     "obligations": ["python -m unittest discover tests"]
   },
   "lifecycle": {
-    "current_state": "package_publish_review",
-    "target_state": "package_publish_review"
+    "current_state": "workflow_realignment_review",
+    "target_state": "workflow_realignment_review"
   }
 }
 ```
@@ -365,12 +407,15 @@ Report the failing command and separate existing failures from failures introduc
 | `package.json` | npm wrapper package manifest |
 | `bin\harness-v2.js` | Windows/macOS Node CLI wrapper for the Python CLI |
 | `control\` | source, approval, permission, proof, and lifecycle boundaries |
+| `records\current-task.md` | human-readable current task note |
+| `records\stages\*.md` | task-local records for spec through improvement |
+| `records\decisions.md`, `records\proof.md`, `records\handoff.md` | supporting decision, proof, and continuity records |
 | `contracts\harness-task.json` | initial project task contract created by `init` |
 | `templates\task.json` | reusable task contract template created by `init` |
 | `harness_v2\` | standard-library Python CLI and helpers |
 | `_build_backend\` | dependency-free local PEP 517 build backend |
 | `tests\` | unittest coverage and fixtures |
-| `records\`, `routing\`, `artifacts\`, `safety\`, `release\` | local boundary and observability surfaces |
+| `routing\`, `artifacts\`, `safety\`, `release\` | control, boundary, and observability surfaces, not workflow stages |
 
 The npm package also ships its own schema and test fixtures for development, but a newly initialized user project starts with the smaller scaffold above.
 
