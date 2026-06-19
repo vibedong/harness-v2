@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .modes import evaluate_mode
+
 
 CURRENT_SURFACES = (
     "AGENTS.md",
@@ -65,18 +67,6 @@ LEGACY_STAGE_ALIASES = {
     "planning": "plan",
     "approval": "plan_approval",
 }
-TASK_MODES = frozenset(
-    {
-        "setup_only",
-        "read_only_analysis",
-        "scaffold_only",
-        "planned_change",
-        "defect_repair",
-        "continuity_only",
-    }
-)
-RECORD_STRENGTHS = frozenset({"minimal", "light", "strict"})
-STRENGTH_RANK = {"minimal": 0, "light": 1, "strict": 2}
 SPEC_PATHS = {"records\\current-task.md", "records\\stages\\spec.md", "records\\decisions.md"}
 SPEC_REVIEW_PATHS = {"records\\stages\\spec-review.md", "records\\decisions.md"}
 PLAN_PATHS = {"records\\stages\\plan.md", "records\\decisions.md"}
@@ -194,9 +184,11 @@ class ValidationResult:
     task_mode: str | None = None
     record_strength: str | None = None
     effective_record_strength: str | None = None
+    classification_required: bool | None = None
     compatibility_mode: bool = True
     gate_state: dict[str, Any] | None = None
     freshness: dict[str, Any] | None = None
+    mode_profile: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -293,13 +285,8 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None, task_pat
     gate_state = _validate_gate_state(root_path, validated_task_path, data, errors)
     freshness = _validate_freshness(root_path, errors)
     current_gate = _derive_current_gate(data, gate_state)
-    task_mode = _task_mode_value(data)
-    record_strength = _record_strength_value(data)
-    effective_record_strength = _effective_record_strength(
-        workflow_stage if isinstance(workflow_stage, str) else None,
-        task_mode,
-        record_strength,
-    )
+    mode = evaluate_mode(data, workflow_stage if isinstance(workflow_stage, str) else None, compatibility_mode, freshness=freshness)
+    errors.extend(mode.errors)
 
     for key in ("task_id", "title", "workflow"):
         if not _non_empty_string(data.get(key)):
@@ -352,12 +339,14 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None, task_pat
         task_id=task_id if isinstance(task_id, str) else None,
         errors=tuple(errors),
         current_gate=current_gate,
-        task_mode=task_mode,
-        record_strength=record_strength,
-        effective_record_strength=effective_record_strength,
+        task_mode=mode.task_mode,
+        record_strength=mode.record_strength,
+        effective_record_strength=mode.effective_record_strength,
+        classification_required=mode.classification_required,
         compatibility_mode=compatibility_mode,
         gate_state=gate_state,
         freshness=freshness,
+        mode_profile=mode.to_json(),
     )
 
 
@@ -548,44 +537,9 @@ def _resolve_project_relative_path(root: Path, value: str, label: str, errors: l
     return candidate
 
 
-def _task_mode_value(data: dict[str, Any]) -> str:
-    value = data.get("task_mode")
-    return value if isinstance(value, str) and value.strip() else "planned_change"
-
-
-def _record_strength_value(data: dict[str, Any]) -> str:
-    value = data.get("record_strength")
-    return value if isinstance(value, str) and value.strip() else "minimal"
-
-
-def _effective_record_strength(stage: str | None, task_mode: str, record_strength: str) -> str:
-    stage_default = {
-        "spec": "light",
-        "spec_review": "light",
-        "plan": "strict",
-        "plan_review": "strict",
-        "plan_approval": "strict",
-        "development": "light",
-        "development_review": "strict",
-        "improvement": "light",
-    }.get(stage or "", "light")
-    task_mode_default = {
-        "setup_only": "minimal",
-        "read_only_analysis": "minimal",
-        "scaffold_only": "light",
-        "planned_change": "strict",
-        "defect_repair": "strict",
-        "continuity_only": "minimal",
-    }.get(task_mode, "light")
-    candidates = tuple(value if value in STRENGTH_RANK else "strict" for value in (stage_default, task_mode_default, record_strength))
-    return max(candidates, key=lambda value: STRENGTH_RANK.get(value, STRENGTH_RANK["strict"]))
-
-
 def _validate_goal0_compatibility_fields(data: dict[str, Any], compatibility_mode: bool, errors: list[str]) -> None:
     workflow_stage = data.get("workflow_stage")
     current_gate = data.get("current_gate")
-    task_mode = data.get("task_mode")
-    record_strength = data.get("record_strength")
 
     if current_gate is not None:
         if not _non_empty_string(current_gate):
@@ -598,18 +552,6 @@ def _validate_goal0_compatibility_fields(data: dict[str, Any], compatibility_mod
             errors.append(f"current_gate is not a known stage: {current_gate}")
         elif workflow_stage in WORKFLOW_STAGES and current_gate != workflow_stage:
             errors.append("current_gate must match workflow_stage when present")
-
-    if task_mode is None:
-        if not compatibility_mode:
-            errors.append("strict task contracts require task_mode")
-    elif task_mode not in TASK_MODES:
-        errors.append(f"task_mode is not known: {task_mode}")
-
-    if record_strength is None:
-        if not compatibility_mode:
-            errors.append("strict task contracts require record_strength")
-    elif record_strength not in RECORD_STRENGTHS:
-        errors.append(f"record_strength is not known: {record_strength}")
 
 
 def _validate_current_context(data: dict[str, Any], root: Path | None, errors: list[str]) -> None:
@@ -678,6 +620,7 @@ def _validate_workflow_stage(data: dict[str, Any], errors: list[str]) -> None:
     permission = data.get("permission") if isinstance(data.get("permission"), dict) else {}
     proof = data.get("proof") if isinstance(data.get("proof"), dict) else {}
     lifecycle = data.get("lifecycle") if isinstance(data.get("lifecycle"), dict) else {}
+    task_mode = data.get("task_mode")
 
     approved_paths = _string_list(approval.get("approved_paths"))
     allowed_side_effects = _string_list(permission.get("allowed_side_effects"))
@@ -713,7 +656,7 @@ def _validate_workflow_stage(data: dict[str, Any], errors: list[str]) -> None:
         if not _non_empty_list(approval.get("excluded_side_effects")):
             errors.append("plan_approval stage requires approval.excluded_side_effects")
     elif stage == "development":
-        if not any(_contains_fragment(value, ("write", "modify", "create")) for value in allowed_side_effects):
+        if task_mode != "read_only_analysis" and not any(_contains_fragment(value, ("write", "modify", "create")) for value in allowed_side_effects):
             errors.append("development stage requires an explicit local write side effect")
         _reject_release_execution_side_effects(stage, allowed_side_effects, errors)
     elif stage == "development_review":
@@ -1165,7 +1108,24 @@ def _initial_task_json() -> str:
   "task_id": "harness-v2-initial-task",
   "title": "Scaffold-only initial HARNESS V2 project binding",
   "workflow": "default",
+  "contract_version": "0.1.8",
   "workflow_stage": "development",
+  "current_gate": "development",
+  "task_mode": "scaffold_only",
+  "record_strength": "light",
+  "risk_flags": [
+    "scaffold_generation"
+  ],
+  "proof_profile": "current",
+  "capability_request": [
+    "init_scaffold"
+  ],
+  "classification_required": true,
+  "record_density": {
+    "generated_file_count": 23,
+    "required_read_set_size": 3,
+    "field_presence": "strict"
+  },
   "source": {
     "basis": [
       "AGENTS.md",
@@ -1251,11 +1211,20 @@ def _task_template_json() -> str:
   "task_id": "<task-id>",
   "title": "<task title>",
   "workflow": "default",
-  "contract_version": "0.1.7",
+  "contract_version": "0.1.8",
   "workflow_stage": "<spec|spec_review|plan|plan_review|plan_approval|development|development_review|improvement>",
   "current_gate": "<derived from workflow_stage unless strict migration changes ownership>",
   "task_mode": "<setup_only|read_only_analysis|scaffold_only|planned_change|defect_repair|continuity_only>",
   "record_strength": "<minimal|light|strict>",
+  "risk_flags": ["<risk flag or none>"],
+  "proof_profile": "<none|basic|current|strict>",
+  "capability_request": ["<capability request or none>"],
+  "classification_required": true,
+  "record_density": {
+    "generated_file_count": 0,
+    "required_read_set_size": 1,
+    "field_presence": "<minimal|light|strict>"
+  },
   "source": {
     "basis": ["CURRENT.md"],
     "current_pointer": "CURRENT.md"

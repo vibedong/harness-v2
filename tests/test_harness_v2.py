@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 VALID_TASK = ROOT / "tests" / "fixtures" / "valid-task.json"
 INVALID_TASK = ROOT / "tests" / "fixtures" / "invalid-missing-approval.json"
 INVALID_GATE_MISMATCH = ROOT / "tests" / "fixtures" / "invalid-gate-mismatch.json"
+INVALID_RECORD_STRENGTH = ROOT / "tests" / "fixtures" / "invalid-record-strength.json"
 APPROVED_SOURCE_FILES = {
     ".gitattributes",
     ".gitignore",
@@ -65,6 +66,7 @@ APPROVED_SOURCE_FILES = {
     "harness_v2/gate.py",
     "harness_v2/lifecycle.py",
     "harness_v2/freshness.py",
+    "harness_v2/modes.py",
     "harness_v2/mcp.py",
     "tests/test_harness_v2.py",
     "tests/fixtures/valid-task.json",
@@ -74,6 +76,7 @@ APPROVED_SOURCE_FILES = {
     "tests/fixtures/invalid-transition-stale-approval.md",
     "tests/fixtures/invalid-stale-approval.json",
     "tests/fixtures/invalid-stale-proof.json",
+    "tests/fixtures/invalid-record-strength.json",
 }
 ALLOWED_COMMANDS = {
     "python -m compileall harness_v2",
@@ -253,7 +256,9 @@ def stage_payload(
     payload["task_id"] = f"harness-v2-{stage}-task"
     payload["title"] = f"Validate {stage} workflow stage"
     payload["workflow_stage"] = stage
+    payload["current_gate"] = stage
     payload["source"]["basis"] = source_basis or ["CURRENT.md"]
+    payload["record_density"]["required_read_set_size"] = len(payload["source"]["basis"])
     payload["approval"]["packet"] = f"Approve exact {stage} workflow stage task"
     payload["approval"]["approved_paths"] = approved_paths
     payload["approval"]["excluded_side_effects"] = excluded_side_effects or list(COMMON_DENIED_SIDE_EFFECTS)
@@ -470,7 +475,9 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
                 self.assertTrue(result.ok, result.errors)
                 self.assertEqual(result.current_gate, "development")
-                self.assertTrue(result.compatibility_mode)
+                self.assertFalse(result.compatibility_mode)
+                self.assertEqual(result.record_strength, "light")
+                self.assertEqual(result.effective_record_strength, "strict")
 
     def test_release_version_policy_is_consistent(self):
         import harness_v2
@@ -507,9 +514,11 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertEqual(verify_payload["task_id"], "harness-v2-valid-task")
         self.assertEqual(verify_payload["current_gate"], "development")
         self.assertEqual(verify_payload["task_mode"], "planned_change")
-        self.assertEqual(verify_payload["record_strength"], "minimal")
+        self.assertEqual(verify_payload["record_strength"], "light")
         self.assertEqual(verify_payload["effective_record_strength"], "strict")
-        self.assertTrue(verify_payload["compatibility_mode"])
+        self.assertTrue(verify_payload["classification_required"])
+        self.assertFalse(verify_payload["compatibility_mode"])
+        self.assertEqual(verify_payload["mode_profile"]["strength_inputs"]["classification_required"], "strict")
 
     def test_cli_preflight_allows_explicit_side_effect_and_write_path(self):
         side_effect = subprocess.run(
@@ -768,9 +777,11 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertTrue(verify_payload["ok"])
             self.assertEqual(verify_payload["current_gate"], "development")
             self.assertEqual(verify_payload["task_mode"], "planned_change")
-            self.assertEqual(verify_payload["record_strength"], "minimal")
+            self.assertEqual(verify_payload["record_strength"], "light")
             self.assertEqual(verify_payload["effective_record_strength"], "strict")
-            self.assertTrue(verify_payload["compatibility_mode"])
+            self.assertTrue(verify_payload["classification_required"])
+            self.assertFalse(verify_payload["compatibility_mode"])
+            self.assertEqual(verify_payload["mode_profile"]["proof_profile"], "current")
             self.assertIn("freshness", verify_payload)
             self.assertFalse(verify_payload["freshness"]["present"])
             self.assertTrue(preflight_payload["ok"])
@@ -945,24 +956,26 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(valid["workflow"], "remaining_completion_program")
         self.assertEqual(valid["workflow_stage"], "development")
+        self.assertEqual(valid["contract_version"], "0.1.8")
+        self.assertEqual(valid["task_mode"], "planned_change")
+        self.assertEqual(valid["record_strength"], "light")
+        self.assertEqual(valid["proof_profile"], "current")
+        self.assertTrue(valid["classification_required"])
         self.assertEqual(valid["lifecycle"]["current_state"], "workflow_realignment_review")
         self.assertEqual(valid["lifecycle"]["target_state"], "workflow_realignment_review")
         self.assertEqual(invalid["workflow"], "remaining_completion_program")
         self.assertEqual(invalid["workflow_stage"], "development")
         self.assertEqual(invalid["lifecycle"]["current_state"], "workflow_realignment_review")
         self.assertEqual(invalid["lifecycle"]["target_state"], "workflow_realignment_review")
-        self.assertIn("contracts\\gate-state.schema.json", valid["approval"]["approved_paths"])
-        self.assertIn("templates\\gate-state.json", valid["approval"]["approved_paths"])
+        self.assertIn("contracts\\task.schema.json", valid["approval"]["approved_paths"])
+        self.assertIn("templates\\task.json", valid["approval"]["approved_paths"])
         self.assertIn("harness_v2\\core.py", valid["approval"]["approved_paths"])
         self.assertIn("harness_v2\\cli.py", valid["approval"]["approved_paths"])
+        self.assertIn("harness_v2\\modes.py", valid["approval"]["approved_paths"])
         self.assertIn("harness_v2\\mcp.py", valid["approval"]["approved_paths"])
-        self.assertIn("tests\\fixtures\\invalid-gate-mismatch.json", valid["approval"]["approved_paths"])
-        self.assertIn("node bin\\harness-v2.js status --root .", valid["permission"]["allowed_side_effects"])
-        self.assertIn("node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json", valid["permission"]["allowed_side_effects"])
-        self.assertIn("node bin\\harness-v2.js gate tests\\fixtures\\valid-task.json --root .", valid["permission"]["allowed_side_effects"])
-        self.assertIn("python -m harness_v2 status --root .", valid["permission"]["allowed_side_effects"])
-        self.assertIn("python -m harness_v2 verify tests\\fixtures\\valid-task.json", valid["permission"]["allowed_side_effects"])
-        self.assertIn("python -m harness_v2 gate tests\\fixtures\\valid-task.json --root .", valid["permission"]["allowed_side_effects"])
+        self.assertIn("tests\\fixtures\\invalid-record-strength.json", valid["approval"]["approved_paths"])
+        self.assertIn("python -m harness_v2 doctor --root .", valid["permission"]["allowed_side_effects"])
+        self.assertIn("node bin\\harness-v2.js doctor --root .", valid["permission"]["allowed_side_effects"])
         self.assertNotIn("npm publish", valid["permission"]["allowed_side_effects"])
         self.assertIn("npm publish", valid["permission"]["denied_side_effects"])
         self.assertIn("Python package registry publish", valid["permission"]["denied_side_effects"])
@@ -1119,9 +1132,14 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         from harness_v2.core import validate_task
 
         payload = valid_task_payload()
+        payload["contract_version"] = "0.1.7"
         payload.pop("task_mode", None)
         payload.pop("record_strength", None)
         payload.pop("current_gate", None)
+        payload.pop("risk_flags", None)
+        payload.pop("proof_profile", None)
+        payload.pop("capability_request", None)
+        payload.pop("classification_required", None)
 
         result = validate_task(payload, root=ROOT)
 
@@ -1129,7 +1147,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertTrue(result.compatibility_mode)
         self.assertEqual(result.current_gate, "development")
         self.assertEqual(result.task_mode, "planned_change")
-        self.assertEqual(result.record_strength, "minimal")
+        self.assertEqual(result.record_strength, "light")
         self.assertEqual(result.effective_record_strength, "strict")
 
     def test_goal0_rejects_current_gate_mismatch(self):
@@ -1157,6 +1175,189 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         errors = "\n".join(result.errors)
         self.assertIn("strict task contracts require task_mode", errors)
         self.assertIn("strict task contracts require record_strength", errors)
+
+    def test_goal4_task_schema_template_and_fixture_cover_mode_fields(self):
+        schema = json.loads((ROOT / "contracts" / "task.schema.json").read_text(encoding="utf-8"))
+        template = json.loads((ROOT / "templates" / "task.json").read_text(encoding="utf-8"))
+        valid = valid_task_payload()
+
+        for field in ("risk_flags", "proof_profile", "capability_request", "classification_required", "record_density"):
+            self.assertIn(field, schema["properties"])
+            self.assertIn(field, template)
+            self.assertIn(field, valid)
+        self.assertEqual(template["contract_version"], "0.1.8")
+        self.assertEqual(valid["contract_version"], "0.1.8")
+        self.assertEqual(valid["record_density"]["required_read_set_size"], len(valid["source"]["basis"]))
+        self.assertEqual(valid["record_density"]["field_presence"], "strict")
+
+    def test_goal4_mode_engine_computes_stage_defaults_and_risk_escalation(self):
+        from harness_v2.modes import evaluate_mode
+
+        base = {
+            "task_mode": "planned_change",
+            "record_strength": "minimal",
+            "risk_flags": [],
+            "proof_profile": "none",
+            "capability_request": [],
+            "classification_required": False,
+            "source": {"basis": ["CURRENT.md"]},
+            "approval": {"approved_paths": []},
+            "permission": {"allowed_side_effects": []},
+            "proof": {"obligations": ["not_required"]},
+            "lifecycle": {"current_state": "ready", "target_state": "ready"},
+            "record_density": {
+                "generated_file_count": 0,
+                "required_read_set_size": 1,
+                "field_presence": "strict",
+            },
+        }
+
+        development = evaluate_mode(base, "development", compatibility_mode=False)
+        plan = evaluate_mode(base, "plan", compatibility_mode=False)
+        plan_review = evaluate_mode(base, "plan_review", compatibility_mode=False)
+        risky = evaluate_mode({**base, "classification_required": True, "risk_flags": ["ambiguous_scope"]}, "development", compatibility_mode=False)
+        stale = evaluate_mode(base, "development", compatibility_mode=False, freshness={"stale": [{"anchor_id": "a"}], "errors": []})
+
+        self.assertEqual(development.effective_record_strength, "light")
+        self.assertEqual(plan.effective_record_strength, "light")
+        self.assertEqual(plan_review.effective_record_strength, "strict")
+        self.assertEqual(risky.effective_record_strength, "strict")
+        self.assertEqual(risky.strength_inputs["classification_required"], "strict")
+        self.assertEqual(stale.effective_record_strength, "strict")
+        self.assertEqual(stale.strength_inputs["stale_status"], "strict")
+
+    def test_goal4_invalid_record_strength_fixture_is_rejected(self):
+        from harness_v2.core import validate_task_file
+
+        result = validate_task_file(INVALID_RECORD_STRENGTH)
+
+        self.assertFalse(result.ok)
+        self.assertIn("record_strength is not known: medium", "\n".join(result.errors))
+
+    def test_goal4_record_density_denies_read_only_write_shortcut(self):
+        from harness_v2.core import validate_task
+        from harness_v2.modes import evaluate_mode
+
+        read_only = {
+            "task_id": "harness-v2-read-only-analysis",
+            "title": "Read-only HARNESS V2 audit",
+            "workflow": "remaining_completion_program",
+            "contract_version": "0.1.8",
+            "workflow_stage": "development",
+            "current_gate": "development",
+            "task_mode": "read_only_analysis",
+            "record_strength": "light",
+            "risk_flags": [],
+            "proof_profile": "none",
+            "capability_request": [],
+            "classification_required": False,
+            "record_density": {
+                "generated_file_count": 0,
+                "required_read_set_size": 2,
+                "field_presence": "light",
+            },
+            "source": {
+                "basis": ["CURRENT.md", "README.md"],
+                "current_pointer": "CURRENT.md",
+            },
+            "approval": {
+                "packet": "Approve read-only audit of README surface",
+                "approved_paths": ["README.md"],
+                "excluded_side_effects": list(COMMON_DENIED_SIDE_EFFECTS),
+            },
+            "permission": {
+                "allowed_side_effects": ["local readback/search only"],
+                "denied_side_effects": list(COMMON_DENIED_SIDE_EFFECTS),
+            },
+            "proof": {
+                "obligations": ["not_required"],
+            },
+            "lifecycle": {
+                "current_state": "workflow_realignment_review",
+                "target_state": "workflow_realignment_review",
+            },
+        }
+        read_only_result = validate_task(read_only, root=ROOT)
+
+        self.assertTrue(read_only_result.ok, read_only_result.errors)
+        self.assertEqual(read_only_result.effective_record_strength, "light")
+        self.assertEqual(read_only_result.mode_profile["strength_inputs"]["write_surface"], "minimal")
+
+        payload = valid_task_payload()
+        payload["task_mode"] = "read_only_analysis"
+        payload["record_strength"] = "light"
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertFalse(result.ok)
+        self.assertIn("read_only_analysis task_mode cannot allow mutating side effects", "\n".join(result.errors))
+
+        docs_only = evaluate_mode(
+            {
+                "task_mode": "read_only_analysis",
+                "record_strength": "light",
+                "risk_flags": [],
+                "proof_profile": "none",
+                "capability_request": [],
+                "classification_required": False,
+                "source": {"basis": ["CURRENT.md"]},
+                "approval": {"approved_paths": ["README.md"]},
+                "permission": {"allowed_side_effects": ["local readback/search only"]},
+                "proof": {"obligations": ["not_required"]},
+                "lifecycle": {"current_state": "ready", "target_state": "ready"},
+                "record_density": {
+                    "generated_file_count": 0,
+                    "required_read_set_size": 1,
+                    "field_presence": "light",
+                },
+            },
+            "development",
+            compatibility_mode=False,
+        )
+
+        self.assertEqual(docs_only.errors, ())
+
+    def test_goal4_strict_contract_requires_record_density_fields(self):
+        from harness_v2.core import validate_task
+
+        payload = valid_task_payload()
+        for key in ("risk_flags", "proof_profile", "capability_request", "classification_required", "record_density"):
+            payload.pop(key, None)
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertFalse(result.ok)
+        errors = "\n".join(result.errors)
+        self.assertIn("strict task contracts require risk_flags", errors)
+        self.assertIn("strict task contracts require proof_profile", errors)
+        self.assertIn("strict task contracts require capability_request", errors)
+        self.assertIn("strict task contracts require classification_required", errors)
+        self.assertIn("strict task contracts require record_density", errors)
+
+    def test_goal4_record_density_rejects_shortcuts(self):
+        from harness_v2.core import validate_task
+
+        read_set = valid_task_payload()
+        read_set["record_density"]["required_read_set_size"] = len(read_set["source"]["basis"]) + 1
+        read_set_result = validate_task(read_set, root=ROOT)
+
+        generated = valid_task_payload()
+        generated["task_mode"] = "scaffold_only"
+        generated["record_density"]["generated_file_count"] = len(generated["approval"]["approved_paths"]) + 1
+        generated_result = validate_task(generated, root=ROOT)
+
+        field_presence = valid_task_payload()
+        field_presence["record_density"]["field_presence"] = "minimal"
+        field_presence_result = validate_task(field_presence, root=ROOT)
+
+        capability = valid_task_payload()
+        capability["capability_request"] = ""
+        capability_result = validate_task(capability, root=ROOT)
+
+        self.assertIn("record_density.required_read_set_size cannot exceed source.basis count", "\n".join(read_set_result.errors))
+        self.assertIn("record_density.generated_file_count cannot exceed approval.approved_paths count", "\n".join(generated_result.errors))
+        self.assertIn("record_density.field_presence must be at least effective_record_strength", "\n".join(field_presence_result.errors))
+        self.assertIn("capability_request must be a non-empty string when present", "\n".join(capability_result.errors))
 
     def test_goal1_gate_state_schema_and_template_are_product_surfaces(self):
         schema = json.loads((ROOT / "contracts" / "gate-state.schema.json").read_text(encoding="utf-8"))
@@ -2267,7 +2468,23 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertEqual(set(initial_task["permission"]["allowed_side_effects"]), INITIAL_ALLOWED_SIDE_EFFECTS)
             self.assertEqual(set(initial_task["permission"]["denied_side_effects"]), INITIAL_DENIED_SIDE_EFFECTS)
             self.assertEqual(set(initial_task["proof"]["obligations"]), INITIAL_PROOF_OBLIGATIONS)
+            self.assertEqual(initial_task["contract_version"], "0.1.8")
             self.assertEqual(initial_task["workflow_stage"], "development")
+            self.assertEqual(initial_task["current_gate"], "development")
+            self.assertEqual(initial_task["task_mode"], "scaffold_only")
+            self.assertEqual(initial_task["record_strength"], "light")
+            self.assertEqual(initial_task["risk_flags"], ["scaffold_generation"])
+            self.assertEqual(initial_task["proof_profile"], "current")
+            self.assertEqual(initial_task["capability_request"], ["init_scaffold"])
+            self.assertTrue(initial_task["classification_required"])
+            self.assertEqual(
+                initial_task["record_density"],
+                {
+                    "generated_file_count": len(INITIAL_APPROVED_PATHS),
+                    "required_read_set_size": 3,
+                    "field_presence": "strict",
+                },
+            )
             self.assertEqual(initial_task["lifecycle"], {"current_state": "ready", "target_state": "ready"})
 
             from harness_v2.core import validate_task

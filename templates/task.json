@@ -2,11 +2,20 @@
   "task_id": "<task-id>",
   "title": "<task title>",
   "workflow": "<workflow>",
-  "contract_version": "0.1.7",
+  "contract_version": "0.1.8",
   "workflow_stage": "<spec|spec_review|plan|plan_review|plan_approval|development|development_review|improvement>",
   "current_gate": "<derived from workflow_stage unless strict migration changes ownership>",
   "task_mode": "<setup_only|read_only_analysis|scaffold_only|planned_change|defect_repair|continuity_only>",
   "record_strength": "<minimal|light|strict>",
+  "risk_flags": ["<risk flag or none>"],
+  "proof_profile": "<none|basic|current|strict>",
+  "capability_request": ["<capability request or none>"],
+  "classification_required": true,
+  "record_density": {
+    "generated_file_count": 0,
+    "required_read_set_size": 1,
+    "field_presence": "<minimal|light|strict>"
+  },
   "source": {
     "basis": ["<source path>"],
     "current_pointer": "CURRENT.md"

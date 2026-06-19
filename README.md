@@ -33,6 +33,7 @@ The executable surface currently covers:
 - stage-specific workflow checks through `workflow_stage`;
 - canonical workflow stages: `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`;
 - task-local stage records under `records\stages\` in generated project scaffolds;
+- task-mode and record-strength checks with an executable `effective_record_strength` profile;
 - side-effect and write-path preflight checks with `preflight`;
 - hook-equivalent gate checks with `gate`;
 - read-only integration reports with `doctor`;
@@ -111,7 +112,11 @@ development_review
 improvement
 ```
 
-`workflow_stage` remains the writable compatibility owner in task contracts. `current_gate` is a derived read-model value unless a later explicit migration changes ownership. Existing `0.1.7` task contracts that omit `current_gate`, `task_mode`, or `record_strength` remain compatibility-mode contracts; strict contracts must provide the new fields or receive migration diagnostics. In compatibility mode, missing `task_mode` defaults to `planned_change`, missing `record_strength` defaults to `minimal`, and `effective_record_strength` is raised by stage and task-mode rules.
+`workflow_stage` remains the writable compatibility owner in task contracts. `current_gate` is a derived read-model value unless a later explicit migration changes ownership. Existing `0.1.7` task contracts that omit `current_gate`, `task_mode`, `record_strength`, `risk_flags`, `proof_profile`, `capability_request`, `classification_required`, or `record_density` remain compatibility-mode contracts. Strict contracts must provide the new mode fields or receive migration diagnostics.
+
+`task_mode` and `record_strength` control record density only. They do not weaken approval, permission, proof, lifecycle, stale, route, capability, or release checks. HARNESS V2 computes `effective_record_strength` from stage minimum, task-mode default, requested record strength, risk flags, proof profile, capability request, classification requirement, write surface, proof obligations, lifecycle movement, stale status, and source volume. `development` starts at `light` before risk escalation; product writes, current proof, capability requests, stale-risk work, or classification-required work raise the effective result to `strict`.
+
+`record_density` makes the density claim executable. It binds expected generated file count, required read-set size, and strict/light/minimal field presence. The verifier rejects read-only tasks with mutating side effects, scaffold tasks without generated-file counts, generated-file counts larger than the approved manifest, read-set sizes larger than `source.basis`, and field-presence declarations below `effective_record_strength`.
 
 When `records\gate-state.json` exists, HARNESS V2 treats it as a generated read-model. It must point to a source task, match that task's SHA-256 hash, derive from `workflow_stage`, and agree with the source task's `workflow_stage`. The file is optional for 0.1.7-compatible tasks and cannot grant approval, permission, proof, lifecycle transition, or release readiness.
 
@@ -187,11 +192,20 @@ To start a new task contract, copy or adapt `templates\task.json` and fill in va
   "task_id": "readme-docs-update",
   "title": "Update public README",
   "workflow": "remaining_completion_program",
-  "contract_version": "0.1.7",
+  "contract_version": "0.1.8",
   "workflow_stage": "development",
   "current_gate": "development",
   "task_mode": "planned_change",
-  "record_strength": "strict",
+  "record_strength": "light",
+  "risk_flags": ["docs_write_surface"],
+  "proof_profile": "current",
+  "capability_request": ["local_docs_update"],
+  "classification_required": true,
+  "record_density": {
+    "generated_file_count": 0,
+    "required_read_set_size": 3,
+    "field_presence": "strict"
+  },
   "source": {
     "basis": ["CURRENT.md", "control\\approval.md", "control\\permission.md"],
     "current_pointer": "CURRENT.md"
@@ -298,7 +312,7 @@ harness-v2 gate contracts\harness-task.json --root . --side-effect "python -m un
 
 `gate` does not execute the proposed command. It reads `CURRENT.md`, verifies the task contract, and runs optional `preflight` checks for proposed side effects or write paths. It is a hook-equivalent gate, not a real Codex app hook, shell blocker, or editor blocker.
 
-`verify` also reports the derived `current_gate` read-model. If a generated `records\gate-state.json` is present, verification checks its source task reference and hash before accepting it.
+`verify` also reports the derived `current_gate` read-model and the mode profile used to compute `effective_record_strength`. If a generated `records\gate-state.json` is present, verification checks its source task reference and hash before accepting it.
 
 Check a proposed side effect or write path before running it:
 
@@ -347,7 +361,7 @@ First read:
 
 Rules:
 - Scale read depth to the evidence needed, not to minimal reading at all costs. Read enough of the named source/control surfaces to bind scope, approval, permission, proof, and lifecycle; use targeted structural reads first, but read exact source text when authority, conflict, or stale-state decisions depend on wording.
-- Treat approval.approved_paths as the approved write surface.
+- Treat approval.approved_paths as the approved path surface; permission.allowed_side_effects decides whether those paths may be written or only read.
 - Do not execute approval.excluded_side_effects.
 - Do not execute permission.denied_side_effects.
 - If the needed change is outside scope, stop and report it.

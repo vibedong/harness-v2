@@ -121,7 +121,9 @@ def _verify_payload(result) -> dict:
         "task_mode": result.task_mode,
         "record_strength": result.record_strength,
         "effective_record_strength": result.effective_record_strength,
+        "classification_required": result.classification_required,
         "compatibility_mode": result.compatibility_mode,
         "gate_state": result.gate_state,
         "freshness": result.freshness,
+        "mode_profile": result.mode_profile,
     }

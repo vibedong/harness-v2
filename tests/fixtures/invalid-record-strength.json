@@ -1,0 +1,67 @@
+{
+  "task_id": "harness-v2-invalid-record-strength",
+  "title": "Invalid HARNESS V2 record strength fixture",
+  "workflow": "remaining_completion_program",
+  "contract_version": "0.1.8",
+  "workflow_stage": "development",
+  "current_gate": "development",
+  "task_mode": "planned_change",
+  "record_strength": "medium",
+  "risk_flags": [],
+  "proof_profile": "current",
+  "capability_request": [],
+  "classification_required": true,
+  "record_density": {
+    "generated_file_count": 0,
+    "required_read_set_size": 1,
+    "field_presence": "strict"
+  },
+  "source": {
+    "basis": [
+      "CURRENT.md"
+    ],
+    "current_pointer": "CURRENT.md"
+  },
+  "approval": {
+    "packet": "Invalid record strength fixture",
+    "approved_paths": [
+      "tests\\fixtures\\invalid-record-strength.json"
+    ],
+    "excluded_side_effects": [
+      "npm publish",
+      "Python package registry publish",
+      "GitHub release creation",
+      "release tag creation",
+      "release execution",
+      "dependency install from network",
+      "secret read",
+      "external network mutation",
+      "destructive operation outside generated TEMP verification artifacts"
+    ]
+  },
+  "permission": {
+    "allowed_side_effects": [
+      "local file writes under F:\\Folder\\harness-v2"
+    ],
+    "denied_side_effects": [
+      "npm publish",
+      "Python package registry publish",
+      "GitHub release creation",
+      "release tag creation",
+      "release execution",
+      "dependency install from network",
+      "secret read",
+      "external network mutation",
+      "destructive operation outside generated TEMP verification artifacts"
+    ]
+  },
+  "proof": {
+    "obligations": [
+      "invalid record_strength is rejected"
+    ]
+  },
+  "lifecycle": {
+    "current_state": "workflow_realignment_review",
+    "target_state": "workflow_realignment_review"
+  }
+}

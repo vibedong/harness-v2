@@ -1,8 +1,26 @@
 {
   "task_id": "harness-v2-valid-task",
-  "title": "Validate HARNESS V2 Goal 1 current gate compatibility fixture",
+  "title": "Validate HARNESS V2 Goal 4 task mode and record strength fixture",
   "workflow": "remaining_completion_program",
+  "contract_version": "0.1.8",
   "workflow_stage": "development",
+  "current_gate": "development",
+  "task_mode": "planned_change",
+  "record_strength": "light",
+  "risk_flags": [
+    "product_write_surface",
+    "proof_required"
+  ],
+  "proof_profile": "current",
+  "capability_request": [
+    "mode_engine_update"
+  ],
+  "classification_required": true,
+  "record_density": {
+    "generated_file_count": 0,
+    "required_read_set_size": 3,
+    "field_presence": "strict"
+  },
   "source": {
     "basis": [
       "CURRENT.md",
@@ -12,20 +30,21 @@
     "current_pointer": "CURRENT.md"
   },
   "approval": {
-    "packet": "Approve HARNESS V2 Goal 1 Current Gate Engine slice; keep workflow_stage as compatibility owner and current_gate as derived read-model alias",
+    "packet": "Approve HARNESS V2 Goal 4 task_mode / record_strength Engine slice; implement mode profile and record-density checks",
     "approved_paths": [
-      "contracts\\gate-state.schema.json",
-      "templates\\gate-state.json",
+      "contracts\\task.schema.json",
+      "templates\\task.json",
       "harness_v2\\core.py",
       "harness_v2\\cli.py",
+      "harness_v2\\modes.py",
       "harness_v2\\mcp.py",
       "tests\\test_harness_v2.py",
       "tests\\fixtures\\valid-task.json",
-      "tests\\fixtures\\invalid-gate-mismatch.json",
+      "tests\\fixtures\\invalid-record-strength.json",
       "README.md",
       "README.ko.md",
-      "control\\lifecycle.md",
-      "routing\\manifest.md"
+      "rules\\workflows.md",
+      "safety\\improvement.md"
     ],
     "excluded_side_effects": [
       "npm publish",
@@ -45,12 +64,8 @@
       "temporary verification folders under TEMP",
       "python -m compileall harness_v2",
       "python -m unittest discover tests",
-      "python -m harness_v2 status --root .",
-      "python -m harness_v2 verify tests\\fixtures\\valid-task.json",
-      "python -m harness_v2 gate tests\\fixtures\\valid-task.json --root .",
-      "node bin\\harness-v2.js status --root .",
-      "node bin\\harness-v2.js verify tests\\fixtures\\valid-task.json",
-      "node bin\\harness-v2.js gate tests\\fixtures\\valid-task.json --root ."
+      "python -m harness_v2 doctor --root .",
+      "node bin\\harness-v2.js doctor --root ."
     ],
     "denied_side_effects": [
       "npm publish",
@@ -68,17 +83,12 @@
     "obligations": [
       "compileall exits 0",
       "unittest exits 0",
-      "python status exits 0",
-      "python verify exits 0",
-      "python gate exits 0",
-      "node wrapper status exits 0",
-      "node wrapper verify exits 0",
-      "node wrapper gate exits 0",
-      "0.1.7-compatible fixture without current_gate verifies",
-      "matching generated gate-state verifies",
-      "mismatched generated gate-state fails closed",
-      "stale gate-state source hash fails closed",
-      "current_gate read-model does not grant approval, permission, proof, lifecycle transition, or release readiness"
+      "python doctor exits 0",
+      "node doctor exits 0",
+      "task_mode and record_strength are validated",
+      "effective_record_strength includes classification_required and risk inputs",
+      "development defaults to light before risk escalation",
+      "record-density shortcuts fail closed"
     ]
   },
   "lifecycle": {

@@ -33,6 +33,7 @@ CLI는 `harness-v2 init --root .`로 초기 scaffold를 적용하고, task contr
 - `workflow_stage`를 통한 stage-specific workflow 검사
 - 공식 workflow stage: `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`
 - 생성된 프로젝트의 `records\stages\`에 task-local 단계 기록 생성
+- 실행 가능한 `effective_record_strength` profile을 통한 task mode / record strength 검사
 - `preflight`로 side effect와 write path 사전 확인
 - `gate`로 hook-equivalent boundary 확인
 - `doctor`로 read-only integration report 확인
@@ -111,7 +112,11 @@ development_review
 improvement
 ```
 
-task contract에서는 `workflow_stage`가 현재 writable compatibility owner입니다. `current_gate`는 별도 migration이 승인되기 전까지 `workflow_stage`에서 파생되는 read-model 값입니다. `current_gate`, `task_mode`, `record_strength`가 없는 기존 `0.1.7` task contract는 compatibility mode로 유지하고, strict contract는 새 필드를 제공하지 않으면 migration diagnostic으로 실패합니다. Compatibility mode에서 빠진 `task_mode`는 `planned_change`, 빠진 `record_strength`는 `minimal`로 기본 처리하고, `effective_record_strength`는 stage와 task-mode 규칙에 따라 더 엄격하게 올라갑니다.
+task contract에서는 `workflow_stage`가 현재 writable compatibility owner입니다. `current_gate`는 별도 migration이 승인되기 전까지 `workflow_stage`에서 파생되는 read-model 값입니다. `current_gate`, `task_mode`, `record_strength`, `risk_flags`, `proof_profile`, `capability_request`, `classification_required`, `record_density`가 없는 기존 `0.1.7` task contract는 compatibility mode로 유지합니다. Strict contract는 새 mode 필드를 제공하지 않으면 migration diagnostic으로 실패합니다.
+
+`task_mode`와 `record_strength`는 기록 밀도만 조절합니다. approval, permission, proof, lifecycle, stale, route, capability, release 검사를 약하게 만들 수 없습니다. HARNESS V2는 stage minimum, task-mode default, 요청한 record strength, risk flags, proof profile, capability request, classification requirement, write surface, proof obligations, lifecycle movement, stale status, source volume을 합쳐 `effective_record_strength`를 계산합니다. `development`는 위험 상승 전에는 `light`에서 시작하고, product write, current proof, capability request, stale-risk work, classification-required work가 있으면 `strict`로 올라갑니다.
+
+`record_density`는 기록 밀도 주장을 실행 가능한 값으로 묶습니다. expected generated file count, required read-set size, strict/light/minimal field presence를 기록합니다. verifier는 mutating side effect가 섞인 read-only task, generated-file count가 없는 scaffold task, approved manifest보다 큰 generated-file count, `source.basis`보다 큰 read-set size, `effective_record_strength`보다 낮은 field-presence 선언을 거부합니다.
 
 `records\gate-state.json`이 있으면 HARNESS V2는 그것을 생성된 read-model로 취급합니다. 이 파일은 source task를 가리키고, 그 task의 SHA-256 hash와 맞아야 하며, `workflow_stage`에서 파생되고 source task의 `workflow_stage`와 일치해야 합니다. `0.1.7` compatibility task에서는 없어도 되며, approval, permission, proof, lifecycle transition, release readiness를 만들 수 없습니다.
 
@@ -187,11 +192,20 @@ harness-v2 gate contracts\harness-task.json --root .
   "task_id": "readme-docs-update",
   "title": "Update public README",
   "workflow": "remaining_completion_program",
-  "contract_version": "0.1.7",
+  "contract_version": "0.1.8",
   "workflow_stage": "development",
   "current_gate": "development",
   "task_mode": "planned_change",
-  "record_strength": "strict",
+  "record_strength": "light",
+  "risk_flags": ["docs_write_surface"],
+  "proof_profile": "current",
+  "capability_request": ["local_docs_update"],
+  "classification_required": true,
+  "record_density": {
+    "generated_file_count": 0,
+    "required_read_set_size": 3,
+    "field_presence": "strict"
+  },
   "source": {
     "basis": ["CURRENT.md", "control\\approval.md", "control\\permission.md"],
     "current_pointer": "CURRENT.md"
@@ -298,7 +312,7 @@ harness-v2 gate contracts\harness-task.json --root . --side-effect "python -m un
 
 `gate`는 제안된 명령을 실행하지 않습니다. `CURRENT.md`를 읽고, task contract를 검증하고, 필요한 경우 side effect나 write path에 대해 `preflight`를 실행합니다. 이것은 hook-equivalent gate이지 실제 Codex app hook, shell blocker, editor blocker가 아닙니다.
 
-`verify`는 파생된 `current_gate` read-model도 출력합니다. 생성된 `records\gate-state.json`이 있으면, 검증은 이 파일의 source task reference와 hash를 확인한 뒤에만 받아들입니다.
+`verify`는 파생된 `current_gate` read-model과 `effective_record_strength`를 계산한 mode profile도 출력합니다. 생성된 `records\gate-state.json`이 있으면, 검증은 이 파일의 source task reference와 hash를 확인한 뒤에만 받아들입니다.
 
 실행하려는 side effect나 write path가 contract 안에 있는지 먼저 확인합니다.
 
@@ -347,7 +361,7 @@ HARNESS V2 기준으로 작업해줘.
 
 규칙:
 - 읽기 깊이는 무조건 최소로 읽는 것이 아니라 필요한 증거에 맞춰 정해. 지정된 source/control surface를 scope, approval, permission, proof, lifecycle을 묶을 만큼 읽고, 구조 확인으로 충분하면 좁게 읽되 authority, 충돌, stale 여부 판단이 문구에 달려 있으면 원문을 확인해.
-- approval.approved_paths를 승인된 수정 표면으로 취급해.
+- approval.approved_paths는 승인된 path surface로 취급해. 해당 path를 수정할 수 있는지, 읽기만 가능한지는 permission.allowed_side_effects가 결정해.
 - approval.excluded_side_effects는 실행하지 마.
 - permission.denied_side_effects는 실행하지 마.
 - 필요한 변경이 범위 밖이면 멈추고 보고해.

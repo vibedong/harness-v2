@@ -21,6 +21,33 @@ Task contracts use `workflow_stage` for stage-specific verifier rules. The allow
 
 Artifact observation, routing, safety/regression, and release boundaries are control surfaces. They are not `workflow_stage` values.
 
+## Record Density Mode Rules
+
+`task_mode` values are `setup_only`, `read_only_analysis`, `scaffold_only`, `planned_change`, `defect_repair`, and `continuity_only`.
+
+`record_strength` values are `minimal`, `light`, and `strict`.
+
+The mode engine computes `effective_record_strength` as the maximum of:
+
+- workflow stage minimum;
+- task-mode default;
+- requested record strength;
+- risk flags;
+- proof profile;
+- capability request;
+- classification requirement;
+- write surface;
+- proof obligations;
+- lifecycle movement;
+- stale status;
+- source volume.
+
+`development` starts at `light` before risk escalation. Approval, permission-sensitive side effects, product writes, current proof, stale-risk work, lifecycle movement, release/package/external/secret/destructive capability, ambiguity, or `classification_required: true` raise the effective result to `strict`.
+
+Record density does not change stage order and cannot weaken approval, permission, proof, lifecycle, stale, route, capability, regression, or release checks.
+
+Executable predicate: strict task contracts require `task_mode`, `record_strength`, `risk_flags`, `proof_profile`, `capability_request`, `classification_required`, and `record_density`; `read_only_analysis` cannot allow mutating side effects. `record_density` verifies generated file count, required read-set size, and field presence against the computed effective strength.
+
 ## Lifecycle Transition Edges
 
 Lifecycle movement is an evaluated operation, not a log line.
