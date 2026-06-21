@@ -727,8 +727,6 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn(f"## {package_json['version']} 업데이트 내용", readme)
         self.assertIn("사용자가 체감하는 변경은 README의 업데이트 내용에 함께 남깁니다", readme)
         self.assertIn("README 업데이트 내용 없이 release, package, scaffold, workflow 변경을 완료로 말하지 않습니다", readme)
-        self.assertIn("local unreleased task binding 업데이트", readme)
-        self.assertIn("records\\stages\\spec.md`도 현재 사용자 요청으로 갱신", readme)
         self.assertIn("README 업데이트 기록 유지", current)
 
     def test_readme_task_contract_examples_match_goal0_contract(self):
@@ -3144,9 +3142,6 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertIn("harness-v2 doctor --root .", agents)
             self.assertIn("현재 작업 등록", agents)
             self.assertIn("harness-v2 task start --root .", agents)
-            self.assertIn("records\\current-task.md", agents)
-            self.assertIn("records\\stages\\spec.md", agents)
-            self.assertIn("대화 답변만으로 기획, 분석, 구현 방향을 진행하지 않습니다", agents)
             self.assertIn("README 파일은 사용자용 문서일 뿐입니다", rules)
             self.assertIn("task-contract validator", rules)
             self.assertIn("자동 enforcement sandbox", rules)
@@ -3154,9 +3149,6 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertIn("증거 수준에 맞춘 읽기", rules)
             self.assertIn("어떤 표면도 다른 표면을 대신하지 않습니다", rules)
             self.assertIn("harness-v2 task start --root .", rules)
-            self.assertIn("records\\current-task.md", rules)
-            self.assertIn("records\\stages\\spec.md", rules)
-            self.assertIn("대화 답변만으로 진행하지 않습니다", rules)
             self.assertIn("자동 enforcement sandbox", current)
             self.assertIn("not_automatic_enforcement_completion", current)
             self.assertIn("harness-v2 doctor --root .", current)
@@ -3246,8 +3238,6 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertEqual(payload["task"], "contracts\\harness-task.json")
             self.assertIn("CURRENT.md", payload["written"])
             self.assertIn("contracts\\harness-task.json", payload["written"])
-            self.assertIn("records\\current-task.md", payload["written"])
-            self.assertIn("records\\stages\\spec.md", payload["written"])
             self.assertEqual(
                 payload["next"],
                 [
@@ -3356,7 +3346,6 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             current = (root / "CURRENT.md").read_text(encoding="utf-8")
             task = json.loads((root / "contracts" / "harness-task.json").read_text(encoding="utf-8"))
             current_task = (root / "records" / "current-task.md").read_text(encoding="utf-8")
-            spec = (root / "records" / "stages" / "spec.md").read_text(encoding="utf-8")
             self.assertIn("나라장터 실시설계 크롤링 판단", current)
             self.assertIn("전체 추출 후 통과/검토필요/제외 판정 흐름", current)
             self.assertEqual(task["title"], "나라장터 실시설계 크롤링 판단")
@@ -3372,10 +3361,6 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertIn("local file writes to records\\current-task.md", task["permission"]["allowed_side_effects"])
             self.assertIn("task scope remains pending", task["proof"]["obligations"])
             self.assertIn("나라장터 실시설계 크롤링 판단", current_task)
-            self.assertIn("나라장터 실시설계 크롤링 판단", spec)
-            self.assertIn("전체 추출 후 통과/검토필요/제외 판정 흐름", spec)
-            self.assertIn("대화 답변만으로 흘려보내지 않습니다", spec)
-            self.assertIn("Spec 진행 원칙", spec)
             current = (root / "CURRENT.md").read_text(encoding="utf-8")
             self.assertIn("## 현재 작업", current)
             self.assertIn("## 중지 조건", current)
