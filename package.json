@@ -1,6 +1,6 @@
 {
   "name": "harness-v2",
-  "version": "0.1.12",
+  "version": "0.1.7",
   "description": "HARNESS V2 workflow boundary harness with a Windows/macOS npm CLI wrapper.",
   "license": "MIT",
   "author": "vibedong",
@@ -29,6 +29,7 @@
     "RULES.md",
     "CURRENT.md",
     "README.md",
+    "README.ko.md",
     "LICENSE",
     "RELEASE_NOTES.md",
     "pyproject.toml",

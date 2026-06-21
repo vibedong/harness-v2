@@ -1,91 +1,61 @@
-# HARNESS V2 현재 상태
+# HARNESS V2 Current State
 
-status: package_github_surface / whole_plan_conformance_audit / current_pointer
+status: package_github_surface / remaining_completion_program / current_pointer
 
-이 파일은 local HARNESS V2 product surface의 visible current pointer입니다.
+This file is the visible current pointer for the local HARNESS V2 product surface.
 
-## 현재 Workflow
+## Current Workflow
 
 workflow: `remaining_completion_program`
 
-state: `workflow_realignment_review`
+state: `public_release_published`
 
-substate: `workflow_binding_engine_classified / unreleased_local / release_closed`
+substate: `npm_release_v0.1.7 / release_closed`
 
 source basis:
 
 - Stage 00~05 confirmed planning artifacts.
-- whole-plan과 stage-plan records. 이 기록들은 canonical task flow를 `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`로 정의합니다.
-- published npm/GitHub state `harness-v2@0.1.7` / `v0.1.7`. 이제 closed release history로 취급합니다.
-- workflow stage는 brainstorming/stage-plan flow를 따라야 하며, control surface를 `workflow_stage`에 섞으면 안 된다는 사용자 correction.
-- package가 현재 주로 owner에게 사용되므로 recommended clean-break direction을 사용한다는 사용자 direction.
+- Product Implementation Entry Gate package/GitHub/npm-wrapper history.
+- Prior published npm package state for `harness-v2@0.1.5`.
+- Current npm and GitHub release target `harness-v2@0.1.7` / `v0.1.7`.
+- User correction that `F:\Folder\harness-v2` is the completed product repository, not the user's downstream working project.
+- User requirement that Codex-app users should install/apply HARNESS V2 into their project root, with README as user documentation and AI-facing rules in generated project-root files.
+- Exact remaining completion program approval for generated scaffold hardening, executable workflow enforcement, side-effect preflight adapter work if locally feasible, MCP feasibility/design only unless separately approved, final audit, documentation sync, and GitHub push.
+- User approval to proceed with Goal G after the three-step MCP, hook, and integration hardening plan.
+- Goal G approval supersedes the prior MCP design-only boundary only for local stdio MCP adapter implementation; hook work, integration hardening, package registry publish, release, dependency, secret, external mutation, and destructive work remain outside this slice.
+- User approval to proceed with Goal H hook / hook-equivalent hardening under the remaining completion program.
+- Local evidence did not expose a direct Codex app pre-command or pre-write hook surface for this repo, so Goal H implements an executable hook-equivalent gate instead of mutating Codex app configuration.
+- User request to proceed with Goal I after Goal H, bound to integration hardening and release preparation without npm publish, Python registry publish, GitHub release, or release tag execution.
+- User-approved public release and npm publish slice for `harness-v2@0.1.7`, including npm publish, Git tag `v0.1.7`, GitHub release creation, release docs/control sync, and the `pyproject.toml` version-consistency amendment.
+- User resumed npm publish after login as `donghyeonlee`.
 
-## 현재 Program
+## Current Program
 
-local worktree는 post-0.1.7 workflow engine completion and conformance audit slice 상태입니다.
+The remaining completion program is complete for the 0.1.7 npm and GitHub release transaction.
 
-완료된 release history:
+Completed slices:
 
 - generated scaffold hardening
+- executable 8-stage workflow engine enforcement
 - side-effect preflight adapter
+- MCP feasibility/design and final quality audit/docs-control sync
 - MCP stdio adapter implementation
 - hook-equivalent gate hardening
-- closed `harness-v2@0.1.7` npm package history reference
-- closed `v0.1.7` GitHub release history reference
+- integration hardening and release preparation
+- npm package release `harness-v2@0.1.7`
+- GitHub release `v0.1.7`
 
-현재 active slice:
+Current active slice:
 
-- executable `workflow_stage`가 canonical task flow와 맞는지 audit하고 보존합니다.
-  - `spec`
-  - `spec_review`
-  - `plan`
-  - `plan_review`
-  - `plan_approval`
-  - `development`
-  - `development_review`
-  - `improvement`
-- later explicit migration이 ownership을 바꾸기 전까지 `workflow_stage`를 writable compatibility owner로 유지하고 `current_gate`는 여기서 파생합니다.
-- 기존 `0.1.7` task contract가 `current_gate`, `task_mode`, `record_strength`를 생략해도 compatible하게 유지합니다. `current_gate`를 파생하고, missing `task_mode`는 `planned_change`, missing `record_strength`는 `minimal`로 default하며, stage와 task-mode rule에서 `effective_record_strength`를 계산합니다.
-- required Goal 0 field가 없는 strict contract는 migration diagnostic과 함께 fail합니다.
-- `artifact_observation`, `routing`, `safety_improvement`, `release_boundary`를 workflow stage에서 제거합니다.
-- artifact, routing, safety/regression, release transaction은 control surface로 유지합니다.
-- generated task-local records scaffold를 `records\` 아래에 추가합니다.
-- npm publish, GitHub release, release tag, dependency install, secret access, destructive work 없이 local verification을 수행합니다.
-- 이 local Goal 6 audit slice를 새 npm publish, GitHub release, release tag로 취급하지 않습니다.
-- 현재 explicit CLI/MCP/task-contract surface를 `advisory_cli_validator`나 `blocked`가 아니라 `workflow_binding_engine`으로 분류합니다. 다만 HARNESS V2가 automatic shell/editor blocker 또는 Codex app hook installer가 아니라는 경계는 유지합니다.
-- current layout version은 `legacy-control-records-v1`로 보고합니다.
-- `status`, `verify`, `doctor`는 `layout_version`, `current_layout_paths_active`, `domain_layout_enabled`, `domain_layout_candidate`를 노출합니다.
-- `layout_version`이 없는 기존 task contract는 current legacy layout으로 호환 처리합니다.
-- unknown layout version은 migration diagnostic과 함께 fail closed합니다.
-- domain layout은 아직 enabled 또는 candidate가 아니며, runtime lookup path와 generated scaffold path는 기존 `control\`, `records\`, `contracts\` 구조를 유지합니다.
-- 새 프로젝트 scaffold 검증은 `init`이 대상 프로젝트 루트 바로 아래에 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `contracts\harness-task.json`, `control\`, `records\`, `templates\`를 만들고, 중첩 source checkout 폴더를 만들지 않는지 확인합니다.
-- README 업데이트 기록 유지: 사용자가 체감하는 release, package, scaffold, workflow, CLI, MCP, contract, install/apply 변경은 README 업데이트 섹션에 함께 남겨야 합니다. README 업데이트 내용 없이는 해당 변경을 완료로 말하지 않습니다.
+- no active implementation slice; npm package release `harness-v2@0.1.7` and GitHub release `v0.1.7` are closed after publish/tag/release proof
 
-## Codex 앱 적용 안내
+Future slices in this program:
 
-HARNESS V2는 Codex 앱에서 프로젝트 작업을 시작할 때 AI가 현재 작업 경계, 승인 범위, 증거, 진행 단계, 금지 작업을 놓치지 않게 해 주는 작업 하네스입니다.
+- repeat npm publish, a later GitHub release/tag change, dependency installation, secret access, or destructive work require a later exact approval packet and release transaction after closeout
 
-사용자는 보통 아래처럼 말하면 됩니다.
+## Current Surface
 
-```text
-이 프로젝트에 HARNESS V2 적용해줘.
-```
-
-어떤 하네스를 적용할지 명확히 해야 하면 아래처럼 말합니다.
-
-```text
-vibedong/harness-v2 기준으로 이 프로젝트에 HARNESS V2 적용해줘.
-```
-
-HARNESS V2는 설치만으로 Codex 앱을 자동 차단하는 샌드박스가 아닙니다. 에이전트는 `AGENTS.md`, `RULES.md`, `CURRENT.md`, active task contract, `status`, `verify`, `gate`, `doctor` 결과를 기준으로 행동해야 합니다.
-
-미래 release path:
-
-- npm publish, GitHub release/tag mutation, Python package registry publish, dependency installation, secret access, destructive work, external mutation은 나중에 정확한 approval packet과 release transaction이 있어야 합니다.
-
-## 현재 Surface
-
-active package, npm wrapper, scaffold, workflow, preflight, local MCP stdio adapter, audit file은 아래를 포함할 수 있습니다.
+Active package, GitHub, npm wrapper, scaffold, workflow, preflight, local MCP stdio adapter, and audit files may include:
 
 - `.gitattributes`
 - `.gitignore`
@@ -93,6 +63,7 @@ active package, npm wrapper, scaffold, workflow, preflight, local MCP stdio adap
 - `RULES.md`
 - `CURRENT.md`
 - `README.md`
+- `README.ko.md`
 - `LICENSE`
 - `RELEASE_NOTES.md`
 - `package.json`
@@ -119,9 +90,9 @@ active package, npm wrapper, scaffold, workflow, preflight, local MCP stdio adap
 - `tests\*.py`
 - `tests\fixtures\*.json`
 
-generated downstream project scaffold는 `records\current-task.md`, `records\stages\*.md`, `records\decisions.md`, `records\proof.md`, `records\handoff.md`를 포함할 수 있습니다.
+New files are allowed only when directly required for workflow engine enforcement, lifecycle ledger/read-set/preflight implementation, generated scaffold templates, tests/fixtures, hook or equivalent local preflight adapter, local MCP stdio adapter implementation, or documentation needed to explain implemented surfaces.
 
-## 현재 허용된 Local Verification Commands
+## Current Allowed Local Verification Commands
 
 - `python -m compileall harness_v2`
 - `python -m unittest discover tests`
@@ -142,12 +113,23 @@ generated downstream project scaffold는 `records\current-task.md`, `records\sta
 - `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
 - `npm pack --dry-run`
 
-## 중지 조건
+## Current Allowed Git/GitHub Commands
 
-요청된 action이 `F:\Folder\harness-v2` 밖의 파일을 필요로 하면 멈춥니다.
+- `git add <intended HARNESS V2 product files>`
+- `git commit`
+- `git push`
+- `git push --tags`
+- `npm publish`
+- `gh release create v0.1.7 --repo vibedong/harness-v2 --title "HARNESS V2 0.1.7" --notes-file RELEASE_NOTES.md`
 
-요청된 action이 npm publish, Python package registry publish, GitHub release or tag mutation, git push, dependency installation from network, secret access, external network mutation, generated temporary verification artifact 밖의 destructive operation을 필요로 하면 멈춥니다.
+## Stop Conditions
 
-pointer, source, approval, permission, proof obligation, lifecycle requirement, route, registry/log row, safety boundary, improvement classification, release boundary가 없거나 stale이거나 충돌하면 멈춥니다.
+Stop if a requested action needs files outside `F:\Folder\harness-v2`.
 
-이 파일은 current pointer입니다. shell-level automatic enforcement, future release authority, real Codex app hook installation, remote MCP hosting, MCP client installation, MCP client configuration state를 주장하지 않습니다.
+Stop if a requested action needs files or new surfaces not directly required by the active remaining completion program.
+
+Stop if a pointer, source, approval, permission, proof obligation, lifecycle requirement, route, registry/log row, safety boundary, improvement classification, or release boundary is missing, stale, or conflicting.
+
+Stop before repeat npm publish, Python package registry publish, GitHub release or tag mutation outside the approved `v0.1.7` release transaction, dependency installation from network, secret access, external network mutation outside allowed git push and the approved GitHub release transaction, or destructive operation outside generated temporary verification artifacts.
+
+This file is a current pointer. It does not claim shell-level automatic enforcement, Python package registry publish state, future release authority, real Codex app hook installation, remote MCP hosting, MCP client installation, or MCP client configuration state.

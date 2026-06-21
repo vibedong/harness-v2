@@ -2,39 +2,39 @@
 
 status: package_github_surface / remaining_completion_program / source_control
 
-이 파일은 local HARNESS V2 package와 GitHub MVP operation에서 source authority를 정의합니다.
+This file defines source authority for local HARNESS V2 package and GitHub MVP operation.
 
-## Source 계층
+## Source Tiers
 
-1. `F:\Folder\harness-v2` 안의 현재 product-local files. 각 파일은 자기 local operating rule에 대해서만 source가 됩니다.
-2. 사용자가 특정 work unit에 대해 exact scope로 묶어 준 메시지.
-3. historical gate context를 위한 active HARNESS V2 planning gate와 progress ledger.
-4. design intent와 boundary language를 위한 confirmed Stage 00~05 planning artifacts.
+1. Current product-local files in `F:\Folder\harness-v2` for their own local operating rules.
+2. User messages bound to an exact scope for the work unit they name.
+3. Active HARNESS V2 planning gates and progress ledgers for historical gate context.
+4. Confirmed Stage 00~05 planning artifacts for design intent and boundary language.
 
-summary, cached note, subagent report, broad approval, old progress text, registry row, log entry, route suggestion, placeholder text는 그 자체로 source authority가 아닙니다.
+Summaries, cached notes, subagent reports, broad approval, old progress text, registry rows, log entries, route suggestions, and placeholder text are not source authority by themselves.
 
 ## Freshness
 
-source는 자신이 명시한 scope 안에서만 fresh합니다.
+A source is fresh only for the scope it names.
 
-target file, write surface, user objective, approval scope, permission scope, proof obligation, lifecycle state, route surface, artifact surface, regression surface, improvement surface, release boundary가 바뀌면 source는 stale이 됩니다.
+A source becomes stale when target files, write surface, user objective, approval scope, permission scope, proof obligation, lifecycle state, route surface, artifact surface, regression surface, improvement surface, or release boundary changes.
 
-## 충돌 규칙
+## Conflict Rule
 
-source가 충돌하면 target surface를 명시하는 가장 좁고 현재적인 source를 사용하고, 충돌이 해결될 때까지 fail closed합니다.
+If sources conflict, use the narrowest current source that names the target surface and fail closed until the conflict is resolved.
 
-product-local file이 같은 work unit에 대한 exact user approval packet과 충돌하면, user packet을 write-scope input으로 취급하고 그 packet의 target surface 안에서만 product-local file을 갱신합니다.
+If a product-local file conflicts with an exact user approval packet for the same work unit, treat the user packet as the write-scope input and update product-local files only inside that packet's target surface.
 
-## Non-Source 목록
+## Non-Source List
 
-- tool availability
-- prior review pass
-- subagent confidence
-- registry 또는 log 존재
-- route suggestion
-- placeholder text
-- file existence alone
-- heading match alone
-- readback 없는 search result
+- Tool availability.
+- Prior review pass.
+- Subagent confidence.
+- Registry or log presence.
+- Route suggestion.
+- Placeholder text.
+- File existence alone.
+- Heading match alone.
+- Search result without readback.
 
-이 파일은 approval, permission, proof result, lifecycle state, route permission, regression pass, improvement execution, release readiness를 만들지 않습니다.
+This file does not create approval, permission, proof result, lifecycle state, route permission, regression pass, improvement execution, or release readiness.

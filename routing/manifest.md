@@ -2,49 +2,42 @@
 
 status: package_github_surface / remaining_completion_program / routing_manifest
 
-이 파일은 operation mode를 suggested local route에 매핑합니다. routing은 guidance이며 permission이 아닙니다.
+This file maps operation modes to suggested local routes. Routing is guidance, not permission.
 
-`routing`은 responsibility owner입니다. workflow stage가 아니며 `workflow_stage`, `current_gate`, `derived_current_gate`, transition gate, freshness backtrack target에 들어가지 않습니다.
+## Route Principles
 
-`domain:improvement`는 improvement domain owner 이름입니다. workflow stage `improvement`와 구분합니다.
+- Choose routes by operation mode and side-effect class, not by skill name alone.
+- Check `RULES.md`, `CURRENT.md`, `control\approval.md`, and `control\permission.md` before any side effect.
+- Require `vowline` discipline for main-agent and subagent work.
+- Treat subagent reports as review material, not approval, permission, proof, lifecycle transition, or release readiness.
+- Read depth is evidence-scaled: start with the current-task surfaces and expand only when stale/conflict, side effects, proof/completion claims, lifecycle movement, package/release work, or approval/permission boundary questions require current evidence.
 
-## Route 원칙
-
-- skill name만 보지 말고 operation mode와 side-effect class로 route를 선택합니다.
-- side effect 전에 `RULES.md`, `CURRENT.md`, `control\approval.md`, `control\permission.md`를 확인합니다.
-- main agent와 subagent 모두 `vowline` discipline을 적용합니다.
-- subagent report는 review material일 뿐이며 approval, permission, proof, lifecycle transition, release readiness가 아닙니다.
-- read depth는 evidence-scaled입니다. current-task surface에서 시작하고, stale/conflict, side effect, proof/completion claim, lifecycle movement, package/release work, approval/permission boundary question이 현재 evidence를 요구할 때만 확장합니다.
-
-## Operation Route
+## Operation Routes
 
 | operation mode | suggested route | required boundary |
 | --- | --- | --- |
-| recovery | `AGENTS.md`, `RULES.md`, `CURRENT.md`를 읽은 뒤 관련 surface | stale 또는 conflicting pointer면 중지 |
-| plan | plan records와 workflow rules | plan output은 execution이 아님 |
-| plan approval analysis | `control\approval.md`와 current user packet | approval은 side effect를 부여하지 않음 |
-| local markdown authoring | `CURRENT.md`, `control\permission.md`, `control\proof.md` | 승인된 markdown path만 write |
-| development review | source, approval, permission, proof, lifecycle, route, artifact, safety surfaces | finding은 proof가 아님 |
-| proof check | `control\proof.md`와 readback/search/listing | artifact check는 obligation과 맞아야 함 |
-| current gate read-model | task contract `workflow_stage`와 optional `records\gate-state.json` | gate-state는 generated/hash-bound이며 approval, permission, proof, lifecycle transition, release readiness가 아님 |
-| lifecycle transition evaluation | `contracts\transition.schema.json`, `templates\transition-log.md`, `harness_v2.lifecycle` | transition record는 evidence이며 lifecycle movement는 log line이 아니라 evaluated operation |
-| side-effect preflight | `harness_v2` CLI의 `preflight <task> --side-effect ...` 또는 `--path ... --mode write` | preflight는 proposed action을 확인하며 실행하거나 shell/editor action을 자동 차단하지 않음 |
-| hook-equivalent gate | `harness_v2` CLI의 `gate <task> --root .` 또는 MCP tool `harness_gate` | status, verify, optional preflight를 결합함. direct Codex app hook surface는 없고 shell/editor action을 자동 차단하지 않음 |
-| executable local MVP | `status`, `verify`, `doctor`를 가진 `harness_v2` CLI | 승인된 local command만, external dependency 없음 |
-| integration hardening | `doctor --root .`와 status/verify/gate/preflight/MCP/package smoke check | read-only integration report이며 release readiness를 만들지 않음 |
-| domain layout migration report | `doctor --root .`의 `domain_layout_migration` 섹션 | read-only report입니다. generated scaffold path, source package surface, runtime lookup path를 보여주지만 domain folder 생성, 파일 이동, migration execution, permission을 만들지 않음 |
-| MCP stdio adapter | `python -m harness_v2 mcp` 또는 `node bin\harness-v2.js mcp`의 JSON-RPC over stdio | local stdio only. tool은 existing status, verify, preflight, gate, decision, init, apply behavior를 감쌀 뿐 source, approval, permission, proof, lifecycle, release boundary를 대체하지 않음 |
-| remaining completion program | current approval이 명시한 generated scaffold, workflow engine, preflight adapter, tests, docs/control, audit surfaces | npm publish, Python package registry publish, release tag, GitHub release, dependency install, secrets, generated verification artifact 밖 destructive action 없음 |
-| package, GitHub, and npm wrapper MVP | explicit package slice가 명시한 package metadata와 wrapper surfaces | package, npm dry-run, registry readback, release work는 current approval, permission, proof 필요 |
-| artifact observation | `artifacts\registry.md`, `artifacts\log.md` | registry/log는 source나 proof가 아님 |
-| regression safety | `safety\regression.md` | mapping은 pass evidence가 아님 |
-| improvement intake | `safety\improvement.md` | candidate는 product change가 아님 |
-| release boundary | `release\transaction.md` | 마지막 recorded package version reference는 `harness-v2@0.1.7`; npm publish, tag creation, GitHub release execution, Python package registry publish, deploy는 future transaction 필요 |
+| recovery | read `AGENTS.md`, `RULES.md`, `CURRENT.md`, then relevant surface | stop on stale or conflicting pointer |
+| planning | planning records and workflow rules | planning output is not execution |
+| approval analysis | `control\approval.md` plus current user packet | approval does not grant side effects |
+| local markdown authoring | `CURRENT.md`, `control\permission.md`, `control\proof.md` | write only approved markdown paths |
+| development review | source, approval, permission, proof, lifecycle, route, artifact, safety surfaces | findings are not proof |
+| proof check | `control\proof.md` plus readback/search/listing | artifact checks must match obligation |
+| side-effect preflight | `harness_v2` CLI with `preflight <task> --side-effect ...` or `--path ... --mode write` | preflight checks a proposed action; it does not execute or automatically block shell/editor actions |
+| hook-equivalent gate | `harness_v2` CLI with `gate <task> --root .`, or MCP tool `harness_gate` | combines status, verify, and optional preflight; no direct Codex app hook surface was found and this does not automatically block shell/editor actions |
+| executable local MVP | `harness_v2` CLI with `status`, `verify`, and `doctor` | only approved local commands and no external dependency |
+| integration hardening | `harness_v2` CLI with `doctor --root .` plus status/verify/gate/preflight/MCP/package smoke checks | read-only integration report; does not create release readiness |
+| MCP stdio adapter | `python -m harness_v2 mcp` or `node bin\harness-v2.js mcp` with JSON-RPC over stdio | local stdio only; tools wrap existing core behavior and do not replace source, approval, permission, proof, lifecycle, or release boundaries |
+| remaining completion program | generated scaffold, workflow engine, preflight adapter, tests, docs/control, and audit surfaces named by current approval | no npm publish, Python package registry publish, release tag, GitHub release, dependency install, secrets, or destructive action outside generated verification artifacts |
+| package, GitHub, and npm wrapper MVP | package metadata and wrapper surfaces named by an explicit package slice | package, npm dry-run, registry readback, or release work require current approval, permission, and proof |
+| artifact observation | `artifacts\registry.md` and `artifacts\log.md` | registry/log are not source or proof |
+| regression safety | `safety\regression.md` | mapping is not pass evidence |
+| improvement intake | `safety\improvement.md` | candidate is not product change |
+| release boundary | `release\transaction.md` | current published npm target is `harness-v2@0.1.5`; repeat npm publish, tag creation, GitHub release execution, Python package registry publish, and deploy require a future transaction |
 
-## Specialist/Subagent Guardrail
+## Specialist And Subagent Guardrail
 
-subagent는 prompt-scoped read surface 안에서 inspect와 review를 할 수 있습니다. later workflow가 명시적으로 권한을 주기 전에는 file edit, approval grant, permission grant, ProofReceipt production, lifecycle state movement, release work, scope widening을 할 수 없습니다.
+Subagents may inspect and review within the prompt-scoped read surface. They must not edit files, grant approval, grant permission, produce ProofReceipt, move lifecycle state, run release work, or widen scope unless a later workflow explicitly gives that authority.
 
-## 권한 없음 경계
+## Non-Authority Boundary
 
-이 manifest는 tool permission, file permission, external permission, approval, proof, lifecycle transition, regression pass, improvement execution, package readiness, release readiness를 부여하지 않습니다.
+This manifest does not grant tool permission, file permission, external permission, approval, proof, lifecycle transition, regression pass, improvement execution, package readiness, or release readiness.

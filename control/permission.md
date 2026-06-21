@@ -1,84 +1,99 @@
 # HARNESS V2 Permission Control
 
-status: package_github_surface / whole_plan_conformance_audit / permission_control
+status: package_github_surface / remaining_completion_program / permission_control
 
-workflow: `remaining_completion_program`
+This file separates approved intent from allowed side effects.
 
-이 파일은 approved intent와 allowed side effect를 분리합니다.
+## Side Effect Classes
 
-## Authority Negative Boundary
-
-이 permission surface는 evidence carrier, not authority generator입니다.
-
-폴더 존재, registry row, log row, review note, route row, release note, package metadata, test pass, agent claim은 side-effect 판단을 보조하거나 기록할 수 있지만, approval에서 제외한 side effect를 허용하거나 permission ceiling을 넓히지 않습니다.
-
-## Side Effect 분류
-
-| class | 현재 Goal 6 decision |
+| class | remaining completion program decision |
 | --- | --- |
-| local read | `F:\Folder\harness-v2`와 generated TEMP verification folder 안에서 허용 |
-| local file write | exact Goal 6 docs/control/test audit surface에 필요한 경우 `F:\Folder\harness-v2` 안에서만 허용 |
-| new files | 이 slice에서는 denied |
-| local command execution | 아래 명령 목록에 있는 경우만 허용 |
-| local MCP stdio adapter | 기존 CLI/MCP surface를 통한 readback만 허용. remote hosting 또는 client configuration mutation 없음 |
-| hook-equivalent gate | `status`, `verify`, 선택적 `preflight`를 묶는 explicit local command로만 허용. real shell/editor hook이 아님 |
-| temporary verification folders | approved verification command 또는 test가 만든 TEMP 하위 폴더만 허용 |
-| cleanup | generated TEMP folder, `__pycache__`, `*.egg-info`에 한해 허용 |
-| read-only subagent review | `vowline` 적용 조건으로 허용. subagent는 edit, git/network mutation, approval grant, proof production, lifecycle transition declaration 금지 |
-| git push | verified Goal 6 commit에 한해 허용 |
-| npm publish | 이 local slice에서는 denied |
-| GitHub release or release tag | 이 local slice에서는 denied |
+| local read | allowed under `F:\Folder\harness-v2` and generated TEMP verification folders |
+| local file write | allowed under `F:\Folder\harness-v2` only when directly required by the active remaining completion program |
+| new files | allowed only for workflow engine enforcement, lifecycle ledger/read-set/preflight implementation, generated scaffold templates, tests/fixtures, hook or equivalent local preflight adapter, local MCP stdio adapter implementation, or documentation needed to explain implemented surfaces |
+| local command execution | allowed only for the commands listed below |
+| local MCP stdio adapter | allowed only as a dependency-free stdio JSON-RPC adapter over existing HARNESS V2 core functions |
+| hook-equivalent gate | allowed only as an explicit local command that combines `status`, `verify`, and optional `preflight`; it is not a real shell/editor hook |
+| integration doctor | allowed only as a read-only local report over current status, project shape, integrated surfaces, and closed release boundary |
+| temporary verification folders | allowed under TEMP |
+| cleanup | allowed only for generated TEMP folders, `__pycache__`, `*.egg-info`, and npm pack dry-run output |
+| read-only subagent review | allowed with `vowline`; subagents may not edit, mutate git/network, grant approval, produce proof, or declare lifecycle transition |
+| GitHub repository push | allowed after a completed slice passes verification and review |
+| npm publish | allowed only for the exact `harness-v2@0.1.7` npm release transaction |
+| GitHub release and release tag | allowed only for `vibedong/harness-v2` `v0.1.7` after release verification passes |
 | Python package registry publish | denied |
-| dependency install from network, secret read, generated verification artifact 밖의 destructive action | denied |
+| dependency install from network, secret read, destructive action outside generated verification artifacts | denied |
 
 ## Exact Write Surface
 
-허용된 write path는 Goal 6에 필요한 `F:\Folder\harness-v2` 하위 product file입니다.
+Allowed write paths are product files under `F:\Folder\harness-v2` needed for the remaining completion program, including:
 
-- `README.md`
+- `AGENTS.md`
+- `RULES.md`
 - `CURRENT.md`
-- `RELEASE_NOTES.md`
-- `tests\test_harness_v2.py`
-- `safety\regression.md`
-- `safety\improvement.md`
-- `release\transaction.md`
+- `README.md`
+- `README.ko.md`
 - `routing\manifest.md`
 - `control\source.md`
 - `control\approval.md`
 - `control\permission.md`
 - `control\proof.md`
 - `control\lifecycle.md`
+- `rules\workflows.md`
+- `records\README.md`
+- `artifacts\registry.md`
+- `artifacts\log.md`
+- `safety\regression.md`
+- `safety\improvement.md`
+- `release\transaction.md`
+- `contracts\*.schema.json`
+- `templates\*.json`
+- `templates\*.md`
+- `harness_v2\*.py`
+- `tests\*.py`
+- `tests\fixtures\*.json`
+- `package.json`
+- `bin\harness-v2.js`
+- `pyproject.toml`
+- `_build_backend\harness_backend.py`
+- `LICENSE`
+- `RELEASE_NOTES.md`
+- `.gitignore`
+- `.gitattributes`
 
-generated TEMP verification artifact와 그 cleanup을 제외하면 `F:\Folder\harness-v2` 밖의 mutation은 fail closed합니다.
+Any mutation outside `F:\Folder\harness-v2` fails closed except generated TEMP verification artifacts and their cleanup.
 
-## 허용된 Local Commands
+## Allowed Local Commands
 
 - `python -m compileall harness_v2`
 - `python -m unittest discover tests`
-- `python -m harness_v2 status --root .`
-- `python -m harness_v2 verify tests\fixtures\valid-task.json`
-- `python -m harness_v2 gate tests\fixtures\valid-task.json --root .`
-- `python -m harness_v2 doctor --root .`
 - `node bin\harness-v2.js status --root .`
 - `node bin\harness-v2.js verify tests\fixtures\valid-task.json`
-- `node bin\harness-v2.js gate tests\fixtures\valid-task.json --root .`
+- `node bin\harness-v2.js preflight tests\fixtures\valid-task.json --side-effect "python -m compileall harness_v2"`
+- `node bin\harness-v2.js gate tests\fixtures\valid-task.json --root . --side-effect "python -m compileall harness_v2"`
 - `node bin\harness-v2.js doctor --root .`
+- `node bin\harness-v2.js mcp < JSON-RPC smoke input`
+- `node bin\harness-v2.js init --root <temporary project>`
+- `python -m harness_v2 status --root <repo root>`
+- `python -m harness_v2 verify tests\fixtures\valid-task.json`
+- `python -m harness_v2 preflight tests\fixtures\valid-task.json --side-effect "python -m unittest discover tests"`
+- `python -m harness_v2 gate tests\fixtures\valid-task.json --root . --side-effect "python -m unittest discover tests"`
+- `python -m harness_v2 doctor --root <repo root>`
+- `python -m harness_v2 mcp < JSON-RPC smoke input`
+- `python -m harness_v2 init --root <temporary project>`
+- `python -m harness_v2 verify <temporary project>\contracts\harness-task.json`
 - `npm pack --dry-run`
 
-## 허용된 Git/GitHub Commands
+## Allowed Git/GitHub Commands
 
-- `git add <intended Goal 6 product files>`
+- `git add <intended HARNESS V2 product files>`
 - `git commit`
 - `git push`
+- `git push --tags`
+- `gh release create v0.1.7 --repo vibedong/harness-v2 --title "HARNESS V2 0.1.7" --notes-file RELEASE_NOTES.md`
 
-## Permission 경계
+## Permission Boundaries
 
-permission은 approval scope를 넓힐 수 없고 proof, lifecycle state, route permission, regression pass, improvement execution, package registry publish readiness, release readiness, real hook installation, automatic external enforcement를 만들 수 없습니다.
+Permission cannot widen approval scope and cannot produce proof, lifecycle state, route permission, regression pass, improvement execution, package registry publish readiness, release readiness, real hook installation, or automatic enforcement completion.
 
-## Structured PermissionDecision Records
-
-PermissionDecision record는 side effect가 있을 때 active approval을 참조해야 하며, side-effect class를 분류하고, approval ceiling 안에 머물며, file, git, network, release, package, secret, destructive side effect에 대한 preflight status를 포함해야 합니다.
-
-PermissionDecision record는 approval에서 제외한 side effect를 승인할 수 없고, approval ceiling을 넘을 수 없고, proof를 만들 수 없고, lifecycle state를 이동할 수 없습니다.
-
-이 permission surface는 verified Goal 6 commit에 한해서만 git push를 허용합니다. 현재 audit slice에서는 npm publish, Git tag creation, GitHub release creation, Python package registry publish, network dependency installation, secret access, approved Goal 6 git push 밖의 external network mutation, remote MCP hosting, MCP client configuration mutation, Codex app configuration mutation, real shell/editor hook installation, generated verification artifact 밖의 destructive action을 denied합니다.
+This permission surface allows npm publish, Git tag creation, GitHub release creation, and external network mutation only for the exact approved `harness-v2@0.1.7` and `vibedong/harness-v2` `v0.1.7` release transaction. It denies repeat npm publish, Python package registry publish, additional GitHub release mutation, additional release tag mutation, dependency installation from network, secret access, external network mutation outside allowed git/GitHub release operations, remote MCP hosting, MCP client configuration mutation, Codex app configuration mutation, real shell/editor hook installation, and destructive action outside generated verification artifacts.

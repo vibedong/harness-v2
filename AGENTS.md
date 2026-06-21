@@ -1,55 +1,55 @@
-# HARNESS V2 제품 진입점
+# HARNESS V2 Product Entry
 
 status: package_github_surface / remaining_completion_program / entry_router
 
-이 파일은 HARNESS V2의 product-local entry router입니다. 짧게 유지하고, 현재 authority surface를 찾는 용도로만 사용합니다.
+This file is the product-local entry router for HARNESS V2. Keep it short and use it only to find the current authority surface.
 
-현재 HARNESS V2는 project scaffold, task-contract validator, CLI helper입니다. 자동 enforcement sandbox, completion layer, approval engine, proof generator, lifecycle transition engine이 아닙니다.
+Current HARNESS V2 is a project scaffold, task-contract validator, and CLI helper. It is not an automatic enforcement sandbox, completion layer, approval engine, proof generator, or lifecycle transition engine.
 
-Goal H는 명시적인 hook-equivalent gate 명령을 추가했습니다. 작업 전 `harness-v2 gate <task.json> --root .`로 status, verify, 선택적 preflight를 함께 확인하되, 이것을 실제 shell/editor blocker나 Codex app hook installation으로 취급하지 않습니다.
+Goal H adds an explicit hook-equivalent gate command. Use `harness-v2 gate <task.json> --root .` to combine status, verify, and optional preflight checks before work, but do not treat it as a real shell/editor blocker or Codex app hook installation.
 
-Goal I는 `harness-v2 doctor --root .`를 통한 read-only integration hardening을 추가했습니다. 이 출력은 local integration report일 뿐이며 release readiness, proof 자체, lifecycle movement가 아닙니다.
+Goal I adds read-only integration hardening through `harness-v2 doctor --root .`. Treat its output as a local integration report, not release readiness, proof by itself, or lifecycle movement.
 
-## 읽기 순서
+## Read Order
 
 1. `RULES.md`
 2. `CURRENT.md`
-3. 요청된 작업이 workflow를 명시하면 `rules\workflows.md`
-4. 요청된 작업과 관련된 `control\`, `records\`, `routing\`, `artifacts\`, `safety\`, `release\` 하위 파일
+3. `rules\workflows.md` when the requested action names a workflow.
+4. The relevant file under `control\`, `records\`, `routing\`, `artifacts\`, `safety\`, or `release\`.
 
-나중에 정확한 approval packet, permission preflight, proof obligation, lifecycle entry가 더 넓은 작업을 명시하기 전까지 현재 package와 GitHub MVP surface 밖으로 확장하지 않습니다.
+Do not expand beyond the current package and GitHub MVP surface unless a later exact approval packet, permission preflight, proof obligation, and lifecycle entry name that wider work.
 
-증거 수준에 맞춰 읽습니다. 일반적인 current-task 작업은 짧은 읽기 순서에서 시작할 수 있지만, approval, permission, proof, lifecycle, stale state, release, external mutation, destructive action, product implementation risk가 있으면 행동 전에 더 깊은 source/control readback이 필요합니다.
+Use evidence-scaled readback. Routine current-task work can start from the short read order, but approval, permission, proof, lifecycle, stale state, release, external mutation, destructive action, or product implementation risk requires deeper source/control readback before acting.
 
-## 복구 규칙
+## Recovery Rule
 
-context compression, resume, handoff, goal continuation 이후:
+After context compression, resume, handoff, or goal continuation:
 
-1. 이 파일을 읽습니다.
-2. `RULES.md`를 읽습니다.
-3. `CURRENT.md`를 읽습니다.
-4. 요청된 작업에 필요한 workflow와 surface 파일만 읽습니다.
-5. source, approval, permission, proof, lifecycle, route, artifact, safety, improvement, release state가 없거나 stale이거나 충돌하거나 scope 밖이면 멈춥니다.
+1. Read this file.
+2. Read `RULES.md`.
+3. Read `CURRENT.md`.
+4. Read only the workflow and surface files required by the requested action.
+5. Stop if source, approval, permission, proof, lifecycle, route, artifact, safety, improvement, or release state is missing, stale, conflicting, or outside scope.
 
-## 현재 중지 규칙
+## Current Stop Rule
 
-작업이 product write를 요청하면, 먼저 요청 대상이 `CURRENT.md`의 current write surface, `control\approval.md`의 bound approval scope, `control\permission.md`의 side-effect ceiling 안에 있는지 확인합니다.
+If the task asks for product writes, first verify the requested target is inside the current write surface in `CURRENT.md`, the bound approval scope in `control\approval.md`, and the side-effect ceiling in `control\permission.md`.
 
-작업이 proof 또는 completion을 요청하면, 먼저 `control\proof.md`의 proof obligation을 확인합니다.
+If the task asks for proof or completion, first verify the proof obligation in `control\proof.md`.
 
-작업이 workflow state 이동을 요청하면, 먼저 `control\lifecycle.md`의 transition requirement를 확인합니다.
+If the task asks to move workflow state, first verify transition requirements in `control\lifecycle.md`.
 
-작업이 routing, artifact indexing, regression safety, improvement intake, release work를 요청하면 해당 local surface를 읽고 non-authority boundary를 유지합니다.
+If the task asks for routing, artifact indexing, regression safety, improvement intake, or release work, read the matching local surface and keep its non-authority boundary intact.
 
-## 현재 금지 사항
+## Forbidden Now
 
-- approval text를 permission으로 취급하지 않습니다.
-- permission을 proof로 취급하지 않습니다.
-- proof material을 lifecycle state로 취급하지 않습니다.
-- route guidance를 side-effect permission으로 취급하지 않습니다.
-- registry row나 log entry를 source authority 또는 proof로 취급하지 않습니다.
-- regression mapping을 regression pass로 취급하지 않습니다.
-- improvement candidate를 product change로 취급하지 않습니다.
-- release transaction boundary를 release readiness로 취급하지 않습니다.
-- install, init/apply, CLI availability를 automatic enforcement completion으로 취급하지 않습니다.
-- 현재 bound approval과 permission scope 밖의 file, code, test, schema, fixture, runner, package, release artifact, dependency, git operation, secret, external mutation, destructive action을 추가하지 않습니다.
+- Do not treat approval text as permission.
+- Do not treat permission as proof.
+- Do not treat proof material as lifecycle state.
+- Do not treat route guidance as side-effect permission.
+- Do not treat registry rows or log entries as source authority or proof.
+- Do not treat regression mapping as a regression pass.
+- Do not treat improvement candidates as product changes.
+- Do not treat release transaction boundaries as release readiness.
+- Do not treat install, init/apply, or CLI availability as automatic enforcement completion.
+- Do not add files, code, tests, schemas, fixtures, runners, packages, release artifacts, dependencies, git operations, secrets, external mutations, or destructive actions beyond the currently bound approval and permission scope.

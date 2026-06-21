@@ -5,8 +5,7 @@ import json
 import sys
 from pathlib import Path
 
-from .core import initialize_project, read_current_status, start_task
-from .decisions import evaluate_decision_file
+from .core import initialize_project, read_current_status
 from .doctor import inspect_project
 from .gate import evaluate_gate
 from .preflight import evaluate_preflight
@@ -42,11 +41,6 @@ def build_parser() -> argparse.ArgumentParser:
     doctor = subparsers.add_parser("doctor", help="Report read-only next action and local project shape.")
     doctor.add_argument("--root", default=".", help="HARNESS V2 product root. Defaults to current directory.")
 
-    decision = subparsers.add_parser("decision", help="Validate an ApprovalDecision, PermissionDecision, or ProofReceipt record.")
-    decision.add_argument("record", help="Path to a decision or receipt JSON file.")
-    decision.add_argument("--task", help="Optional task JSON file to bind the record against.")
-    decision.add_argument("--root", default=".", help="HARNESS V2 product root. Defaults to current directory.")
-
     subparsers.add_parser("mcp", help="Run the HARNESS V2 MCP stdio adapter.")
 
     init = subparsers.add_parser("init", help="Apply HARNESS V2 scaffold files to a project root.")
@@ -56,15 +50,6 @@ def build_parser() -> argparse.ArgumentParser:
     apply = subparsers.add_parser("apply", help="Alias for init: apply HARNESS V2 to a project root.")
     apply.add_argument("--root", default=".", help="Project root to apply HARNESS V2 to. Defaults to current directory.")
     apply.add_argument("--force", action="store_true", help="Overwrite existing HARNESS V2 scaffold files.")
-
-    task = subparsers.add_parser("task", help="Manage the active HARNESS V2 task contract.")
-    task_subparsers = task.add_subparsers(dest="task_command", required=True)
-    task_start = task_subparsers.add_parser("start", help="Register the current user request as the active spec-stage task.")
-    task_start.add_argument("--root", default=".", help="Applied project root. Defaults to current directory.")
-    task_start.add_argument("--title", required=True, help="Short title for the current user request.")
-    task_start.add_argument("--summary", default="", help="Brief summary of the current user request.")
-    task_start.add_argument("--source", dest="sources", action="append", default=[], help="Additional source basis path or label. May be repeated.")
-    task_start.add_argument("--force", action="store_true", help="Replace an already registered active task.")
 
     return parser
 
@@ -81,9 +66,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "verify":
         result = verify_task(Path(args.task))
         if result.ok:
-            print(json.dumps(_verify_payload(result), sort_keys=True))
+            print(json.dumps({"ok": True, "task_id": result.task_id}, sort_keys=True))
             return 0
-        print(json.dumps(_verify_payload(result), sort_keys=True))
         print("\n".join(result.errors), file=sys.stderr)
         return 1
 
@@ -113,11 +97,6 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
         return 0
 
-    if args.command == "decision":
-        result = evaluate_decision_file(Path(args.record), task_path=Path(args.task) if args.task else None, root=Path(args.root))
-        print(json.dumps(result.to_json(), ensure_ascii=False, sort_keys=True))
-        return 0 if result.ok else 1
-
     if args.command == "mcp":
         from .mcp import run_stdio_server
 
@@ -126,48 +105,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command in {"init", "apply"}:
         payload = initialize_project(Path(args.root), force=args.force)
         print(json.dumps(payload.to_json(), ensure_ascii=False, sort_keys=True))
-        if not payload.ok:
-            print("\n".join(payload.errors), file=sys.stderr)
-            return 1
         return 0
-
-    if args.command == "task":
-        if args.task_command == "start":
-            payload = start_task(
-                Path(args.root),
-                title=args.title,
-                summary=args.summary,
-                source_basis=args.sources,
-                force=args.force,
-            )
-            print(json.dumps(payload.to_json(), ensure_ascii=False, sort_keys=True))
-            if not payload.ok:
-                print("\n".join(payload.errors), file=sys.stderr)
-                return 1
-            return 0
-        parser.error(f"unknown task command: {args.task_command}")
-        return 2
 
     parser.error(f"unknown command: {args.command}")
     return 2
-
-
-def _verify_payload(result) -> dict:
-    return {
-        "ok": result.ok,
-        "task_id": result.task_id,
-        "errors": list(result.errors),
-        "current_gate": result.current_gate,
-        "task_mode": result.task_mode,
-        "record_strength": result.record_strength,
-        "effective_record_strength": result.effective_record_strength,
-        "classification_required": result.classification_required,
-        "compatibility_mode": result.compatibility_mode,
-        "gate_state": result.gate_state,
-        "freshness": result.freshness,
-        "mode_profile": result.mode_profile,
-        "layout_version": result.layout_version,
-        "current_layout_paths_active": result.layout_report["current_layout_paths_active"] if result.layout_report else None,
-        "domain_layout_enabled": result.layout_report["domain_layout_enabled"] if result.layout_report else None,
-        "domain_layout_candidate": result.layout_report["domain_layout_candidate"] if result.layout_report else None,
-    }

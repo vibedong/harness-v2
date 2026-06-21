@@ -8,84 +8,18 @@
     "task_id": { "type": "string", "minLength": 1 },
     "title": { "type": "string", "minLength": 1 },
     "workflow": { "type": "string", "minLength": 1 },
-    "contract_version": { "type": "string", "minLength": 1 },
-    "layout_version": {
-      "type": "string",
-      "enum": ["legacy-control-records-v1"]
-    },
     "workflow_stage": {
       "type": "string",
       "enum": [
-        "spec",
-        "spec_review",
-        "plan",
-        "plan_review",
-        "plan_approval",
+        "planning",
+        "approval",
         "development",
         "development_review",
-        "improvement"
+        "artifact_observation",
+        "routing",
+        "safety_improvement",
+        "release_boundary"
       ]
-    },
-    "current_gate": {
-      "type": "string",
-      "enum": [
-        "spec",
-        "spec_review",
-        "plan",
-        "plan_review",
-        "plan_approval",
-        "development",
-        "development_review",
-        "improvement"
-      ]
-    },
-    "task_mode": {
-      "type": "string",
-      "enum": [
-        "setup_only",
-        "read_only_analysis",
-        "scaffold_only",
-        "planned_change",
-        "defect_repair",
-        "continuity_only"
-      ]
-    },
-    "record_strength": {
-      "type": "string",
-      "enum": ["minimal", "light", "strict"]
-    },
-    "risk_flags": {
-      "type": "array",
-      "items": { "type": "string", "minLength": 1 }
-    },
-    "proof_profile": {
-      "type": "string",
-      "enum": ["none", "basic", "current", "strict"]
-    },
-    "capability_request": {
-      "oneOf": [
-        { "type": "string", "minLength": 1 },
-        {
-          "type": "array",
-          "items": { "type": "string", "minLength": 1 }
-        }
-      ]
-    },
-    "classification_required": {
-      "type": "boolean"
-    },
-    "record_density": {
-      "type": "object",
-      "required": ["generated_file_count", "required_read_set_size", "field_presence"],
-      "properties": {
-        "generated_file_count": { "type": "integer", "minimum": 0 },
-        "required_read_set_size": { "type": "integer", "minimum": 0 },
-        "field_presence": {
-          "type": "string",
-          "enum": ["minimal", "light", "strict"]
-        }
-      },
-      "additionalProperties": true
     },
     "source": {
       "type": "object",

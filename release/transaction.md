@@ -1,117 +1,77 @@
 # HARNESS V2 Release Transaction
 
-status: package_github_surface / npm_0.1.12_release / release_transaction_boundary
+status: package_github_surface / remaining_completion_program / release_transaction_boundary
 
-이 파일은 install/release transaction을 위한 local markdown boundary를 정의합니다. release readiness input을 기록하지만, 자체로 npm, Python package registry publish, GitHub release, release tag, deploy, product release work를 실행하지 않습니다.
+This file defines the local markdown boundary for install and release transactions. It records release readiness inputs but does not execute npm, Python package registry publish, GitHub release, release tag, deploy, or product release work by itself.
 
-## Release 분리
+## Release Separation
 
-release work는 아래 표면과 분리됩니다.
+Release work is separate from:
 
-- source authority
-- approval scope
-- permission preflight
-- proof obligation
-- lifecycle state
-- route guidance
-- artifact registry/log entry
-- regression mapping
-- improvement intake
-- binding-surface classification
+- source authority;
+- approval scope;
+- permission preflight;
+- proof obligation;
+- lifecycle state;
+- route guidance;
+- artifact registry/log entries;
+- regression mapping;
+- improvement intake.
 
-이 표면 중 어떤 것도 자체로 release readiness를 만들 수 없습니다.
+No one of these surfaces can create release readiness by itself.
 
-## 현재 Release Transaction
+## Future Transaction Inputs
 
-release target:
+A future release transaction must name:
 
-```text
-harness-v2@0.1.12
-```
+- source release record;
+- npm, Python package, GitHub release, tag, deploy, or install artifact target;
+- permission scope for package, publish, deploy, install, or external mutation;
+- proof obligation and verifier;
+- installed project or rollback evidence when applicable;
+- lifecycle transition target;
+- stale triggers and rollback path.
 
-release scope:
+## Current Release Transaction Status
 
-- current GitHub source state를 npm package `harness-v2@0.1.12`로 publish합니다.
-- README 업데이트 기록 유지 원칙을 공개 사용자 문서와 테스트에 고정합니다.
-- generated `CURRENT.md`의 남은 영어 heading을 한국어로 정리한 `0.1.11` 상태를 유지합니다.
-- 한국어 scaffold 설명문과 `task start` 흐름을 유지합니다.
-- direct source checkout에 대한 install/apply confusion guard를 유지합니다.
-- single Korean public `README.md`를 유지합니다.
-- 제거된 `README.ko.md` package surface는 제외 상태로 유지합니다.
-- Python package registry publish는 denied 상태로 유지합니다.
-- 별도 approval이 없으면 GitHub release/tag creation은 이 npm-only transaction 밖에 둡니다.
-
-required verification:
+Target:
 
 ```text
-python -m compileall harness_v2
-python -m unittest discover tests
-python -m harness_v2 status --root .
-python -m harness_v2 verify tests\fixtures\valid-task.json
-python -m harness_v2 gate tests\fixtures\valid-task.json --root .
-python -m harness_v2 doctor --root .
-node bin\harness-v2.js status --root .
-node bin\harness-v2.js verify tests\fixtures\valid-task.json
-node bin\harness-v2.js gate tests\fixtures\valid-task.json --root .
-node bin\harness-v2.js doctor --root .
-npm pack --dry-run
-npm publish
+harness-v2@0.1.7
 ```
 
-publish 성공 후 이 transaction은 `harness-v2@0.1.12`에 대해 closed 상태입니다.
-
-## 닫힌 Release History
-
-closed release target:
-
-```text
-harness-v2@0.1.11 / harness-v2@0.1.10 / harness-v2@0.1.9 / harness-v2@0.1.8 / harness-v2@0.1.7 / v0.1.7
-```
-
-closed status:
+Status:
 
 ```text
 NPM_PUBLISHED / GITHUB_RELEASE_PUBLISHED / RELEASE_EXECUTION_CLOSED
 ```
 
-historical notes:
+Reason:
 
-- npm package `harness-v2@0.1.11`은 closed npm release history입니다.
-- npm package `harness-v2@0.1.10`은 closed npm release history입니다.
-- npm package `harness-v2@0.1.9`는 closed npm release history입니다.
-- npm package `harness-v2@0.1.8`은 closed npm release history입니다.
-- npm package `harness-v2@0.1.7`과 Git tag/GitHub release `v0.1.7`은 closed release history입니다.
-- 해당 transaction은 exact 0.1.7 transaction에 대해서만 npm publish 1회, Git tag 1회, GitHub release 1회를 승인했습니다.
-- closed transaction은 repeat npm publish, tag mutation, GitHub release mutation, Python package registry publish, dependency installation, secret access, external mutation, destructive work를 승인하지 않습니다.
-- local post-0.1.7 workflow engine completion, conformance audit, `workflow_binding_engine` classification은 자체로 npm publish, GitHub release, release tag, deploy, release readiness가 아닙니다.
+- npm package `harness-v2@0.1.7` is the current release target.
+- The current release slice authorizes exactly one npm publish for `harness-v2@0.1.7`.
+- Generated scaffold hardening improves the files created by `harness-v2 init --root .` and `harness-v2 apply --root .` for future package updates.
+- Hook-equivalent gate hardening adds local `gate` checks to the source surface, but it does not execute a release, create a tag, or republish the package.
+- Integration hardening and release preparation add a read-only `doctor` report for local surface composition.
+- Git tag `v0.1.7` and GitHub release creation for `vibedong/harness-v2` are permitted only for this exact transaction.
+- Python package registry publish is not permitted by the current transaction.
 
-## Future Transaction Input
+## Current Permission Ceiling
 
-future release transaction은 아래를 명시해야 합니다.
+The current release transaction allows local verification, generated TEMP project verification, read-only subagent review, npm publish for `harness-v2@0.1.7`, Git tag `v0.1.7`, GitHub release creation for `vibedong/harness-v2`, and git push after verification and review pass.
 
-- source release record
-- npm, Python package, GitHub release, tag, deploy, install artifact target
-- package, publish, deploy, install, external mutation의 permission scope
-- proof obligation과 verifier
-- 해당되는 경우 installed project 또는 rollback evidence
-- lifecycle transition target
-- stale trigger와 rollback path
+After this transaction completes, the permission ceiling denies:
 
-## 현재 Permission Ceiling
+- repeat npm publish;
+- Python package registry publish or deploy work;
+- additional GitHub release mutation;
+- additional release tag mutation;
+- dependency installation from network;
+- secret access;
+- external network mutation outside allowed git push;
+- destructive action outside generated temporary verification artifacts;
+- release readiness claims.
 
-현재 npm 0.1.12 release transaction은 local verification, verified release commit을 위한 git add/commit/push, `harness-v2@0.1.12` npm publish 1회를 허용합니다.
+## Non-Authority Boundary
 
-현재 npm 0.1.12 release transaction은 아래를 denied로 둡니다.
-
-- Python package registry publish 또는 deploy work
-- GitHub release creation 또는 mutation
-- release tag creation 또는 mutation
-- network dependency installation
-- secret access
-- approved git push와 npm publish 밖의 external network mutation
-- generated temporary verification artifact 밖의 destructive action
-- named npm package target 밖의 release readiness claim
-
-## 권한 없음 경계
-
-이 파일은 자체로 npm publish, Python package registry publish, deploy, GitHub release, tag creation, approval, permission, proof, lifecycle transition, automatic external enforcement, implementation completion을 실행하지 않습니다.
+This file does not execute npm publish, Python package registry publish, deploy, GitHub release, tag creation, approval, permission, proof, lifecycle transition, automatic enforcement completion, or implementation completion by itself.

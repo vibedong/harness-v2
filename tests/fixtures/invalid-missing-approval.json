@@ -1,6 +1,6 @@
 {
   "task_id": "harness-v2-invalid-missing-approval",
-  "title": "Reject missing workflow realignment approval contract",
+  "title": "Reject missing remaining completion approval contract",
   "workflow": "remaining_completion_program",
   "workflow_stage": "development",
   "source": {
@@ -23,7 +23,7 @@
     ]
   },
   "lifecycle": {
-    "current_state": "workflow_realignment_review",
-    "target_state": "workflow_realignment_review"
+    "current_state": "package_publish_review",
+    "target_state": "package_publish_review"
   }
 }

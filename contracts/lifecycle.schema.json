@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "harness-v2://contracts/lifecycle.schema.json",
   "title": "HARNESS V2 Lifecycle Movement",
-  "description": "Lifecycle movement is an evidence carrier, not authority generator. Folders, registry rows, log rows, review notes, route rows, release notes, package metadata, test pass output, and agent claims do not move lifecycle state without evaluated transition requirements.",
   "type": "object",
   "required": ["current_state", "target_state"],
   "properties": {

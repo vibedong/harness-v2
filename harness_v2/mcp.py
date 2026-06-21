@@ -7,7 +7,6 @@ from typing import Any, TextIO
 
 from . import __version__
 from .core import initialize_project, read_current_status
-from .decisions import evaluate_decision_file
 from .gate import evaluate_gate
 from .preflight import evaluate_preflight
 from .verify import verify_task
@@ -164,21 +163,6 @@ def _tools() -> list[dict[str, Any]]:
             },
         },
         {
-            "name": "harness_decision",
-            "title": "HARNESS V2 Decision Record Verify",
-            "description": "Validate an ApprovalDecision, PermissionDecision, or ProofReceipt record against an optional task contract.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "record": {"type": "string", "description": "Path to the decision or receipt JSON file."},
-                    "task": {"type": "string", "description": "Optional task JSON file to bind the record against."},
-                    "root": {"type": "string", "description": "HARNESS V2 root. Defaults to current directory."},
-                },
-                "required": ["record"],
-                "additionalProperties": False,
-            },
-        },
-        {
             "name": "harness_init",
             "title": "HARNESS V2 Init",
             "description": "Apply HARNESS V2 scaffold files to a project root.",
@@ -220,20 +204,7 @@ def _call_tool(params: Any) -> dict[str, Any]:
         payload = {"ok": True, "status": read_current_status(Path(_string_arg(arguments, "root", ".")))}
     elif name == "harness_verify":
         result = verify_task(Path(_required_string_arg(arguments, "task")))
-        payload = {
-            "ok": result.ok,
-            "task_id": result.task_id,
-            "errors": list(result.errors),
-            "current_gate": result.current_gate,
-            "task_mode": result.task_mode,
-            "record_strength": result.record_strength,
-            "effective_record_strength": result.effective_record_strength,
-            "classification_required": result.classification_required,
-            "compatibility_mode": result.compatibility_mode,
-            "gate_state": result.gate_state,
-            "freshness": result.freshness,
-            "mode_profile": result.mode_profile,
-        }
+        payload = {"ok": result.ok, "task_id": result.task_id, "errors": list(result.errors)}
     elif name == "harness_preflight":
         result = evaluate_preflight(
             Path(_required_string_arg(arguments, "task")),
@@ -249,13 +220,6 @@ def _call_tool(params: Any) -> dict[str, Any]:
             side_effects=_optional_string_list_arg(arguments, "side_effects"),
             paths=_optional_string_list_arg(arguments, "paths"),
             mode=_string_arg(arguments, "mode", "command"),
-        )
-        payload = result.to_json()
-    elif name == "harness_decision":
-        result = evaluate_decision_file(
-            Path(_required_string_arg(arguments, "record")),
-            task_path=Path(_optional_string_arg(arguments, "task")) if _optional_string_arg(arguments, "task") else None,
-            root=Path(_string_arg(arguments, "root", ".")),
         )
         payload = result.to_json()
     elif name == "harness_init":

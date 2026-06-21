@@ -1,4 +1,4 @@
-# HARNESS V2 Proof Report 템플릿
+# HARNESS V2 Proof Report Template
 
 status: template / not_proof_receipt / not_lifecycle / not_release
 
@@ -14,4 +14,4 @@ status: template / not_proof_receipt / not_lifecycle / not_release
 | --- | --- | --- |
 | `<check>` | `<command>` | `<result>` |
 
-이 템플릿은 proof-report 구조일 뿐입니다. current evidence로 채우고 active proof obligation에 맞춰 평가하기 전까지는 proof가 아닙니다.
+This template is proof-report structure only. It is not proof until filled with current evidence and evaluated against the active proof obligation.
