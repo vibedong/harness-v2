@@ -1,5 +1,45 @@
 # HARNESS V2 릴리스 노트
 
+## HARNESS V2 0.1.12 릴리스 노트
+
+README 업데이트 기록 유지 원칙을 공개 사용자 문서와 테스트에 고정하는 npm patch release입니다.
+
+## 변경 사항
+
+- current source package metadata를 `0.1.12`로 publish합니다.
+- README에 `README 업데이트 기록 유지 원칙`을 추가합니다.
+- 사용자가 체감하는 release, package, scaffold, workflow, CLI, MCP, contract, install/apply 변경은 README 업데이트 섹션에 함께 남기도록 문서화합니다.
+- README 업데이트 내용 없이 release, package, scaffold, workflow 변경을 완료로 말하지 않도록 테스트를 추가합니다.
+- `0.1.11`의 한국어 `CURRENT.md` heading 정리와 `0.1.10`의 한국어 scaffold/task start 흐름은 유지합니다.
+
+## Runtime 요구사항
+
+- Node.js 18 이상
+- PATH에 등록된 Python 3.11 이상
+- 이번 release의 npm wrapper 지원 platform: Windows, macOS
+
+## 검증
+
+release는 아래 명령으로 검증했습니다.
+
+```text
+python -m compileall harness_v2
+python -m unittest discover tests
+node bin\harness-v2.js verify tests\fixtures\valid-task.json
+npm pack --dry-run
+npm publish
+```
+
+## Publish 범위
+
+release target:
+
+```text
+harness-v2@0.1.12
+```
+
+이 version에 대한 repeat npm publish는 불가능합니다. 이후 package update에는 새 version이 필요합니다.
+
 ## HARNESS V2 0.1.11 릴리스 노트
 
 generated `CURRENT.md`의 남은 영어 heading을 한국어로 정리하는 npm patch release입니다.
