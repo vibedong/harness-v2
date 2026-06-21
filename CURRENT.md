@@ -59,6 +59,7 @@ local worktree는 post-0.1.7 workflow engine completion and conformance audit sl
 - unknown layout version은 migration diagnostic과 함께 fail closed합니다.
 - domain layout은 아직 enabled 또는 candidate가 아니며, runtime lookup path와 generated scaffold path는 기존 `control\`, `records\`, `contracts\` 구조를 유지합니다.
 - 새 프로젝트 scaffold 검증은 `init`이 대상 프로젝트 루트 바로 아래에 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `contracts\harness-task.json`, `control\`, `records\`, `templates\`를 만들고, 중첩 source checkout 폴더를 만들지 않는지 확인합니다.
+- README 업데이트 기록 유지: 사용자가 체감하는 release, package, scaffold, workflow, CLI, MCP, contract, install/apply 변경은 README 업데이트 섹션에 함께 남겨야 합니다. README 업데이트 내용 없이는 해당 변경을 완료로 말하지 않습니다.
 
 ## Codex 앱 적용 안내
 

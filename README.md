@@ -352,6 +352,16 @@ AI 코딩 도구에 맡길 때는 짧게 말해도 됩니다.
 
 단, README 자체는 AI 지시문이 아닙니다. 실제 작업 규칙은 프로젝트-local HARNESS 파일이 담당합니다.
 
+## README 업데이트 기록 유지 원칙
+
+HARNESS V2의 사용자가 체감하는 변경은 README의 업데이트 내용에 함께 남깁니다.
+
+- release, npm package, scaffold, workflow, CLI, MCP, contract, install/apply 동작이 바뀌면 README의 해당 버전 또는 `local unreleased` 업데이트 섹션을 갱신합니다.
+- README 업데이트 내용 없이 release, package, scaffold, workflow 변경을 완료로 말하지 않습니다.
+- 자세한 내부 기록은 `RELEASE_NOTES.md`, `CURRENT.md`, control/record surface에 둘 수 있지만, 사용자가 보는 변경 요약은 README에 남깁니다.
+
+이 원칙은 README가 AI 지시문이라는 뜻이 아니라, 공개 사용자 문서가 현재 제품 상태와 어긋나지 않게 하는 documentation/release rule입니다.
+
 ## 0.1.11 업데이트 내용
 
 - `harness-v2@0.1.11` npm package로 generated `CURRENT.md`의 남은 영어 heading을 한국어로 정리합니다.

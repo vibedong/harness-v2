@@ -718,6 +718,17 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, readme)
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, release_notes)
 
+    def test_readme_tracks_current_update_status(self):
+        package_json = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        current = (ROOT / "CURRENT.md").read_text(encoding="utf-8")
+
+        self.assertIn("## README 업데이트 기록 유지 원칙", readme)
+        self.assertIn(f"## {package_json['version']} 업데이트 내용", readme)
+        self.assertIn("사용자가 체감하는 변경은 README의 업데이트 내용에 함께 남깁니다", readme)
+        self.assertIn("README 업데이트 내용 없이 release, package, scaffold, workflow 변경을 완료로 말하지 않습니다", readme)
+        self.assertIn("README 업데이트 기록 유지", current)
+
     def test_readme_task_contract_examples_match_goal0_contract(self):
         from harness_v2.core import validate_task
 
