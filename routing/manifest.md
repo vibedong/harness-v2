@@ -4,6 +4,10 @@ status: package_github_surface / remaining_completion_program / routing_manifest
 
 이 파일은 operation mode를 suggested local route에 매핑합니다. routing은 guidance이며 permission이 아닙니다.
 
+`routing`은 responsibility owner입니다. workflow stage가 아니며 `workflow_stage`, `current_gate`, `derived_current_gate`, transition gate, freshness backtrack target에 들어가지 않습니다.
+
+`domain:improvement`는 improvement domain owner 이름입니다. workflow stage `improvement`와 구분합니다.
+
 ## Route 원칙
 
 - skill name만 보지 말고 operation mode와 side-effect class로 route를 선택합니다.
@@ -28,6 +32,7 @@ status: package_github_surface / remaining_completion_program / routing_manifest
 | hook-equivalent gate | `harness_v2` CLI의 `gate <task> --root .` 또는 MCP tool `harness_gate` | status, verify, optional preflight를 결합함. direct Codex app hook surface는 없고 shell/editor action을 자동 차단하지 않음 |
 | executable local MVP | `status`, `verify`, `doctor`를 가진 `harness_v2` CLI | 승인된 local command만, external dependency 없음 |
 | integration hardening | `doctor --root .`와 status/verify/gate/preflight/MCP/package smoke check | read-only integration report이며 release readiness를 만들지 않음 |
+| domain layout migration report | `doctor --root .`의 `domain_layout_migration` 섹션 | read-only report입니다. generated scaffold path, source package surface, runtime lookup path를 보여주지만 domain folder 생성, 파일 이동, migration execution, permission을 만들지 않음 |
 | MCP stdio adapter | `python -m harness_v2 mcp` 또는 `node bin\harness-v2.js mcp`의 JSON-RPC over stdio | local stdio only. tool은 existing status, verify, preflight, gate, decision, init, apply behavior를 감쌀 뿐 source, approval, permission, proof, lifecycle, release boundary를 대체하지 않음 |
 | remaining completion program | current approval이 명시한 generated scaffold, workflow engine, preflight adapter, tests, docs/control, audit surfaces | npm publish, Python package registry publish, release tag, GitHub release, dependency install, secrets, generated verification artifact 밖 destructive action 없음 |
 | package, GitHub, and npm wrapper MVP | explicit package slice가 명시한 package metadata와 wrapper surfaces | package, npm dry-run, registry readback, release work는 current approval, permission, proof 필요 |

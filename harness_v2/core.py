@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .layout import CURRENT_LAYOUT_VERSION, DEFAULT_LAYOUT, current_layout_report, resolve_layout_version
 from .modes import evaluate_mode
 
 
@@ -61,6 +62,31 @@ WORKFLOW_STAGES = frozenset(
         "development",
         "development_review",
         "improvement",
+    }
+)
+RESPONSIBILITY_OWNER_IDS = frozenset(
+    {
+        "task",
+        "source",
+        "workflow",
+        "approval",
+        "permission",
+        "proof",
+        "lifecycle",
+        "route",
+        "routing",
+        "artifact",
+        "artifacts",
+        "inventory",
+        "regression",
+        "safety",
+        "domain:improvement",
+        "release",
+        "contract",
+        "contracts",
+        "artifact_observation",
+        "safety_improvement",
+        "release_boundary",
     }
 )
 LEGACY_STAGE_ALIASES = {
@@ -144,7 +170,34 @@ CORE_DENIED_FRAGMENTS = (
     "destructive",
 )
 BROAD_APPROVAL_PACKETS = {"go ahead", "ok", "okay", "approved", "do it", "all approved"}
-INITIAL_TASK_PATH = "contracts\\harness-task.json"
+AUTHORITY_CARRIER_FRAGMENTS = (
+    "folder",
+    "registry row",
+    "artifact registry",
+    "registry.md",
+    "log row",
+    "artifact log",
+    "log.md",
+    "review note",
+    "review findings",
+    "route row",
+    "routing row",
+    "routing manifest",
+    "routing\\manifest.md",
+    "release note",
+    "release notes",
+    "release_notes.md",
+    "release\\transaction.md",
+)
+AUTHORITY_TARGET_FRAGMENTS = (
+    "approval",
+    "permission",
+    "proof",
+    "lifecycle transition",
+    "lifecycle state",
+    "release readiness",
+)
+INITIAL_TASK_PATH = str(DEFAULT_LAYOUT.task_contract)
 
 
 def _scaffold_files() -> tuple[tuple[tuple[str, ...], str], ...]:
@@ -189,6 +242,8 @@ class ValidationResult:
     gate_state: dict[str, Any] | None = None
     freshness: dict[str, Any] | None = None
     mode_profile: dict[str, Any] | None = None
+    layout_version: str | None = None
+    layout_report: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -331,8 +386,8 @@ def start_task(
     force: bool = False,
 ) -> TaskStartResult:
     root_path = Path(root).resolve()
-    current_path = root_path / "CURRENT.md"
-    task_path = root_path / "contracts" / "harness-task.json"
+    current_path = DEFAULT_LAYOUT.resolve(root_path, DEFAULT_LAYOUT.current_pointer)
+    task_path = DEFAULT_LAYOUT.resolve(root_path, DEFAULT_LAYOUT.task_contract)
     current_task_path = root_path / "records" / "current-task.md"
 
     if not current_path.exists() or not task_path.exists():
@@ -457,6 +512,8 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None, task_pat
     root_path = Path(root) if root is not None else None
     validated_task_path = Path(task_path) if task_path is not None else None
     compatibility_mode = not _is_strict_task_contract(data)
+    layout_version, layout_errors = resolve_layout_version(data.get("layout_version"))
+    errors.extend(layout_errors)
     workflow_stage = data.get("workflow_stage")
     gate_state = _validate_gate_state(root_path, validated_task_path, data, errors)
     freshness = _validate_freshness(root_path, errors)
@@ -487,7 +544,9 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None, task_pat
     approval = data.get("approval") if isinstance(data.get("approval"), dict) else {}
     if not _non_empty_string(approval.get("packet")):
         errors.append("approval.packet must be a non-empty string")
-    if not _non_empty_list(approval.get("approved_paths")):
+    if "approved_paths" not in approval:
+        errors.append("approval.approved_paths is required")
+    elif not _non_empty_list(approval.get("approved_paths")):
         errors.append("approval.approved_paths must be a non-empty list")
 
     permission = data.get("permission") if isinstance(data.get("permission"), dict) else {}
@@ -508,6 +567,7 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None, task_pat
 
     _validate_current_context(data, root_path, errors)
     _validate_goal0_compatibility_fields(data, compatibility_mode, errors)
+    _reject_authority_substitution_claims(data, errors)
     _validate_workflow_stage(data, errors)
     _validate_proof_receipt_requirement(data, root_path, errors)
 
@@ -524,11 +584,13 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None, task_pat
         gate_state=gate_state,
         freshness=freshness,
         mode_profile=mode.to_json(),
+        layout_version=layout_version,
+        layout_report=current_layout_report(),
     )
 
 
 def read_current_status(root: str | Path) -> dict[str, str]:
-    current_path = Path(root) / "CURRENT.md"
+    current_path = DEFAULT_LAYOUT.resolve(root, DEFAULT_LAYOUT.current_pointer)
     result: dict[str, str] = {}
     for raw_line in current_path.read_text(encoding="utf-8").splitlines():
         line = raw_line.strip()
@@ -542,6 +604,7 @@ def read_current_status(root: str | Path) -> dict[str, str]:
     if missing:
         missing_text = ", ".join(sorted(missing))
         raise ValueError(f"CURRENT.md missing {missing_text}")
+    result.update(current_layout_report())
     return result
 
 
@@ -634,7 +697,7 @@ def _validate_gate_state(root: Path | None, task_path: Path | None, data: dict[s
     if root is None:
         return status
 
-    gate_state_path = root / "records" / "gate-state.json"
+    gate_state_path = DEFAULT_LAYOUT.resolve(root, DEFAULT_LAYOUT.gate_state)
     if not gate_state_path.exists():
         return status
 
@@ -671,6 +734,7 @@ def _validate_gate_state(root: Path | None, task_path: Path | None, data: dict[s
                 f"gate-state derived_current_gate uses legacy alias {derived_current_gate!r}; use {LEGACY_STAGE_ALIASES[derived_current_gate]!r}"
             )
         elif derived_current_gate not in WORKFLOW_STAGES:
+            _reject_stage_owner_confusion("gate-state derived_current_gate", derived_current_gate, errors)
             errors.append(f"gate-state derived_current_gate is not a known stage: {derived_current_gate}")
         elif workflow_stage in WORKFLOW_STAGES and derived_current_gate != workflow_stage:
             errors.append("gate-state derived_current_gate must match workflow_stage")
@@ -726,6 +790,7 @@ def _validate_goal0_compatibility_fields(data: dict[str, Any], compatibility_mod
                 f"current_gate uses legacy alias {current_gate!r}; use {LEGACY_STAGE_ALIASES[current_gate]!r}"
             )
         elif current_gate not in WORKFLOW_STAGES:
+            _reject_stage_owner_confusion("current_gate", current_gate, errors)
             errors.append(f"current_gate is not a known stage: {current_gate}")
         elif workflow_stage in WORKFLOW_STAGES and current_gate != workflow_stage:
             errors.append("current_gate must match workflow_stage when present")
@@ -790,6 +855,7 @@ def _validate_workflow_stage(data: dict[str, Any], errors: list[str]) -> None:
         errors.append(f"workflow_stage uses legacy alias {stage!r}; use {LEGACY_STAGE_ALIASES[stage]!r}")
         return
     if stage not in WORKFLOW_STAGES:
+        _reject_stage_owner_confusion("workflow_stage", stage, errors)
         errors.append(f"workflow_stage is not a known stage: {stage}")
         return
 
@@ -847,6 +913,11 @@ def _validate_workflow_stage(data: dict[str, Any], errors: list[str]) -> None:
         _reject_product_implementation_paths(stage, approved_paths, errors)
         _reject_non_record_side_effects(stage, allowed_side_effects, errors)
         _reject_release_execution_side_effects(stage, allowed_side_effects, errors)
+
+
+def _reject_stage_owner_confusion(field: str, value: Any, errors: list[str]) -> None:
+    if isinstance(value, str) and value in RESPONSIBILITY_OWNER_IDS:
+        errors.append(f"{field} is a responsibility/domain owner, not a workflow stage: {value}")
 
 
 def _validate_proof_receipt_requirement(data: dict[str, Any], root: Path | None, errors: list[str]) -> None:
@@ -947,6 +1018,31 @@ def _reject_claimed_authority(stage: str, values: list[str], fragments: tuple[st
             errors.append(f"{stage} stage cannot claim authority from review/route/artifact material: {value}")
 
 
+def _reject_authority_substitution_claims(data: dict[str, Any], errors: list[str]) -> None:
+    for value in _iter_contract_strings(data):
+        if _contains_fragment(value, AUTHORITY_CARRIER_FRAGMENTS) and _contains_fragment(value, AUTHORITY_TARGET_FRAGMENTS):
+            errors.append(
+                "authority carrier cannot substitute for approval, permission, proof, or lifecycle transition: "
+                f"{value}"
+            )
+
+
+def _iter_contract_strings(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        result: list[str] = []
+        for item in value:
+            result.extend(_iter_contract_strings(item))
+        return result
+    if isinstance(value, dict):
+        result: list[str] = []
+        for item in value.values():
+            result.extend(_iter_contract_strings(item))
+        return result
+    return []
+
+
 def _reject_side_effect_conflicts(
     allowed: list[str],
     denied: list[str],
@@ -956,7 +1052,10 @@ def _reject_side_effect_conflicts(
     denied_by_normalized = {_normalize_side_effect(value): value for value in denied}
     for value in allowed:
         if _normalize_side_effect(value) in denied_by_normalized:
-            errors.append(f"{message}: {denied_by_normalized[_normalize_side_effect(value)]}")
+            denied_value = denied_by_normalized[_normalize_side_effect(value)]
+            errors.append(f"{message}: {denied_value}")
+            if message == "permission side effect conflicts with approval exclusion":
+                errors.append(f"permission side effect is excluded by approval: {denied_value}")
 
 
 def _reject_author_local_status_commands(side_effects: list[str], errors: list[str]) -> None:
@@ -969,7 +1068,7 @@ def _reject_author_local_status_commands(side_effects: list[str], errors: list[s
 def _known_lifecycle_states(root: Path | None) -> frozenset[str]:
     if root is None:
         return DEFAULT_KNOWN_STATES
-    lifecycle_path = root / "control" / "lifecycle.md"
+    lifecycle_path = DEFAULT_LAYOUT.resolve(root, DEFAULT_LAYOUT.lifecycle_control)
     if not lifecycle_path.exists():
         return DEFAULT_KNOWN_STATES
     states: set[str] = set()
@@ -996,7 +1095,7 @@ def _stale_status_errors(root: Path) -> list[str]:
 def _find_project_root(path: Path) -> Path | None:
     resolved = path.resolve()
     for candidate in (resolved.parent, *resolved.parents):
-        if (candidate / "CURRENT.md").exists():
+        if DEFAULT_LAYOUT.resolve(candidate, DEFAULT_LAYOUT.current_pointer).exists():
             return candidate
     return None
 
@@ -1135,6 +1234,7 @@ def _registered_task_json(
         "title": title,
         "workflow": workflow,
         "contract_version": "0.1.8",
+        "layout_version": CURRENT_LAYOUT_VERSION,
         "workflow_stage": stage,
         "current_gate": stage,
         "task_mode": "planned_change",
@@ -1376,6 +1476,23 @@ source basis:
 - `RULES.md`
 - `contracts\\harness-task.json`
 
+## Workflow stage
+
+HARNESS V2의 기본 workflow stage는 아래 8개입니다.
+
+```text
+spec
+spec_review
+plan
+plan_review
+plan_approval
+development
+development_review
+improvement
+```
+
+초기 scaffold contract는 `spec` 단계에서 시작합니다. `artifact_observation`, `routing`, `safety_improvement`, `release_boundary`는 workflow stage가 아니라 control 또는 관찰 표면입니다.
+
 ## 현재 작업
 
 초기 task contract는 `contracts\\harness-task.json`입니다.
@@ -1551,8 +1668,9 @@ def _initial_task_json() -> str:
   "title": "Scaffold-only initial HARNESS V2 project binding",
   "workflow": "default",
   "contract_version": "0.1.8",
-  "workflow_stage": "development",
-  "current_gate": "development",
+  "layout_version": "legacy-control-records-v1",
+  "workflow_stage": "spec",
+  "current_gate": "spec",
   "task_mode": "scaffold_only",
   "record_strength": "light",
   "risk_flags": [
@@ -1564,7 +1682,7 @@ def _initial_task_json() -> str:
   ],
   "classification_required": true,
   "record_density": {
-    "generated_file_count": 23,
+    "generated_file_count": 3,
     "required_read_set_size": 3,
     "field_presence": "strict"
   },
@@ -1579,29 +1697,9 @@ def _initial_task_json() -> str:
   "approval": {
     "packet": "Scaffold-only initial local HARNESS V2 project application as scaffold, task-contract validator, and CLI helper",
     "approved_paths": [
-      "AGENTS.md",
-      "RULES.md",
-      "CURRENT.md",
-      "control\\\\source.md",
-      "control\\\\approval.md",
-      "control\\\\permission.md",
-      "control\\\\proof.md",
-      "control\\\\lifecycle.md",
-      "records\\\\README.md",
       "records\\\\current-task.md",
       "records\\\\stages\\\\spec.md",
-      "records\\\\stages\\\\spec-review.md",
-      "records\\\\stages\\\\plan.md",
-      "records\\\\stages\\\\plan-review.md",
-      "records\\\\stages\\\\plan-approval.md",
-      "records\\\\stages\\\\development.md",
-      "records\\\\stages\\\\development-review.md",
-      "records\\\\stages\\\\improvement.md",
-      "records\\\\decisions.md",
-      "records\\\\proof.md",
-      "records\\\\handoff.md",
-      "contracts\\\\harness-task.json",
-      "templates\\\\task.json"
+      "records\\\\decisions.md"
     ],
     "excluded_side_effects": [
       "dependency install from network",
@@ -1614,7 +1712,9 @@ def _initial_task_json() -> str:
   },
   "permission": {
     "allowed_side_effects": [
-      "local file writes to initial HARNESS V2 scaffold files",
+      "local file writes to records\\\\current-task.md",
+      "local file writes to records\\\\stages\\\\spec.md",
+      "local file writes to records\\\\decisions.md",
       "local readback of generated HARNESS V2 scaffold files",
       "harness-v2 status --root .",
       "harness-v2 verify contracts\\\\harness-task.json",
@@ -1654,6 +1754,7 @@ def _task_template_json() -> str:
   "title": "<task title>",
   "workflow": "default",
   "contract_version": "0.1.8",
+  "layout_version": "legacy-control-records-v1",
   "workflow_stage": "<spec|spec_review|plan|plan_review|plan_approval|development|development_review|improvement>",
   "current_gate": "<derived from workflow_stage unless strict migration changes ownership>",
   "task_mode": "<setup_only|read_only_analysis|scaffold_only|planned_change|defect_repair|continuity_only>",

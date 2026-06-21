@@ -3,6 +3,7 @@
   "title": "Validate HARNESS V2 Goal 4 task mode and record strength fixture",
   "workflow": "remaining_completion_program",
   "contract_version": "0.1.8",
+  "layout_version": "legacy-control-records-v1",
   "workflow_stage": "development",
   "current_gate": "development",
   "task_mode": "planned_change",

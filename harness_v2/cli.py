@@ -166,4 +166,8 @@ def _verify_payload(result) -> dict:
         "gate_state": result.gate_state,
         "freshness": result.freshness,
         "mode_profile": result.mode_profile,
+        "layout_version": result.layout_version,
+        "current_layout_paths_active": result.layout_report["current_layout_paths_active"] if result.layout_report else None,
+        "domain_layout_enabled": result.layout_report["domain_layout_enabled"] if result.layout_report else None,
+        "domain_layout_candidate": result.layout_report["domain_layout_candidate"] if result.layout_report else None,
     }

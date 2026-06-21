@@ -53,6 +53,30 @@ local worktree는 post-0.1.7 workflow engine completion and conformance audit sl
 - npm publish, GitHub release, release tag, dependency install, secret access, destructive work 없이 local verification을 수행합니다.
 - 이 local Goal 6 audit slice를 새 npm publish, GitHub release, release tag로 취급하지 않습니다.
 - 현재 explicit CLI/MCP/task-contract surface를 `advisory_cli_validator`나 `blocked`가 아니라 `workflow_binding_engine`으로 분류합니다. 다만 HARNESS V2가 automatic shell/editor blocker 또는 Codex app hook installer가 아니라는 경계는 유지합니다.
+- current layout version은 `legacy-control-records-v1`로 보고합니다.
+- `status`, `verify`, `doctor`는 `layout_version`, `current_layout_paths_active`, `domain_layout_enabled`, `domain_layout_candidate`를 노출합니다.
+- `layout_version`이 없는 기존 task contract는 current legacy layout으로 호환 처리합니다.
+- unknown layout version은 migration diagnostic과 함께 fail closed합니다.
+- domain layout은 아직 enabled 또는 candidate가 아니며, runtime lookup path와 generated scaffold path는 기존 `control\`, `records\`, `contracts\` 구조를 유지합니다.
+- 새 프로젝트 scaffold 검증은 `init`이 대상 프로젝트 루트 바로 아래에 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `contracts\harness-task.json`, `control\`, `records\`, `templates\`를 만들고, 중첩 source checkout 폴더를 만들지 않는지 확인합니다.
+
+## Codex 앱 적용 안내
+
+HARNESS V2는 Codex 앱에서 프로젝트 작업을 시작할 때 AI가 현재 작업 경계, 승인 범위, 증거, 진행 단계, 금지 작업을 놓치지 않게 해 주는 작업 하네스입니다.
+
+사용자는 보통 아래처럼 말하면 됩니다.
+
+```text
+이 프로젝트에 HARNESS V2 적용해줘.
+```
+
+어떤 하네스를 적용할지 명확히 해야 하면 아래처럼 말합니다.
+
+```text
+vibedong/harness-v2 기준으로 이 프로젝트에 HARNESS V2 적용해줘.
+```
+
+HARNESS V2는 설치만으로 Codex 앱을 자동 차단하는 샌드박스가 아닙니다. 에이전트는 `AGENTS.md`, `RULES.md`, `CURRENT.md`, active task contract, `status`, `verify`, `gate`, `doctor` 결과를 기준으로 행동해야 합니다.
 
 미래 release path:
 

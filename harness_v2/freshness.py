@@ -6,8 +6,9 @@ from dataclasses import dataclass
 from pathlib import Path, PureWindowsPath
 from typing import Any
 
+from .layout import DEFAULT_LAYOUT
 
-DEFAULT_MAP_PATH = Path("records") / "freshness-map.json"
+DEFAULT_MAP_PATH = DEFAULT_LAYOUT.freshness_map
 COMPATIBILITY_DIAGNOSTIC = (
     "freshness map is absent; compatibility mode keeps verification read-only and does not overwrite existing projects"
 )
@@ -59,7 +60,7 @@ class FreshnessEvaluation:
 
 def evaluate_freshness_map(root: str | Path, map_path: str | Path | None = None) -> FreshnessEvaluation:
     root_path = Path(root)
-    freshness_path = Path(map_path) if map_path is not None else root_path / DEFAULT_MAP_PATH
+    freshness_path = Path(map_path) if map_path is not None else DEFAULT_LAYOUT.resolve(root_path, DEFAULT_LAYOUT.freshness_map)
     if not freshness_path.exists():
         return FreshnessEvaluation(True, False, (), (), COMPATIBILITY_DIAGNOSTIC)
     if not _under_root(freshness_path.resolve(), root_path):

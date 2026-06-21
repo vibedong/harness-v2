@@ -10,11 +10,11 @@ status: package_github_surface / workflow_stage_realignment / records_index
 
 | stage | generated record | authority limit |
 | --- | --- | --- |
-| `spec` | `records\stages\spec.md` | task goal/scope를 기록합니다. planning이나 implementation을 승인하지 않습니다. |
+| `spec` | `records\stages\spec.md` | task goal/scope를 기록합니다. 계획이나 implementation을 승인하지 않습니다. |
 | `spec_review` | `records\stages\spec-review.md` | review finding을 기록합니다. approval을 부여하지 않습니다. |
-| `planning` | `records\stages\planning.md` | work order와 proof plan을 기록합니다. work를 실행하지 않습니다. |
+| `plan` | `records\stages\plan.md` | work order와 proof plan을 기록합니다. work를 실행하지 않습니다. |
 | `plan_review` | `records\stages\plan-review.md` | plan review를 기록합니다. implementation을 승인하지 않습니다. |
-| `approval` | `records\stages\approval.md` | approval context를 반영합니다. 자체로 side effect를 부여하지 않습니다. |
+| `plan_approval` | `records\stages\plan-approval.md` | approval context를 반영합니다. 자체로 side effect를 부여하지 않습니다. |
 | `development` | `records\stages\development.md` | implementation note를 기록합니다. approved path를 넓히지 않습니다. |
 | `development_review` | `records\stages\development-review.md` | review/proof readback을 기록합니다. 자체로 proof를 만들지 않습니다. |
 | `improvement` | `records\stages\improvement.md` | lesson과 next candidate를 기록합니다. product behavior를 바꾸지 않습니다. |

@@ -3,6 +3,7 @@
   "title": "<task title>",
   "workflow": "<workflow>",
   "contract_version": "0.1.8",
+  "layout_version": "legacy-control-records-v1",
   "workflow_stage": "<spec|spec_review|plan|plan_review|plan_approval|development|development_review|improvement>",
   "current_gate": "<derived from workflow_stage unless strict migration changes ownership>",
   "task_mode": "<setup_only|read_only_analysis|scaffold_only|planned_change|defect_repair|continuity_only>",

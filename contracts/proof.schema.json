@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "harness-v2://contracts/proof.schema.json",
   "title": "HARNESS V2 Proof Obligation",
+  "description": "Proof obligation is an evidence carrier, not authority generator. Folders, registry rows, log rows, review notes, route rows, release notes, package metadata, test pass output, and agent claims do not create proof results without an evaluated proof obligation or current ProofReceipt.",
   "type": "object",
   "required": ["obligations"],
   "properties": {

@@ -4,6 +4,8 @@ status: package_github_surface / remaining_completion_program / improvement_safe
 
 이 파일은 improvement observation을 분류합니다. product rule을 직접 바꾸지는 않습니다.
 
+`domain:improvement`는 improvement domain owner입니다. workflow stage `improvement`와 구분하며, domain owner는 workflow stage가 아닙니다.
+
 ## Improvement 분류
 
 | class | meaning | next handling |

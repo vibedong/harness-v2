@@ -21,6 +21,31 @@ improvement
 
 `artifact_observation`, `routing`, `safety_improvement`, `release_boundary`는 workflow stage가 아닙니다. 각각 artifact, route, safety/improvement, release transaction surface로 남습니다.
 
+## Stage와 Owner 분리
+
+`workflow_stage`, `current_gate`, `derived_current_gate`, transition `from_gate` / `to_gate`, freshness `backtrack_target`은 workflow stage만 받습니다.
+
+아래 responsibility owner 또는 domain owner는 workflow stage가 아닙니다.
+
+```text
+task
+source
+workflow
+approval
+permission
+proof
+lifecycle
+route
+artifact
+inventory
+regression
+domain:improvement
+release
+contract
+```
+
+`domain:improvement`는 improvement domain owner를 가리키는 이름입니다. workflow stage `improvement`와 같은 값으로 쓰지 않습니다.
+
 ## Record Density Mode 규칙
 
 task contract는 아래 mode field를 사용합니다.

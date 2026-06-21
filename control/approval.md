@@ -6,6 +6,12 @@ workflow: `remaining_completion_program`
 
 이 파일은 approval request, user response, bound approval scope를 분리합니다.
 
+## Authority Negative Boundary
+
+이 approval surface는 evidence carrier, not authority generator입니다.
+
+폴더 존재, registry row, log row, review note, route row, release note, package metadata, test pass, agent claim은 approval request와 user response를 보조하거나 기록할 수 있지만, 그 자체로 approval을 만들거나 approval scope를 넓히지 않습니다.
+
 ## 현재 Bound Scope
 
 현재 bound work unit:

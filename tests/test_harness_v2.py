@@ -74,6 +74,7 @@ APPROVED_SOURCE_FILES = {
     "harness_v2/preflight.py",
     "harness_v2/gate.py",
     "harness_v2/lifecycle.py",
+    "harness_v2/layout.py",
     "harness_v2/freshness.py",
     "harness_v2/modes.py",
     "harness_v2/decisions.py",
@@ -158,32 +159,14 @@ EXPECTED_SCAFFOLD_CREATED = {
 }
 EXPECTED_SCAFFOLD_FILES = {path.replace("\\", "/") for path in EXPECTED_SCAFFOLD_CREATED}
 INITIAL_APPROVED_PATHS = {
-    "AGENTS.md",
-    "RULES.md",
-    "CURRENT.md",
-    "control\\source.md",
-    "control\\approval.md",
-    "control\\permission.md",
-    "control\\proof.md",
-    "control\\lifecycle.md",
-    "records\\README.md",
     "records\\current-task.md",
     "records\\stages\\spec.md",
-    "records\\stages\\spec-review.md",
-    "records\\stages\\plan.md",
-    "records\\stages\\plan-review.md",
-    "records\\stages\\plan-approval.md",
-    "records\\stages\\development.md",
-    "records\\stages\\development-review.md",
-    "records\\stages\\improvement.md",
     "records\\decisions.md",
-    "records\\proof.md",
-    "records\\handoff.md",
-    "contracts\\harness-task.json",
-    "templates\\task.json",
 }
 INITIAL_ALLOWED_SIDE_EFFECTS = {
-    "local file writes to initial HARNESS V2 scaffold files",
+    "local file writes to records\\current-task.md",
+    "local file writes to records\\stages\\spec.md",
+    "local file writes to records\\decisions.md",
     "local readback of generated HARNESS V2 scaffold files",
     "harness-v2 status --root .",
     "harness-v2 verify contracts\\harness-task.json",
@@ -387,6 +370,255 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         ):
             self.assertIn(heading, workflow_rules)
 
+    def test_records_index_uses_canonical_plan_stage_names(self):
+        records = (ROOT / "records" / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("| `plan` | `records\\stages\\plan.md` |", records)
+        self.assertIn("| `plan_approval` | `records\\stages\\plan-approval.md` |", records)
+        self.assertNotIn("| `planning` |", records)
+        self.assertNotIn("| `approval` |", records)
+
+    def test_artifact_log_does_not_reintroduce_legacy_stage_aliases(self):
+        log = (ROOT / "artifacts" / "log.md").read_text(encoding="utf-8")
+
+        self.assertIn("spec", log)
+        self.assertIn("plan_approval", log)
+        self.assertNotIn("planning", log)
+        self.assertNotIn("approval ->", log)
+
+    def test_generated_scaffold_path_inventory_matches_current_init_surface(self):
+        expected_generated_paths = {
+            "AGENTS.md",
+            "RULES.md",
+            "CURRENT.md",
+            "control\\source.md",
+            "control\\approval.md",
+            "control\\permission.md",
+            "control\\proof.md",
+            "control\\lifecycle.md",
+            "contracts\\harness-task.json",
+            "records\\README.md",
+            "records\\current-task.md",
+            "records\\decisions.md",
+            "records\\proof.md",
+            "records\\handoff.md",
+            "records\\stages\\spec.md",
+            "records\\stages\\spec-review.md",
+            "records\\stages\\plan.md",
+            "records\\stages\\plan-review.md",
+            "records\\stages\\plan-approval.md",
+            "records\\stages\\development.md",
+            "records\\stages\\development-review.md",
+            "records\\stages\\improvement.md",
+            "templates\\task.json",
+        }
+        source_only_paths = {
+            "routing\\manifest.md",
+            "artifacts\\registry.md",
+            "artifacts\\log.md",
+            "safety\\regression.md",
+            "release\\transaction.md",
+            "records\\gate-state.json",
+            "records\\freshness-map.json",
+            "templates\\gate-state.json",
+            "templates\\freshness-map.json",
+        }
+
+        self.assertEqual(EXPECTED_SCAFFOLD_CREATED, expected_generated_paths)
+        self.assertTrue(expected_generated_paths.isdisjoint(source_only_paths))
+
+    def test_generated_scaffold_documents_hybrid_planning_workflow(self):
+        from harness_v2.core import initialize_project
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "project"
+            result = initialize_project(root)
+
+            self.assertTrue(result.ok, result.errors)
+            current = (root / "CURRENT.md").read_text(encoding="utf-8")
+            task = json.loads((root / "contracts" / "harness-task.json").read_text(encoding="utf-8"))
+            self.assertIn("spec", current)
+            self.assertIn("plan_approval", current)
+            self.assertIn("artifact_observation", current)
+            self.assertIn("workflow stage가 아니라 control 또는 관찰 표면", current)
+            self.assertEqual(task["workflow_stage"], "spec")
+            self.assertEqual(task["current_gate"], "spec")
+            self.assertIn("approval", task)
+            self.assertIn("permission", task)
+            self.assertIn("proof", task)
+            self.assertIn("lifecycle", task)
+
+    def test_hybrid_workflow_forbidden_wording_absent(self):
+        text = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in [
+                ROOT / "rules" / "workflows.md",
+                ROOT / "templates" / "task.json",
+                ROOT / "README.md",
+            ]
+        )
+
+        self.assertNotIn("artifact_observation is a workflow stage", text)
+        self.assertNotIn("routing is a workflow stage", text)
+        self.assertNotIn("release_boundary is a workflow stage", text)
+
+    def test_artifact_surfaces_separate_stage_and_domain_owner_language(self):
+        manifest = (ROOT / "routing" / "manifest.md").read_text(encoding="utf-8")
+        improvement = (ROOT / "safety" / "improvement.md").read_text(encoding="utf-8")
+
+        self.assertIn("domain:improvement", manifest + improvement)
+        self.assertNotIn("domain owner is a workflow stage", manifest + improvement)
+
+    def test_authority_control_docs_and_schemas_state_evidence_carrier_boundary(self):
+        control_paths = [
+            ROOT / "control" / "approval.md",
+            ROOT / "control" / "permission.md",
+            ROOT / "control" / "proof.md",
+            ROOT / "control" / "lifecycle.md",
+        ]
+        schema_paths = [
+            ROOT / "contracts" / "approval.schema.json",
+            ROOT / "contracts" / "permission.schema.json",
+            ROOT / "contracts" / "proof.schema.json",
+            ROOT / "contracts" / "lifecycle.schema.json",
+        ]
+
+        for path in control_paths:
+            with self.subTest(path=path):
+                text = path.read_text(encoding="utf-8")
+                self.assertIn("evidence carrier, not authority generator", text)
+        for path in schema_paths:
+            with self.subTest(path=path):
+                schema = json.loads(path.read_text(encoding="utf-8"))
+                self.assertIn("evidence carrier, not authority generator", schema["description"])
+
+    def test_current_layout_paths_are_centralized(self):
+        from harness_v2.layout import CURRENT_LAYOUT_VERSION, HarnessLayout
+
+        layout = HarnessLayout()
+
+        self.assertEqual(CURRENT_LAYOUT_VERSION, "legacy-control-records-v1")
+        self.assertEqual(layout.task_contract.as_posix(), "contracts/harness-task.json")
+        self.assertEqual(layout.gate_state.as_posix(), "records/gate-state.json")
+        self.assertEqual(layout.freshness_map.as_posix(), "records/freshness-map.json")
+        self.assertEqual(layout.lifecycle_control.as_posix(), "control/lifecycle.md")
+        self.assertEqual(layout.current_pointer.as_posix(), "CURRENT.md")
+
+    def test_missing_layout_version_uses_current_legacy_layout(self):
+        from harness_v2.core import validate_task
+        from harness_v2.layout import CURRENT_LAYOUT_VERSION
+
+        payload = valid_task_payload()
+        payload.pop("layout_version", None)
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertTrue(result.ok, result.errors)
+        self.assertEqual(result.layout_version, CURRENT_LAYOUT_VERSION)
+        self.assertTrue(result.layout_report["current_layout_paths_active"])
+        self.assertFalse(result.layout_report["domain_layout_enabled"])
+        self.assertFalse(result.layout_report["domain_layout_candidate"])
+
+    def test_known_layout_version_uses_current_legacy_layout(self):
+        from harness_v2.core import validate_task
+        from harness_v2.layout import CURRENT_LAYOUT_VERSION
+
+        payload = valid_task_payload()
+        payload["layout_version"] = CURRENT_LAYOUT_VERSION
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertTrue(result.ok, result.errors)
+        self.assertEqual(result.layout_version, CURRENT_LAYOUT_VERSION)
+        self.assertEqual(result.layout_report["layout_version"], CURRENT_LAYOUT_VERSION)
+
+    def test_unknown_layout_version_fails_with_migration_diagnostic(self):
+        from harness_v2.core import validate_task
+
+        payload = valid_task_payload()
+        payload["layout_version"] = "domain-v99"
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertFalse(result.ok)
+        self.assertIn("unknown layout_version", "\n".join(result.errors))
+
+    def test_status_and_doctor_report_current_layout_fields(self):
+        from harness_v2.core import read_current_status
+        from harness_v2.doctor import inspect_project
+        from harness_v2.layout import CURRENT_LAYOUT_VERSION
+
+        status = read_current_status(ROOT)
+        doctor = inspect_project(ROOT)
+
+        for payload in (status, doctor):
+            with self.subTest(payload=payload):
+                self.assertEqual(payload["layout_version"], CURRENT_LAYOUT_VERSION)
+                self.assertTrue(payload["current_layout_paths_active"])
+                self.assertFalse(payload["domain_layout_enabled"])
+                self.assertFalse(payload["domain_layout_candidate"])
+
+    def test_domain_layout_migration_report_exposes_current_read_only_fields(self):
+        from harness_v2.layout import CURRENT_LAYOUT_VERSION, domain_layout_migration_report
+
+        report = domain_layout_migration_report()
+
+        self.assertEqual(
+            set(report),
+            {
+                "current_layout_version",
+                "generated_scaffold_paths",
+                "source_package_surfaces",
+                "runtime_lookup_paths",
+                "domain_layout_candidate",
+                "migration_required",
+                "migration_blockers",
+            },
+        )
+        self.assertEqual(report["current_layout_version"], CURRENT_LAYOUT_VERSION)
+        self.assertEqual(
+            set(report["generated_scaffold_paths"]),
+            {path.replace("\\", "/") for path in EXPECTED_SCAFFOLD_CREATED},
+        )
+        self.assertIn("AGENTS.md", report["generated_scaffold_paths"])
+        self.assertIn("contracts/harness-task.json", report["generated_scaffold_paths"])
+        self.assertIn("harness_v2/layout.py", report["source_package_surfaces"])
+        self.assertEqual(
+            report["runtime_lookup_paths"],
+            {
+                "task_contract": "contracts/harness-task.json",
+                "gate_state": "records/gate-state.json",
+                "freshness_map": "records/freshness-map.json",
+                "lifecycle_control": "control/lifecycle.md",
+                "current_pointer": "CURRENT.md",
+            },
+        )
+        self.assertFalse(report["domain_layout_candidate"])
+        self.assertFalse(report["migration_required"])
+        self.assertEqual(report["migration_blockers"], [])
+
+    def test_domain_layout_report_is_read_only(self):
+        from harness_v2.core import initialize_project
+        from harness_v2.doctor import inspect_project
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "project"
+            init = initialize_project(root)
+            self.assertTrue(init.ok, init.errors)
+
+            before = sorted(path.relative_to(root).as_posix() for path in root.rglob("*"))
+            report = inspect_project(root)
+            after = sorted(path.relative_to(root).as_posix() for path in root.rglob("*"))
+
+        self.assertEqual(before, after)
+        self.assertEqual(report["mutation"], "none")
+        self.assertFalse(report["domain_layout_candidate"])
+        migration = report["domain_layout_migration"]
+        self.assertEqual(migration["current_layout_version"], "legacy-control-records-v1")
+        self.assertFalse(migration["domain_layout_candidate"])
+        self.assertFalse(migration["migration_required"])
+        self.assertEqual(migration["migration_blockers"], [])
+
     def test_npm_wrapper_package_metadata_is_dependency_free(self):
         package_json = json.loads((ROOT / "package.json").read_text())
 
@@ -442,6 +674,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         license_text = (ROOT / "LICENSE").read_text()
         release_notes = (ROOT / "RELEASE_NOTES.md").read_text()
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        current = (ROOT / "CURRENT.md").read_text(encoding="utf-8")
 
         self.assertIn("MIT License", license_text)
         self.assertIn("Copyright (c) 2026 vibedong", license_text)
@@ -452,6 +685,9 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("GitHub 저장소를 프로젝트 폴더에 clone하지 않습니다", readme)
         self.assertIn("git clone https://github.com/vibedong/harness-v2.git .", readme)
         self.assertIn("HARNESS V2 소스 체크아웃", readme)
+        self.assertIn("HARNESS V2는 Codex 앱에서 프로젝트 작업을 시작할 때 AI가 현재 작업 경계", readme)
+        self.assertIn("이 프로젝트에 HARNESS V2 적용해줘.", readme)
+        self.assertIn("vibedong/harness-v2 기준으로 이 프로젝트에 HARNESS V2 적용해줘.", readme)
         self.assertIn("이 프로젝트에 하네스 설치해줘.", readme)
         self.assertIn("https://github.com/vibedong/harness-v2 이 프로젝트에 하네스 설치해줘.", readme)
         self.assertIn("링크는 어떤 하네스를 설치할지 알려주는 식별자입니다", readme)
@@ -475,6 +711,10 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("Python 3.11", readme)
         self.assertIn("Python 3.11", release_notes)
         self.assertIn("NPM_PUBLISHED", release_notes)
+        self.assertIn("새 프로젝트 scaffold 검증", readme)
+        self.assertIn("새 프로젝트 scaffold 검증", current)
+        self.assertIn("대상 프로젝트 루트 바로 아래", readme)
+        self.assertIn("중첩된 `harness-v2` 소스 폴더", readme)
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, readme)
         self.assertNotIn(REMOVED_PACKAGE_REGISTRY_ACRONYM, release_notes)
 
@@ -752,8 +992,10 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("gate", payload["integrated_surfaces"])
 
     def test_python_mcp_adapter_lists_and_calls_core_tools(self):
-        with tempfile.TemporaryDirectory() as temp_root:
+        with tempfile.TemporaryDirectory() as temp_root, tempfile.TemporaryDirectory() as decision_root:
             root = Path(temp_root)
+            decision_path = Path(decision_root) / "valid-proof-receipt.json"
+            decision_path.write_text(json.dumps(fresh_proof_receipt_payload()), encoding="utf-8")
             completed = subprocess.run(
                 [sys.executable, "-m", "harness_v2", "mcp"],
                 cwd=ROOT,
@@ -766,7 +1008,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                     {"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "harness_preflight", "arguments": {"task": "tests\\fixtures\\valid-task.json", "side_effect": "python -m unittest discover tests"}}},
                     {"jsonrpc": "2.0", "id": 6, "method": "tools/call", "params": {"name": "harness_gate", "arguments": {"task": "tests\\fixtures\\valid-task.json", "root": ".", "side_effects": ["python -m unittest discover tests"]}}},
                     {"jsonrpc": "2.0", "id": 7, "method": "tools/call", "params": {"name": "harness_init", "arguments": {"root": str(root)}}},
-                    {"jsonrpc": "2.0", "id": 8, "method": "tools/call", "params": {"name": "harness_decision", "arguments": {"record": "tests\\fixtures\\valid-proof-receipt.json", "task": "tests\\fixtures\\valid-task.json", "root": "."}}},
+                    {"jsonrpc": "2.0", "id": 8, "method": "tools/call", "params": {"name": "harness_decision", "arguments": {"record": str(decision_path), "task": "tests\\fixtures\\valid-task.json", "root": "."}}},
                 ),
                 text=True,
                 capture_output=True,
@@ -1164,6 +1406,105 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                 self.assertFalse(result.ok)
                 self.assertIn(f"workflow_stage is not a known stage: {stage}", "\n".join(result.errors))
 
+    def test_domain_owner_names_are_not_accepted_as_workflow_stages(self):
+        from harness_v2.core import validate_task
+
+        owner_names = [
+            "task",
+            "source",
+            "workflow",
+            "approval",
+            "permission",
+            "proof",
+            "lifecycle",
+            "route",
+            "artifact",
+            "inventory",
+            "regression",
+            "domain:improvement",
+            "release",
+            "contract",
+            "artifact_observation",
+            "safety_improvement",
+            "release_boundary",
+        ]
+        for owner_name in owner_names:
+            with self.subTest(owner_name=owner_name):
+                payload = valid_task_payload()
+                payload["workflow_stage"] = owner_name
+
+                result = validate_task(payload, root=ROOT)
+
+                self.assertFalse(result.ok, owner_name)
+                errors = "\n".join(result.errors)
+                if owner_name == "approval":
+                    self.assertIn("workflow_stage uses legacy alias 'approval'; use 'plan_approval'", errors)
+                else:
+                    self.assertIn("workflow_stage is not a known stage", errors)
+                    self.assertIn("workflow_stage is a responsibility/domain owner, not a workflow stage", errors)
+
+    def test_domain_owner_names_are_not_accepted_as_current_gate_values(self):
+        from harness_v2.core import validate_task
+
+        payload = valid_task_payload()
+        payload["current_gate"] = "domain:improvement"
+
+        result = validate_task(payload, root=ROOT)
+
+        self.assertFalse(result.ok)
+        self.assertIn("current_gate is not a known stage: domain:improvement", "\n".join(result.errors))
+        self.assertIn("current_gate is a responsibility/domain owner, not a workflow stage: domain:improvement", "\n".join(result.errors))
+
+    def test_folder_existence_does_not_satisfy_decision_or_receipt_requirements(self):
+        from harness_v2.core import validate_task
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "CURRENT.md").write_text(
+                "\n".join(
+                    [
+                        "workflow: `remaining_completion_program`",
+                        "state: `workflow_realignment_review`",
+                        "substate: `authority-negative-test`",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            for name in ["approval", "permission", "proof", "lifecycle"]:
+                (root / name).mkdir()
+            task = valid_task_payload()
+            task["approval"].pop("approved_paths", None)
+
+            result = validate_task(task, root=root)
+
+        self.assertFalse(result.ok)
+        self.assertIn("approval.approved_paths is required", "\n".join(result.errors))
+
+    def test_registry_and_log_rows_do_not_satisfy_authority_records(self):
+        from harness_v2.core import validate_task
+
+        task = valid_task_payload()
+        task["permission"]["allowed_side_effects"] = ["git push"]
+        task["approval"]["excluded_side_effects"] = ["git push"]
+        task["proof"]["obligations"] = [
+            "artifact registry row proves approval",
+            "artifact log row grants permission",
+        ]
+
+        result = validate_task(task, root=ROOT)
+
+        self.assertFalse(result.ok)
+        errors = "\n".join(result.errors)
+        self.assertIn("permission side effect is excluded by approval: git push", errors)
+        self.assertIn(
+            "authority carrier cannot substitute for approval, permission, proof, or lifecycle transition: artifact registry row proves approval",
+            errors,
+        )
+        self.assertIn(
+            "authority carrier cannot substitute for approval, permission, proof, or lifecycle transition: artifact log row grants permission",
+            errors,
+        )
+
     def test_verifier_rejects_legacy_stage_aliases_with_migration_diagnostic(self):
         from harness_v2.core import validate_task
 
@@ -1427,18 +1768,19 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertEqual(json.loads(VALID_PROOF_RECEIPT.read_text(encoding="utf-8"))["kind"], "ProofReceipt")
 
     def test_goal5_approval_decision_binds_user_response_and_scope(self):
-        from harness_v2.decisions import evaluate_decision, evaluate_decision_file
+        from harness_v2.decisions import evaluate_decision
 
-        valid = evaluate_decision_file(VALID_APPROVAL_DECISION, task_path=VALID_TASK, root=ROOT)
-        broad = evaluate_decision_file(INVALID_BROAD_APPROVAL, task_path=VALID_TASK, root=ROOT)
-        no_user_response = json.loads(VALID_APPROVAL_DECISION.read_text(encoding="utf-8"))
+        valid_payload = fresh_approval_decision_payload()
+        valid = evaluate_decision(valid_payload, task=valid_task_payload(), root=ROOT)
+        broad = evaluate_decision(json.loads(INVALID_BROAD_APPROVAL.read_text(encoding="utf-8")), task=valid_task_payload(), root=ROOT)
+        no_user_response = fresh_approval_decision_payload()
         no_user_response.pop("user_response")
         no_user_response_result = evaluate_decision(no_user_response, task=valid_task_payload(), root=ROOT)
-        broad_with_metadata = json.loads(VALID_APPROVAL_DECISION.read_text(encoding="utf-8"))
+        broad_with_metadata = fresh_approval_decision_payload()
         broad_with_metadata["user_response"]["text"] = "Approve broad unspecified work."
         broad_with_metadata["user_response"]["sha256"] = "76aa8eaeee04042890cec8789a8a945e62e42d71125bee81f6b9fd83d08a665b"
         broad_with_metadata_result = evaluate_decision(broad_with_metadata, task=valid_task_payload(), root=ROOT)
-        git_scope_widening = json.loads(VALID_APPROVAL_DECISION.read_text(encoding="utf-8"))
+        git_scope_widening = fresh_approval_decision_payload()
         git_scope_widening["git_scope"] = "git push"
         git_scope_widening_result = evaluate_decision(git_scope_widening, task=valid_task_payload(), root=ROOT)
 
@@ -1499,11 +1841,12 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
     def test_goal5_proof_receipt_binds_obligation_and_current_source(self):
         from harness_v2.decisions import evaluate_decision, evaluate_decision_file
 
-        valid = evaluate_decision_file(VALID_PROOF_RECEIPT, task_path=VALID_TASK, root=ROOT)
+        valid_payload = fresh_proof_receipt_payload()
+        valid = evaluate_decision(valid_payload, task=valid_task_payload(), root=ROOT)
         stale = evaluate_decision_file(INVALID_STALE_PROOF_RECEIPT, task_path=VALID_TASK, root=ROOT)
-        missing_source = json.loads(VALID_PROOF_RECEIPT.read_text(encoding="utf-8"))
+        missing_source = fresh_proof_receipt_payload()
         missing_source.pop("source_refs")
-        transition_claim = json.loads(VALID_PROOF_RECEIPT.read_text(encoding="utf-8"))
+        transition_claim = fresh_proof_receipt_payload()
         transition_claim["lifecycle_transition"] = True
 
         missing_source_result = evaluate_decision(missing_source, task=valid_task_payload(), root=ROOT)
@@ -1528,11 +1871,9 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         missing = validate_task(task, root=ROOT)
 
-        task["proof"]["receipts"] = ["tests\\fixtures\\valid-proof-receipt.json"]
-        present = validate_task(task, root=ROOT)
         requirement = evaluate_proof_receipt_requirement(
             task,
-            [json.loads(VALID_PROOF_RECEIPT.read_text(encoding="utf-8"))],
+            [fresh_proof_receipt_payload()],
             root=ROOT,
         )
         task["proof"]["receipts"] = ["tests\\fixtures\\valid-approval-decision.json"]
@@ -1540,29 +1881,31 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertFalse(missing.ok)
         self.assertIn("proof receipt required but proof.receipts is empty", "\n".join(missing.errors))
-        self.assertTrue(present.ok, present.errors)
         self.assertTrue(requirement.ok, requirement.errors)
         self.assertFalse(substituted.ok)
         self.assertIn("expected ProofReceipt, got ApprovalDecision", "\n".join(substituted.errors))
 
     def test_goal5_cli_decision_command_reports_decision_result(self):
-        completed = subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "harness_v2",
-                "decision",
-                str(VALID_PROOF_RECEIPT),
-                "--task",
-                str(VALID_TASK),
-                "--root",
-                str(ROOT),
-            ],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
+        with tempfile.TemporaryDirectory() as temp_root:
+            decision_path = Path(temp_root) / "valid-proof-receipt.json"
+            decision_path.write_text(json.dumps(fresh_proof_receipt_payload()), encoding="utf-8")
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "harness_v2",
+                    "decision",
+                    str(decision_path),
+                    "--task",
+                    str(VALID_TASK),
+                    "--root",
+                    str(ROOT),
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
         payload = json.loads(completed.stdout)
@@ -1620,6 +1963,23 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertFalse(result.ok)
         self.assertIn("gate-state derived_current_gate must match workflow_stage", "\n".join(result.errors))
+
+    def test_goal1_rejects_domain_owner_gate_state_as_current_gate(self):
+        from harness_v2.core import validate_task_file
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            task_path = write_goal1_project(
+                Path(temp_root),
+                contract_version="0.1.8",
+                gate="domain:improvement",
+            )
+
+            result = validate_task_file(task_path)
+
+        self.assertFalse(result.ok)
+        errors = "\n".join(result.errors)
+        self.assertIn("gate-state derived_current_gate is not a known stage: domain:improvement", errors)
+        self.assertIn("gate-state derived_current_gate is a responsibility/domain owner, not a workflow stage: domain:improvement", errors)
 
     def test_goal1_rejects_stale_gate_state_source_hash(self):
         from harness_v2.core import validate_task_file
@@ -1841,6 +2201,45 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertIn("improvement entry requires active approval and permission", result.errors)
 
+    def test_lifecycle_transition_refs_reject_observability_surfaces_as_authority(self):
+        from harness_v2.lifecycle import TransitionRecord, evaluate_transition_record
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            write_goal2_task(root, stage="development_review")
+            for relative_path in (
+                "artifacts\\registry.md",
+                "artifacts\\log.md",
+                "routing\\manifest.md",
+                "release\\transaction.md",
+                "records\\stages\\development-review.md",
+            ):
+                path = root / relative_path
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(f"# {relative_path}\n", encoding="utf-8")
+            result = evaluate_transition_record(
+                goal2_task_payload(stage="development_review"),
+                TransitionRecord(
+                    timestamp="2026-06-19T00:00:00Z",
+                    from_gate="development_review",
+                    to_gate="improvement",
+                    reason="observability rows are not authority",
+                    source_refs=("records\\stages\\development-review.md",),
+                    approval_ref="artifacts\\registry.md",
+                    permission_ref="artifacts\\log.md",
+                    proof_ref="routing\\manifest.md",
+                    freshness_refs=("records\\stages\\development-review.md", "release\\transaction.md"),
+                    stale_check="fresh",
+                    actor="test",
+                ),
+                root=root,
+            )
+
+        self.assertFalse(result.ok)
+        self.assertIn("approval_ref cannot use artifact registry/log, review, route, or release surface as authority: artifacts\\registry.md", result.errors)
+        self.assertIn("permission_ref cannot use artifact registry/log, review, route, or release surface as authority: artifacts\\log.md", result.errors)
+        self.assertIn("proof_ref cannot use artifact registry/log, review, route, or release surface as authority: routing\\manifest.md", result.errors)
+
     def test_goal2_valid_improvement_requires_active_approval_permission_and_current_proof(self):
         from harness_v2.lifecycle import TransitionRecord, evaluate_transition_record
 
@@ -2001,6 +2400,30 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("transition uses legacy stage alias 'approval'; use 'plan_approval'", legacy.errors)
         self.assertFalse(same_task_loop.ok)
         self.assertIn("same-task improvement-to-spec transition is denied", same_task_loop.errors)
+
+    def test_goal2_transition_rejects_domain_owner_gate_values(self):
+        from harness_v2.lifecycle import TransitionRecord, evaluate_transition_record
+
+        result = evaluate_transition_record(
+            goal2_task_payload(stage="development_review"),
+            TransitionRecord(
+                timestamp="2026-06-19T00:00:00Z",
+                from_gate="development_review",
+                to_gate="domain:improvement",
+                reason="domain owner is not a workflow stage",
+                source_refs=("records\\stages\\development-review.md",),
+                approval_ref="control\\approval.md",
+                permission_ref="control\\permission.md",
+                proof_ref="records\\proof.md",
+                freshness_refs=("records\\stages\\development-review.md",),
+                stale_check="fresh",
+                actor="test",
+            ),
+            root=ROOT,
+        )
+
+        self.assertFalse(result.ok)
+        self.assertIn("transition gate is not known: domain:improvement", result.errors)
 
     def test_goal3_freshness_schema_template_and_compatibility_diagnostic(self):
         from harness_v2.core import validate_task_file
@@ -2223,6 +2646,32 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         joined_errors = "\n".join(result.errors)
         self.assertIn("backtrack_target 'nonsense' is not allowed", joined_errors)
         self.assertIn("path must reference a file: records\\stages", joined_errors)
+
+    def test_goal3_rejects_domain_owner_backtrack_target(self):
+        from harness_v2.freshness import evaluate_freshness_map
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            write_goal2_task(root, stage="development_review")
+            evidence_ref = write_goal3_evidence(root, "records\\stages\\development-review.md", "0" * 64)
+            write_goal3_freshness_map(
+                root,
+                [
+                    goal3_anchor(
+                        "domain-owner-target",
+                        "records\\stages\\development-review.md",
+                        "0" * 64,
+                        affects=["proof_receipt"],
+                        backtrack_target="domain:improvement",
+                        reason="domain owner must not be a backtrack target",
+                        evidence_refs=[evidence_ref],
+                    )
+                ],
+            )
+            result = evaluate_freshness_map(root)
+
+        self.assertFalse(result.ok)
+        self.assertIn("backtrack_target 'domain:improvement' is not allowed", "\n".join(result.errors))
 
     def test_goal3_cli_verify_failure_outputs_stale_reason_and_freshness_payload(self):
         with tempfile.TemporaryDirectory() as temp_root:
@@ -2602,6 +3051,25 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertNotEqual(rejected.returncode, 0)
         self.assertIn("approval", rejected.stderr)
 
+    def test_init_places_scaffold_in_target_root_not_nested_source_folder(self):
+        from harness_v2.core import initialize_project
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            root = Path(temp_root)
+            init = initialize_project(root)
+            payload = init.to_json()
+
+            self.assertTrue(init.ok, init.errors)
+            assert_fresh_scaffold_shape(self, root, payload, root)
+            self.assertTrue((root / "AGENTS.md").exists())
+            self.assertTrue((root / "RULES.md").exists())
+            self.assertTrue((root / "CURRENT.md").exists())
+            self.assertTrue((root / "contracts" / "harness-task.json").exists())
+            self.assertFalse((root / "harness-v2").exists())
+            self.assertFalse((root / "harness_v2").exists())
+            self.assertFalse((root / "bin").exists())
+            self.assertFalse((root / "package.json").exists())
+
     def test_cli_init_applies_harness_to_empty_project(self):
         with tempfile.TemporaryDirectory() as temp_root:
             root = Path(temp_root)
@@ -2693,8 +3161,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             self.assertEqual(set(initial_task["permission"]["denied_side_effects"]), INITIAL_DENIED_SIDE_EFFECTS)
             self.assertEqual(set(initial_task["proof"]["obligations"]), INITIAL_PROOF_OBLIGATIONS)
             self.assertEqual(initial_task["contract_version"], "0.1.8")
-            self.assertEqual(initial_task["workflow_stage"], "development")
-            self.assertEqual(initial_task["current_gate"], "development")
+            self.assertEqual(initial_task["workflow_stage"], "spec")
+            self.assertEqual(initial_task["current_gate"], "spec")
             self.assertEqual(initial_task["task_mode"], "scaffold_only")
             self.assertEqual(initial_task["record_strength"], "light")
             self.assertEqual(initial_task["risk_flags"], ["scaffold_generation"])
@@ -2848,7 +3316,14 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             )
 
             self.assertEqual(status.returncode, 0, status.stderr)
-            self.assertEqual(json.loads(status.stdout), {"state": "active", "substate": "task_registered / scope_pending", "workflow": "default"})
+            status_payload = json.loads(status.stdout)
+            self.assertEqual(status_payload["workflow"], "default")
+            self.assertEqual(status_payload["state"], "active")
+            self.assertEqual(status_payload["substate"], "task_registered / scope_pending")
+            self.assertEqual(status_payload["layout_version"], "legacy-control-records-v1")
+            self.assertTrue(status_payload["current_layout_paths_active"])
+            self.assertFalse(status_payload["domain_layout_enabled"])
+            self.assertFalse(status_payload["domain_layout_candidate"])
             self.assertEqual(verify.returncode, 0, verify.stderr)
             self.assertEqual(gate.returncode, 0, gate.stderr)
             self.assertNotEqual(denied_publish.returncode, 0)
@@ -3391,6 +3866,44 @@ def write_goal3_evidence(root: Path, relative_path: str, *source_hashes: str) ->
     lines = ["# Freshness Evidence", *[f"source_sha256: {source_hash}" for source_hash in source_hashes]]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return {"path": relative_path, "sha256": sha256_file(path)}
+
+
+def fresh_approval_decision_payload() -> dict:
+    payload = json.loads(VALID_APPROVAL_DECISION.read_text(encoding="utf-8"))
+    payload["source_refs"] = [
+        {
+            "path": "CURRENT.md",
+            "sha256": sha256_file(ROOT / "CURRENT.md"),
+        }
+    ]
+    return payload
+
+
+def fresh_proof_receipt_payload() -> dict:
+    payload = json.loads(VALID_PROOF_RECEIPT.read_text(encoding="utf-8"))
+    payload["source_refs"] = [
+        {
+            "path": "CURRENT.md",
+            "sha256": sha256_file(ROOT / "CURRENT.md"),
+            "affects": ["proof predicate"],
+        },
+        {
+            "path": "harness_v2\\decisions.py",
+            "sha256": sha256_file(ROOT / "harness_v2" / "decisions.py"),
+            "affects": ["implementation"],
+        },
+        {
+            "path": "tests\\test_harness_v2.py",
+            "sha256": sha256_file(ROOT / "tests" / "test_harness_v2.py"),
+            "affects": ["tests"],
+        },
+        {
+            "path": "tests\\fixtures\\valid-task.json",
+            "sha256": sha256_file(ROOT / "tests" / "fixtures" / "valid-task.json"),
+            "affects": ["proof command"],
+        },
+    ]
+    return payload
 
 
 def sha256_file(path: Path) -> str:

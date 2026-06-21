@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from .core import is_harness_source_checkout, project_shape, read_current_status
+from .layout import domain_layout_migration_report
 
 
 def inspect_project(root: str | Path) -> dict[str, Any]:
@@ -23,6 +24,11 @@ def inspect_project(root: str | Path) -> dict[str, Any]:
         "workflow": status["workflow"],
         "state": status["state"],
         "substate": status["substate"],
+        "layout_version": status["layout_version"],
+        "current_layout_paths_active": status["current_layout_paths_active"],
+        "domain_layout_enabled": status["domain_layout_enabled"],
+        "domain_layout_candidate": status["domain_layout_candidate"],
+        "domain_layout_migration": domain_layout_migration_report(),
         "root_kind": "harness_v2_source_checkout" if source_checkout else "applied_project_or_project_root",
         "source_checkout": source_checkout,
         "applied_project": not source_checkout,

@@ -6,6 +6,12 @@ workflow: `remaining_completion_program`
 
 이 파일은 proof obligation, artifact check, proof result를 분리합니다.
 
+## Authority Negative Boundary
+
+이 proof surface는 evidence carrier, not authority generator입니다.
+
+폴더 존재, registry row, log row, review note, route row, release note, package metadata, test pass, agent claim은 proof material이 될 수 있지만, current ProofReceipt나 proof obligation 평가 없이 proof result를 만들지 않습니다.
+
 ## 현재 Proof Obligation
 
 Goal 6 whole-plan conformance와 binding surface audit slice에서는 authoring 후 아래를 검증합니다.

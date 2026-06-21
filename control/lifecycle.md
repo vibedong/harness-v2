@@ -6,6 +6,12 @@ workflow: `remaining_completion_program`
 
 이 파일은 current pointer, progress note, lifecycle state movement를 분리합니다.
 
+## Authority Negative Boundary
+
+이 lifecycle surface는 evidence carrier, not authority generator입니다.
+
+폴더 존재, registry row, log row, review note, route row, release note, package metadata, test pass, agent claim은 lifecycle evidence가 될 수 있지만, transition evaluator와 required refs 없이 lifecycle state movement를 만들지 않습니다.
+
 ## State Model
 
 알려진 local state:

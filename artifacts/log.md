@@ -21,9 +21,9 @@ source/current truth, approval, permission, proof, lifecycle, route, artifact, s
 | docs/control sync | root rule, route, artifact, safety, README, CURRENT, test | 현재 stale-surface reconciliation 범위 |
 | generated scaffold hardening | `harness_v2\core.py`, generated project-root scaffold, fixture, test, current control surface | 완료된 remaining completion program slice |
 | executable 8-stage workflow enforcement | `workflow_stage`, verifier stage predicate, schema/template update, fixture, test, workflow rule | 완료된 remaining completion program slice |
-| canonical workflow stage realignment | `spec`, `spec_review`, `planning`, `plan_review`, `approval`, `development`, `development_review`, `improvement`; control surface는 `workflow_stage`에서 제거 | 아직 release되지 않은 local workflow realignment slice |
+| canonical workflow stage realignment | `spec`, `spec_review`, `plan`, `plan_review`, `plan_approval`, `development`, `development_review`, `improvement`; control surface는 `workflow_stage`에서 제거 | 아직 release되지 않은 local workflow realignment slice |
 | side-effect preflight adapter | `harness_v2\preflight.py`, `harness_v2\cli.py`, test, README usage, control surface | 완료된 remaining completion program slice |
-| MCP feasibility/design and final audit | README, README.ko, routing, control, artifact, safety, improvement, release, test, verification output | 완료된 remaining completion program closeout slice |
+| MCP feasibility/design and final audit | README, routing, control, artifact, safety, improvement, release, test, verification output | 완료된 remaining completion program closeout slice |
 | MCP stdio adapter implementation | `harness_v2\mcp.py`, CLI `mcp` command, test, README usage, routing, control, artifact, safety surface | 완료된 Goal G slice |
 | hook-equivalent gate hardening | `harness_v2\gate.py`, CLI `gate` command, MCP `harness_gate`, generated scaffold, test, README usage, routing, control, artifact, safety surface | 완료된 Goal H slice |
 | integration hardening and release preparation | `harness_v2\doctor.py`, CLI `doctor` output, test, README usage, routing, control, artifact, safety, release surface | release execution 없이 완료된 Goal I slice |

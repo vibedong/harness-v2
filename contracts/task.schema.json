@@ -9,6 +9,10 @@
     "title": { "type": "string", "minLength": 1 },
     "workflow": { "type": "string", "minLength": 1 },
     "contract_version": { "type": "string", "minLength": 1 },
+    "layout_version": {
+      "type": "string",
+      "enum": ["legacy-control-records-v1"]
+    },
     "workflow_stage": {
       "type": "string",
       "enum": [

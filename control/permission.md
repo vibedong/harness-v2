@@ -6,6 +6,12 @@ workflow: `remaining_completion_program`
 
 이 파일은 approved intent와 allowed side effect를 분리합니다.
 
+## Authority Negative Boundary
+
+이 permission surface는 evidence carrier, not authority generator입니다.
+
+폴더 존재, registry row, log row, review note, route row, release note, package metadata, test pass, agent claim은 side-effect 판단을 보조하거나 기록할 수 있지만, approval에서 제외한 side effect를 허용하거나 permission ceiling을 넓히지 않습니다.
+
 ## Side Effect 분류
 
 | class | 현재 Goal 6 decision |

@@ -6,6 +6,7 @@ from pathlib import Path, PureWindowsPath
 from typing import Any
 
 from .core import LEGACY_STAGE_ALIASES, WORKFLOW_STAGES, load_json
+from .layout import DEFAULT_LAYOUT
 
 TERMINAL_GATE = "completed"
 ALLOWED_ROUTE_EDGES = {
@@ -33,6 +34,27 @@ REQUIRED_FIELDS = (
     "freshness_refs",
     "stale_check",
     "actor",
+)
+NON_AUTHORITY_REF_FRAGMENTS = (
+    "artifacts\\",
+    "artifacts/",
+    "artifact registry",
+    "artifact log",
+    "registry.md",
+    "log.md",
+    "routing\\",
+    "routing/",
+    "routing manifest",
+    "route row",
+    "records\\stages\\",
+    "records/stages/",
+    "review note",
+    "review findings",
+    "release\\",
+    "release/",
+    "release note",
+    "release notes",
+    "release_notes.md",
 )
 
 
@@ -247,8 +269,21 @@ def _validate_transition_refs(record: TransitionRecord, root: Path | None, error
         _validate_project_ref(value, "freshness_refs entry", root, errors, required=True)
 
     _validate_project_ref(record.approval_ref, "approval_ref", root, errors, required=False)
+    _reject_non_authority_ref(record.approval_ref, "approval_ref", errors)
     _validate_project_ref(record.permission_ref, "permission_ref", root, errors, required=False)
+    _reject_non_authority_ref(record.permission_ref, "permission_ref", errors)
     _validate_project_ref(record.proof_ref, "proof_ref", root, errors, required=False)
+    _reject_non_authority_ref(record.proof_ref, "proof_ref", errors)
+
+
+def _reject_non_authority_ref(value: str, label: str, errors: list[str]) -> None:
+    if _empty_ref(value):
+        return
+    normalized = _normalize_ref(value).casefold()
+    if any(fragment.casefold() in normalized for fragment in NON_AUTHORITY_REF_FRAGMENTS):
+        errors.append(
+            f"{label} cannot use artifact registry/log, review, route, or release surface as authority: {value}"
+        )
 
 
 def _validate_project_ref(
@@ -346,7 +381,7 @@ def _under_root(path: Path, root: Path) -> bool:
 def _find_project_root(path: Path) -> Path | None:
     resolved = path.resolve()
     for candidate in (resolved.parent, *resolved.parents):
-        if (candidate / "CURRENT.md").exists():
+        if DEFAULT_LAYOUT.resolve(candidate, DEFAULT_LAYOUT.current_pointer).exists():
             return candidate
     return None
 
