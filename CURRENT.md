@@ -10,14 +10,14 @@ workflow: `remaining_completion_program`
 
 state: `public_release_published`
 
-substate: `npm_release_v0.1.7 / release_closed`
+substate: `npm_release_v0.1.13 / release_closed`
 
 source basis:
 
 - Stage 00~05 confirmed planning artifacts.
 - Product Implementation Entry Gate package/GitHub/npm-wrapper history.
 - Prior published npm package state for `harness-v2@0.1.5`.
-- Current npm and GitHub release target `harness-v2@0.1.7` / `v0.1.7`.
+- Current npm package and GitHub source push target `harness-v2@0.1.13` and `vibedong/harness-v2` `main`.
 - User correction that `F:\Folder\harness-v2` is the completed product repository, not the user's downstream working project.
 - User requirement that Codex-app users should install/apply HARNESS V2 into their project root, with README as user documentation and AI-facing rules in generated project-root files.
 - Exact remaining completion program approval for generated scaffold hardening, executable workflow enforcement, side-effect preflight adapter work if locally feasible, MCP feasibility/design only unless separately approved, final audit, documentation sync, and GitHub push.
@@ -26,12 +26,12 @@ source basis:
 - User approval to proceed with Goal H hook / hook-equivalent hardening under the remaining completion program.
 - Local evidence did not expose a direct Codex app pre-command or pre-write hook surface for this repo, so Goal H implements an executable hook-equivalent gate instead of mutating Codex app configuration.
 - User request to proceed with Goal I after Goal H, bound to integration hardening and release preparation without npm publish, Python registry publish, GitHub release, or release tag execution.
-- User-approved public release and npm publish slice for `harness-v2@0.1.7`, including npm publish, Git tag `v0.1.7`, GitHub release creation, release docs/control sync, and the `pyproject.toml` version-consistency amendment.
+- User-requested GitHub source push and npm publish for `harness-v2@0.1.13`, including release docs/control sync and version consistency across `package.json`, `pyproject.toml`, and `harness_v2\__init__.py`.
 - User resumed npm publish after login as `donghyeonlee`.
 
 ## Current Program
 
-The remaining completion program is complete for the 0.1.7 npm and GitHub release transaction.
+The remaining completion program is complete for the 0.1.13 npm package and GitHub source push transaction.
 
 Completed slices:
 
@@ -42,12 +42,12 @@ Completed slices:
 - MCP stdio adapter implementation
 - hook-equivalent gate hardening
 - integration hardening and release preparation
-- npm package release `harness-v2@0.1.7`
-- GitHub release `v0.1.7`
+- npm package release `harness-v2@0.1.13`
+- GitHub source push to `vibedong/harness-v2` `main`
 
 Current active slice:
 
-- no active implementation slice; npm package release `harness-v2@0.1.7` and GitHub release `v0.1.7` are closed after publish/tag/release proof
+- no active implementation slice; npm package release `harness-v2@0.1.13` and GitHub source push are closed after publish/push proof
 
 Future slices in this program:
 
@@ -118,9 +118,7 @@ New files are allowed only when directly required for workflow engine enforcemen
 - `git add <intended HARNESS V2 product files>`
 - `git commit`
 - `git push`
-- `git push --tags`
 - `npm publish`
-- `gh release create v0.1.7 --repo vibedong/harness-v2 --title "HARNESS V2 0.1.7" --notes-file RELEASE_NOTES.md`
 
 ## Stop Conditions
 
@@ -130,6 +128,6 @@ Stop if a requested action needs files or new surfaces not directly required by 
 
 Stop if a pointer, source, approval, permission, proof obligation, lifecycle requirement, route, registry/log row, safety boundary, improvement classification, or release boundary is missing, stale, or conflicting.
 
-Stop before repeat npm publish, Python package registry publish, GitHub release or tag mutation outside the approved `v0.1.7` release transaction, dependency installation from network, secret access, external network mutation outside allowed git push and the approved GitHub release transaction, or destructive operation outside generated temporary verification artifacts.
+Stop before repeat npm publish, Python package registry publish, GitHub release or tag mutation without a separate exact transaction, dependency installation from network, secret access, external network mutation outside allowed git push and npm publish, or destructive operation outside generated temporary verification artifacts.
 
 This file is a current pointer. It does not claim shell-level automatic enforcement, Python package registry publish state, future release authority, real Codex app hook installation, remote MCP hosting, MCP client installation, or MCP client configuration state.

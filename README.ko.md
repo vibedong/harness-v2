@@ -42,6 +42,20 @@ HARNESS V2는 local stdio MCP adapter를 포함합니다. 이 adapter는 `status
 
 HARNESS V2는 현재 HTTP MCP server, 실제 editor hook, shell-level blocker, Codex 앱 설정 installer를 포함하지 않습니다.
 
+## 권장 작업 흐름
+
+기획 작업에서는 AI가 먼저 요청을 이해하고, 스펙을 정리하거나 질문하고, 구현 계획을 만들고, 정확한 승인 범위를 받은 뒤, 승인된 경로만 구현하고, 현재 검증 증거로 확인한 뒤, 개선 피드백을 처리하는 흐름이 좋습니다.
+
+간단히 말하면 아래 흐름입니다.
+
+```text
+understand -> clarify/spec -> plan -> approval -> implement -> verify -> improve
+```
+
+기존 코드베이스가 제공되면 AI는 먼저 그 코드가 순수 리서치/참고용인지, source of truth인지, 수정 후보인지, 비교 예시인지 분류해야 합니다. 참고 코드가 있다는 이유만으로 쓰기 대상이 되지는 않습니다.
+
+프로젝트 도메인 용어는 나중에 프로젝트 루트의 `CONTEXT.md`에 기록할 수 있고, 지속되는 아키텍처 결정은 `docs\adr\` 아래에 기록할 수 있습니다. 다만 HARNESS V2는 이 파일들을 기본 생성하지 않습니다.
+
 ## 언제 사용하나요?
 
 HARNESS V2는 이런 상황에서 유용합니다.
@@ -84,10 +98,10 @@ npm install -g harness-v2
 
 npm 명령은 내부적으로 Python CLI에 위임합니다. HARNESS V2를 JavaScript로 다시 구현한 것이 아닙니다.
 
-## 0.1.7 업데이트 내용
+## 0.1.13 업데이트 내용
 
-- 현재 Codex-app-focused HARNESS V2 source를 npm의 `harness-v2@0.1.7`로 배포합니다.
-- GitHub source release 경로도 `v0.1.7` tag 기준으로 맞춥니다.
+- 현재 Codex-app-focused HARNESS V2 source를 npm의 `harness-v2@0.1.13`로 배포합니다.
+- GitHub source release 경로도 `v0.1.13` tag 기준으로 맞춥니다.
 - 적용된 project file은 대상 프로젝트 루트에 바로 있어야 하며, 프로젝트 안에 `harness-v2` 하위 폴더가 남는 구조가 정상 흐름이 아닙니다.
 - 생성되는 `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\` scaffold가 더 강해졌습니다.
 - `status`, `verify`, 선택적 `preflight`를 한 번에 확인하는 hook-equivalent `gate` 명령을 포함합니다.

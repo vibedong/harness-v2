@@ -2,7 +2,7 @@
 
 status: package_github_surface / remaining_completion_program / release_transaction_boundary
 
-This file defines the local markdown boundary for install and release transactions. It records release readiness inputs but does not execute npm, Python package registry publish, GitHub release, release tag, deploy, or product release work by itself.
+This file defines the local markdown boundary for install and release transactions. It records release readiness inputs but does not execute npm, Python package registry publish, GitHub source push, GitHub release, release tag, deploy, or product release work by itself.
 
 ## Release Separation
 
@@ -37,28 +37,29 @@ A future release transaction must name:
 Target:
 
 ```text
-harness-v2@0.1.7
+harness-v2@0.1.13
 ```
 
 Status:
 
 ```text
-NPM_PUBLISHED / GITHUB_RELEASE_PUBLISHED / RELEASE_EXECUTION_CLOSED
+NPM_PUBLISHED / GITHUB_SOURCE_PUSHED / RELEASE_EXECUTION_CLOSED
 ```
 
 Reason:
 
-- npm package `harness-v2@0.1.7` is the current release target.
-- The current release slice authorizes exactly one npm publish for `harness-v2@0.1.7`.
+- npm package `harness-v2@0.1.13` is the current release target.
+- The current release slice authorizes exactly one npm publish for `harness-v2@0.1.13`.
 - Generated scaffold hardening improves the files created by `harness-v2 init --root .` and `harness-v2 apply --root .` for future package updates.
 - Hook-equivalent gate hardening adds local `gate` checks to the source surface, but it does not execute a release, create a tag, or republish the package.
 - Integration hardening and release preparation add a read-only `doctor` report for local surface composition.
-- Git tag `v0.1.7` and GitHub release creation for `vibedong/harness-v2` are permitted only for this exact transaction.
+- GitHub source push to `vibedong/harness-v2` `main` is permitted for this exact transaction.
+- Git tag creation and GitHub release creation are not part of this transaction.
 - Python package registry publish is not permitted by the current transaction.
 
 ## Current Permission Ceiling
 
-The current release transaction allows local verification, generated TEMP project verification, read-only subagent review, npm publish for `harness-v2@0.1.7`, Git tag `v0.1.7`, GitHub release creation for `vibedong/harness-v2`, and git push after verification and review pass.
+The current release transaction allows local verification, generated TEMP project verification, read-only subagent review, npm publish for `harness-v2@0.1.13`, and git push after verification and review pass.
 
 After this transaction completes, the permission ceiling denies:
 

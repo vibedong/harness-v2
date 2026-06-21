@@ -36,7 +36,7 @@ package_publish_review -> public_release_published
 Active slice:
 
 ```text
-npm_release_v0.1.7 / release_closed
+npm_release_v0.1.13 / release_closed
 ```
 
 Scope:
@@ -50,15 +50,15 @@ Scope:
 - hook-equivalent gate hardening is complete for Goal H;
 - the gate is an explicit executable check over status, verify, and optional preflight, not a real Codex app hook, shell blocker, or editor blocker;
 - integration hardening and release preparation are complete for Goal I;
-- the current release path authorizes npm publish for `harness-v2@0.1.7`, Git tag `v0.1.7`, GitHub release creation, release docs/control sync, and the `pyproject.toml` version-consistency amendment;
+- the current release path authorizes npm publish for `harness-v2@0.1.13`, GitHub source push, release docs/control sync, and the `pyproject.toml` version-consistency amendment;
 - `doctor` reports integrated local surfaces and keeps the repeat-release boundary closed;
 - no remote MCP hosting, MCP client configuration mutation, Python package registry publish, dependency install, secret access, or destructive operation is part of this lifecycle entry;
 - local verification commands named in `control\permission.md`;
 - read-only subagent review with `vowline`;
 - git add, commit, and push after completed slices pass verification and review;
-- no repeat npm publish, Python package registry publish, GitHub release or tag mutation outside the approved `v0.1.7` transaction, dependency install from network, secret access, external network mutation outside allowed git/GitHub release operations, or destructive operation outside generated temporary verification artifacts.
+- no repeat npm publish, Python package registry publish, GitHub release or tag mutation without a separate exact transaction, dependency install from network, secret access, external network mutation outside allowed git push and npm publish, or destructive operation outside generated temporary verification artifacts.
 
-This entry moves from `package_publish_review` to `public_release_published` for the exact npm/GitHub release `harness-v2@0.1.7` / `v0.1.7`. It is not repeat npm publish, Python package registry publish, future release authority, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, or MCP client configuration.
+This entry moves from `package_publish_review` to `public_release_published` for the exact npm package and GitHub source push transaction `harness-v2@0.1.13`. It is not repeat npm publish, Python package registry publish, future release authority, shell-level automatic enforcement, real hook installation, remote MCP hosting, MCP client installation, or MCP client configuration.
 
 ## Transition Requirements
 
@@ -76,5 +76,11 @@ A later state movement must name:
 ## Backtrack Rule
 
 Backtrack to `package_publish_review`, `package_publish_authoring`, `npm_wrapper_authoring`, or `public_release_candidate` if approval scope, permission scope, source basis, proof obligation, lifecycle target, route surface, artifact surface, safety boundary, improvement classification, release boundary, package surface, npm wrapper surface, GitHub target, npm target, generated scaffold behavior, automatic-enforcement wording, or target surface becomes stale or conflicting.
+
+## Planning Backtrack Rule
+
+If unresolved logic/UI/interaction questions are discovered after spec, mark downstream material stale and backtrack to spec or plan before plan approval or development continues.
+
+If improvement intake is out of scope, mark downstream material stale and backtrack to plan/approval or create a follow-up candidate. A blocker fails closed and marks downstream material stale.
 
 This file does not produce proof, approval, npm publish state, Python package registry publish state, release state, route permission, regression pass, improvement execution, or permission for future slices.

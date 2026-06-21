@@ -32,11 +32,25 @@ This file maps operation modes to suggested local routes. Routing is guidance, n
 | artifact observation | `artifacts\registry.md` and `artifacts\log.md` | registry/log are not source or proof |
 | regression safety | `safety\regression.md` | mapping is not pass evidence |
 | improvement intake | `safety\improvement.md` | candidate is not product change |
-| release boundary | `release\transaction.md` | current published npm target is `harness-v2@0.1.5`; repeat npm publish, tag creation, GitHub release execution, Python package registry publish, and deploy require a future transaction |
+| release boundary | `release\transaction.md` | current npm source-push target is `harness-v2@0.1.13`; repeat npm publish, tag creation, GitHub release execution, Python package registry publish, and deploy require a future transaction |
 
 ## Specialist And Subagent Guardrail
 
 Subagents may inspect and review within the prompt-scoped read surface. They must not edit files, grant approval, grant permission, produce ProofReceipt, move lifecycle state, run release work, or widen scope unless a later workflow explicitly gives that authority.
+
+## Layout And Owner Compatibility
+
+compatibility paths remain public targets: `AGENTS.md`, `RULES.md`, `CURRENT.md`, `control\`, `contracts\`, `templates\`, `records\`, `routing\`, `artifacts\`, `safety\`, and `release\`.
+
+domain owner ids are not workflow stages. Workflow stages describe process state; domain owner ids describe responsibility areas.
+
+folder existence, registry rows, log rows, route rows, release notes, and release transaction entries are not authority.
+
+release notes do not create release readiness, publish authority, tag authority, or version authority.
+
+release/package surfaces are not part of the layout task and do not create release readiness, publish authority, tag authority, or version authority.
+
+No domain-centered folder rename or big-bang migration is implied by owner/domain analysis.
 
 ## Non-Authority Boundary
 

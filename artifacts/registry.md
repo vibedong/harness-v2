@@ -49,3 +49,5 @@ A registry row is stale when its path, role, authority limit, target surface, pr
 ## Non-Authority Boundary
 
 Registry rows do not grant approval, permission, proof, lifecycle transition, route permission, regression pass, improvement execution, package readiness, or release readiness.
+
+registry rows do not grant approval. Registry rows, file existence, release notes, and release transaction entries are index or history material only; they do not create source authority, route authority, release readiness, publish authority, tag authority, or version authority.

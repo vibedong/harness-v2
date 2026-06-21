@@ -42,6 +42,20 @@ HARNESS V2 ships a local stdio MCP adapter that exposes `status`, `verify`, `pre
 
 HARNESS V2 does not currently ship an HTTP MCP server, real editor hook, shell-level blocker, or Codex app configuration installer.
 
+## Recommended Agent Flow
+
+For planning work, the agent should first understand the request, clarify or write the spec, plan the implementation, ask for exact approval, implement only approved paths, verify with current evidence, and then handle improvement feedback.
+
+In short:
+
+```text
+understand -> clarify/spec -> plan -> approval -> implement -> verify -> improve
+```
+
+If an existing codebase is provided, the agent should first classify whether it is pure research/reference, source of truth, possible modification target, or example/comparison. Reference code is read-only unless the active task contract names exact write paths.
+
+Project-local domain terms may be recorded later in `CONTEXT.md`, and durable architecture decisions may be recorded under `docs\adr\`, but HARNESS V2 does not create those files by default.
+
 ## When To Use It
 
 HARNESS V2 is useful when:
@@ -84,10 +98,10 @@ Runtime prerequisites:
 
 The npm command delegates to the Python CLI. HARNESS V2 is not rewritten in JavaScript.
 
-## What's New In 0.1.7
+## What's New In 0.1.13
 
-- Publishes the current Codex-app-focused HARNESS V2 source as `harness-v2@0.1.7` on npm.
-- Keeps the GitHub source release path aligned with tag `v0.1.7`.
+- Publishes the current Codex-app-focused HARNESS V2 source as `harness-v2@0.1.13` on npm.
+- Keeps the GitHub source release path aligned with tag `v0.1.13`.
 - Keeps installed project files directly in the target project root, not inside a nested `harness-v2` folder.
 - Includes stronger generated `AGENTS.md`, `RULES.md`, `CURRENT.md`, and `control\` scaffold files.
 - Adds the hook-equivalent `gate` command for explicit status, verify, and optional preflight checks.

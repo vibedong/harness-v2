@@ -34,3 +34,5 @@ Log notes become stale when the referenced artifact, approval scope, permission 
 ## Non-Authority Boundary
 
 Log entries do not grant approval, permission, proof, lifecycle transition, route permission, regression pass, improvement execution, package readiness, release readiness, or implementation completion.
+
+log rows do not grant approval. Log rows, route rows, release notes, and release transaction entries are provenance material only; they do not create source authority, route authority, release readiness, publish authority, tag authority, or version authority.

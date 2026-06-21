@@ -37,4 +37,10 @@ If a product-local file conflicts with an exact user approval packet for the sam
 - Heading match alone.
 - Search result without readback.
 
+## Project Domain Sources
+
+Project-root `CONTEXT.md` and project-root `docs\adr\*.md` may appear in `source.basis` only for project-domain terminology, invariants, and durable architecture/tradeoff decisions.
+
+They do not grant approval, permission, proof, lifecycle transition, route authority, release readiness, workflow stage IDs, or HARNESS internal vocabulary/schema/CLI IDs.
+
 This file does not create approval, permission, proof result, lifecycle state, route permission, regression pass, improvement execution, or release readiness.

@@ -104,8 +104,6 @@ ALLOWED_GIT_COMMANDS = {
     "git add <intended HARNESS V2 product files>",
     "git commit",
     "git push",
-    "git push --tags",
-    "gh release create v0.1.7 --repo vibedong/harness-v2 --title \"HARNESS V2 0.1.7\" --notes-file RELEASE_NOTES.md",
 }
 EXPECTED_SCAFFOLD_CREATED = {
     "AGENTS.md",
@@ -155,16 +153,25 @@ INITIAL_PROOF_OBLIGATIONS = {
     "harness-v2 gate contracts\\harness-task.json --root .",
     "harness-v2 doctor --root .",
 }
-WORKFLOW_STAGES = {
-    "planning",
-    "approval",
+CANONICAL_WORKFLOW_STAGES = {
+    "spec",
+    "spec_review",
+    "plan",
+    "plan_review",
+    "plan_approval",
     "development",
     "development_review",
+    "improvement",
+}
+LEGACY_WORKFLOW_STAGES = {
+    "planning",
+    "approval",
     "artifact_observation",
     "routing",
     "safety_improvement",
     "release_boundary",
 }
+WORKFLOW_STAGES = CANONICAL_WORKFLOW_STAGES | LEGACY_WORKFLOW_STAGES
 COMMON_DENIED_SIDE_EFFECTS = [
     "npm publish",
     "Python package registry publish",
@@ -236,6 +243,20 @@ def stage_payload(
 
 
 class HarnessV2ExecutableMvpTests(unittest.TestCase):
+    def _fresh_scaffold_root(self) -> tuple[tempfile.TemporaryDirectory, Path]:
+        from harness_v2.core import initialize_project
+
+        temp_dir = tempfile.TemporaryDirectory()
+        root = Path(temp_dir.name) / "applied-project"
+        result = initialize_project(root)
+        self.assertTrue(result.ok)
+        return temp_dir, root
+
+    def _fresh_scaffold_text(self, relative_path: str) -> str:
+        temp_dir, root = self._fresh_scaffold_root()
+        self.addCleanup(temp_dir.cleanup)
+        return (root / relative_path).read_text(encoding="utf-8")
+
     def test_approved_source_file_surface_is_exact(self):
         actual = {
             path.relative_to(ROOT).as_posix()
@@ -264,8 +285,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
             self.assertIn("harness_v2/cli.py", names)
             self.assertIn("harness_v2/core.py", names)
-            self.assertIn("harness_v2-0.1.7.dist-info/METADATA", names)
-            self.assertIn("harness_v2-0.1.7.dist-info/entry_points.txt", names)
+            self.assertIn("harness_v2-0.1.13.dist-info/METADATA", names)
+            self.assertIn("harness_v2-0.1.13.dist-info/entry_points.txt", names)
         finally:
             sys.path.remove(str(ROOT / "_build_backend"))
 
@@ -286,8 +307,8 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
             self.assertEqual(pth, str(ROOT))
             self.assertNotIn("harness_v2/cli.py", names)
-            self.assertIn("harness_v2-0.1.7.dist-info/METADATA", names)
-            self.assertIn("harness_v2-0.1.7.dist-info/entry_points.txt", names)
+            self.assertIn("harness_v2-0.1.13.dist-info/METADATA", names)
+            self.assertIn("harness_v2-0.1.13.dist-info/entry_points.txt", names)
         finally:
             sys.path.remove(str(ROOT / "_build_backend"))
 
@@ -315,14 +336,30 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
             content = (ROOT / source_file).read_text()
             self.assertNotIn(FORBIDDEN_SOURCE_FRAGMENT, content)
 
-    def test_workflow_stage_registry_is_exact_eight_stage_contract(self):
+    def test_workflow_stage_registry_splits_canonical_and_legacy_values(self):
+        from harness_v2.core import (
+            ACCEPTED_WORKFLOW_STAGES,
+            CANONICAL_WORKFLOW_STAGES as CORE_CANONICAL_WORKFLOW_STAGES,
+            LEGACY_WORKFLOW_STAGES as CORE_LEGACY_WORKFLOW_STAGES,
+        )
+
         task_schema = json.loads((ROOT / "contracts" / "task.schema.json").read_text())
         workflow_rules = (ROOT / "rules" / "workflows.md").read_text()
         template = (ROOT / "templates" / "task.json").read_text()
 
+        self.assertEqual(CORE_CANONICAL_WORKFLOW_STAGES, CANONICAL_WORKFLOW_STAGES)
+        self.assertEqual(CORE_LEGACY_WORKFLOW_STAGES, LEGACY_WORKFLOW_STAGES)
+        self.assertEqual(ACCEPTED_WORKFLOW_STAGES, WORKFLOW_STAGES)
         self.assertEqual(set(task_schema["properties"]["workflow_stage"]["enum"]), WORKFLOW_STAGES)
-        self.assertIn("<planning|approval|development|development_review|artifact_observation|routing|safety_improvement|release_boundary>", template)
+        self.assertIn("<spec|spec_review|plan|plan_review|plan_approval|development|development_review|improvement>", template)
+        self.assertIn("legacy compatibility", template)
+        self.assertNotIn("artifact_observation", CORE_CANONICAL_WORKFLOW_STAGES)
         for heading in (
+            "## Spec Workflow",
+            "## Spec Review Workflow",
+            "## Plan Workflow",
+            "## Plan Review Workflow",
+            "## Plan Approval Workflow",
             "## Planning Workflow",
             "## Approval Workflow",
             "## Development Workflow",
@@ -338,7 +375,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         package_json = json.loads((ROOT / "package.json").read_text())
 
         self.assertEqual(package_json["name"], "harness-v2")
-        self.assertEqual(package_json["version"], "0.1.7")
+        self.assertEqual(package_json["version"], "0.1.13")
         self.assertEqual(package_json["license"], "MIT")
         self.assertEqual(package_json["bin"], {"harness-v2": "bin/harness-v2.js"})
         self.assertEqual(package_json["os"], ["win32", "darwin"])
@@ -394,12 +431,12 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertIn("MIT License", license_text)
         self.assertIn("Copyright (c) 2026 vibedong", license_text)
-        self.assertIn("# HARNESS V2 0.1.7 Release Notes", release_notes)
+        self.assertIn("# HARNESS V2 0.1.13 Release Notes", release_notes)
         self.assertIn("npm install -g harness-v2", readme)
         self.assertIn("npm install -g harness-v2@latest", readme)
         self.assertIn("harness-v2 init --root .", readme)
         self.assertIn("harness-v2 apply --root .", readme)
-        self.assertIn("What's New In 0.1.7", readme)
+        self.assertIn("What's New In 0.1.13", readme)
         self.assertIn("하네스 업데이트해줘.", readme)
         self.assertIn("Do not create or leave a nested `harness-v2` folder", readme)
         self.assertIn("ships a local stdio MCP adapter", readme)
@@ -412,7 +449,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         self.assertIn("npm install -g harness-v2", korean_readme)
         self.assertIn("npm install -g harness-v2@latest", korean_readme)
         self.assertIn("harness-v2 init --root .", korean_readme)
-        self.assertIn("0.1.7 업데이트 내용", korean_readme)
+        self.assertIn("0.1.13 업데이트 내용", korean_readme)
         self.assertIn("하네스 업데이트해줘.", korean_readme)
         self.assertIn("프로젝트 안에 `harness-v2` 하위 폴더를 만들거나 남기지 않습니다", korean_readme)
         self.assertIn("local stdio MCP adapter", korean_readme)
@@ -434,10 +471,10 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         pyproject = (ROOT / "pyproject.toml").read_text()
 
-        self.assertEqual(harness_v2.__version__, "0.1.7")
-        self.assertEqual(package_json["version"], "0.1.7")
-        self.assertIn('version = "0.1.7"', pyproject)
-        self.assertIn("0.1.7", (ROOT / "RELEASE_NOTES.md").read_text())
+        self.assertEqual(harness_v2.__version__, "0.1.13")
+        self.assertEqual(package_json["version"], "0.1.13")
+        self.assertIn('version = "0.1.13"', pyproject)
+        self.assertIn("0.1.13", (ROOT / "RELEASE_NOTES.md").read_text())
 
     def test_node_wrapper_delegates_status_and_verify_to_python_cli(self):
         status = subprocess.run(
@@ -800,7 +837,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
         )
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
-        self.assertIn("harness-v2-0.1.7.tgz", completed.stdout)
+        self.assertIn("harness-v2-0.1.13.tgz", completed.stdout)
         self.assertNotIn("__pycache__", completed.stdout)
         self.assertNotIn(".pyc", completed.stdout)
 
@@ -1057,6 +1094,64 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                 result = validate_task(payload, root=ROOT)
                 self.assertTrue(result.ok, result.errors)
 
+    def test_verifier_accepts_all_canonical_workflow_stages_without_warning(self):
+        from harness_v2.core import validate_task
+
+        examples = {
+            "spec": stage_payload("spec", ["records\\README.md"]),
+            "spec_review": stage_payload("spec_review", ["records\\README.md"]),
+            "plan": stage_payload("plan", ["records\\README.md"]),
+            "plan_review": stage_payload("plan_review", ["records\\README.md"]),
+            "plan_approval": stage_payload("plan_approval", ["control\\approval.md"]),
+            "development": stage_payload(
+                "development",
+                ["AGENTS.md"],
+                allowed_side_effects=["local file writes under F:\\Folder\\harness-v2"],
+            ),
+            "development_review": stage_payload("development_review", ["records\\README.md"]),
+            "improvement": stage_payload("improvement", ["safety\\improvement.md"]),
+        }
+
+        for stage, payload in examples.items():
+            with self.subTest(stage=stage):
+                result = validate_task(payload, root=ROOT)
+                self.assertTrue(result.ok, result.errors)
+                self.assertEqual(result.warnings, ())
+
+    def test_verifier_accepts_legacy_workflow_stages_with_warning(self):
+        from harness_v2.core import validate_task
+
+        examples = {
+            "planning": stage_payload("planning", ["stage-plans\\candidate.md"]),
+            "approval": stage_payload("approval", ["control\\approval.md"]),
+            "artifact_observation": stage_payload("artifact_observation", ["artifacts\\registry.md", "artifacts\\log.md"]),
+            "routing": stage_payload("routing", ["routing\\manifest.md"]),
+            "safety_improvement": stage_payload("safety_improvement", ["safety\\regression.md", "safety\\improvement.md"]),
+            "release_boundary": stage_payload("release_boundary", ["release\\transaction.md"]),
+        }
+
+        for stage, payload in examples.items():
+            with self.subTest(stage=stage):
+                result = validate_task(payload, root=ROOT)
+                self.assertTrue(result.ok, result.errors)
+                self.assertIn("legacy workflow_stage", "\n".join(result.warnings))
+
+    def test_legacy_stage_values_are_not_silently_normalized(self):
+        from harness_v2.core import validate_task
+
+        planning = stage_payload("planning", ["stage-plans\\candidate.md"])
+        approval = stage_payload("approval", ["control\\approval.md"])
+
+        planning_result = validate_task(planning, root=ROOT)
+        approval_result = validate_task(approval, root=ROOT)
+
+        self.assertTrue(planning_result.ok, planning_result.errors)
+        self.assertTrue(approval_result.ok, approval_result.errors)
+        self.assertEqual(planning["workflow_stage"], "planning")
+        self.assertEqual(approval["workflow_stage"], "approval")
+        self.assertNotEqual(planning["workflow_stage"], "plan")
+        self.assertNotEqual(approval["workflow_stage"], "plan_approval")
+
     def test_workflow_stage_engine_rejects_stage_rule_violations(self):
         from harness_v2.core import validate_task
 
@@ -1290,7 +1385,7 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
 
         self.assertEqual(status["workflow"], "remaining_completion_program")
         self.assertEqual(status["state"], "public_release_published")
-        self.assertIn("npm_release_v0.1.7", status["substate"])
+        self.assertIn("npm_release_v0.1.13", status["substate"])
         self.assertIn("release_closed", status["substate"])
 
     def test_doctor_reports_integration_hardening_without_mutation_or_release_claim(self):
@@ -1447,6 +1542,192 @@ class HarnessV2ExecutableMvpTests(unittest.TestCase):
                 result = validate_task(mutated, root=root)
                 self.assertFalse(result.ok, denied)
                 self.assertIn(f"permission side effect conflicts with denied side effect: {denied}", "\n".join(result.errors))
+
+    def test_generated_rules_include_codebase_purpose_classes(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("pure research/reference", rules)
+        self.assertIn("source of truth", rules)
+        self.assertIn("possible modification target", rules)
+        self.assertIn("example/comparison", rules)
+        self.assertIn("does not automatically make it a write target", rules)
+        self.assertIn("exact paths", rules)
+
+    def test_generated_rules_do_not_treat_reference_code_as_write_target(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("reference code is read-only unless the active task contract names exact write paths", rules)
+        self.assertIn("source of truth is not write permission", rules)
+
+    def test_generated_codex_usage_is_plain_language_not_stage_pressure(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("understand -> clarify/spec -> plan -> approval -> implement -> verify -> improve", rules)
+        self.assertIn("The user does not need to speak HARNESS stage names", rules)
+
+    def test_generated_rules_put_prd_before_writing_plans(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("/to-prd", rules)
+        self.assertIn("HARNESS PRD-equivalent", rules)
+        self.assertIn("superpowers:writing-plans", rules)
+        self.assertIn("after PRD/spec approval", rules)
+        self.assertIn("PRD is not approval", rules)
+
+    def test_generated_rules_do_not_label_superpowers_as_matt_pocock_flow(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("superpowers:writing-plans is not Matt Pocock flow", rules)
+        self.assertIn("plan-ceo-review and plan-eng-review are specialist review axes", rules)
+        self.assertNotIn("brainstorming -> writing-plans is Matt Pocock", rules)
+
+    def test_review_pass_does_not_create_approval_permission_or_proof(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("review pass is not approval", rules)
+        self.assertIn("review pass is not permission", rules)
+        self.assertIn("review pass is not proof", rules)
+        self.assertIn("review pass is not lifecycle transition", rules)
+
+    def test_generated_rules_define_throwaway_prototype_route(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("handoff -> prototype -> handoff", rules)
+        self.assertIn("throwaway validation", rules)
+        self.assertIn("PRD/ADR/plan", rules)
+        self.assertIn("prototype result is not product implementation approval", rules)
+
+    def test_handoff_records_are_not_authority_surfaces(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("handoff records are context-transfer records only", rules)
+        self.assertIn("handoff is not approval, permission, proof, lifecycle transition, route permission, or product implementation authority", rules)
+
+    def test_unresolved_questions_backtrack_to_spec_or_plan(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("unresolved logic/UI/interaction questions are spec open questions", rules)
+        self.assertIn("mark downstream material stale and backtrack to spec or plan", rules)
+
+    def test_fresh_scaffold_does_not_create_records_prototype(self):
+        temp_dir, root = self._fresh_scaffold_root()
+        self.addCleanup(temp_dir.cleanup)
+
+        self.assertFalse((root / "records" / "prototype.md").exists())
+
+    def test_generated_rules_forbid_prototype_as_product_approval(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertNotIn("prototype is product implementation approval", rules)
+        self.assertIn("prototype side effects require approval, permission, and preflight", rules)
+
+    def test_generated_rules_define_project_local_context_and_adr_surfaces(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("CONTEXT.md", rules)
+        self.assertIn("docs\\adr", rules)
+        self.assertIn("project-root", rules)
+        self.assertIn("not approval", rules)
+
+    def test_fresh_scaffold_does_not_create_context_or_docs_adr(self):
+        temp_dir, root = self._fresh_scaffold_root()
+        self.addCleanup(temp_dir.cleanup)
+
+        self.assertFalse((root / "CONTEXT.md").exists())
+        self.assertFalse((root / "docs" / "adr").exists())
+
+    def test_domain_docs_are_limited_source_not_authority(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("Domain docs may appear in source.basis only for project-domain terminology", rules)
+        self.assertIn("Domain docs never grant approval, permission, proof, lifecycle, route, release readiness, workflow stage IDs, or HARNESS internal vocabulary", rules)
+
+    def test_generic_scaffold_does_not_seed_project_specific_domain_terms(self):
+        combined = "\n".join(
+            [
+                self._fresh_scaffold_text("AGENTS.md"),
+                self._fresh_scaffold_text("RULES.md"),
+                self._fresh_scaffold_text("CURRENT.md"),
+            ]
+        )
+
+        for term in ("나라장터", "실시설계", "수요기관", "통과", "검토필요", "제외"):
+            self.assertNotIn(term, combined)
+
+    def test_generated_rules_contain_five_improvement_intake_classes(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("current-stage correction", rules)
+        self.assertIn("current-scope improvement", rules)
+        self.assertIn("new-scope request", rules)
+        self.assertIn("discomfort/usability feedback", rules)
+        self.assertIn("blocker", rules)
+
+    def test_improvement_intake_does_not_replace_product_status_classes(self):
+        improvement = (ROOT / "safety" / "improvement.md").read_text(encoding="utf-8")
+
+        for status in ("observation", "candidate", "rejected", "deferred", "unknown"):
+            self.assertIn(status, improvement)
+        self.assertIn("intake routing classes", improvement)
+
+    def test_improvement_does_not_create_approval_or_permission(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+        improvement = (ROOT / "safety" / "improvement.md").read_text(encoding="utf-8")
+
+        self.assertIn("improvement intake does not create approval or permission", rules)
+        self.assertIn("Direct-Change Guard", improvement)
+
+    def test_scope_expanding_improvement_backtracks_to_plan_or_approval(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("Out-of-scope improvement marks downstream material stale and backtracks to plan/approval", rules)
+
+    def test_blocker_fails_closed_and_marks_downstream_stale(self):
+        rules = self._fresh_scaffold_text("RULES.md")
+
+        self.assertIn("blocker fails closed", rules)
+        self.assertIn("downstream material stale", rules)
+
+    def test_compatibility_paths_remain_public_targets(self):
+        manifest = (ROOT / "routing" / "manifest.md").read_text(encoding="utf-8")
+
+        self.assertIn("compatibility paths remain public targets", manifest)
+        for path in ("AGENTS.md", "RULES.md", "CURRENT.md", "control\\", "contracts\\", "templates\\", "records\\"):
+            self.assertIn(path, manifest)
+        self.assertIn("No domain-centered folder rename or big-bang migration is implied", manifest)
+
+    def test_domain_owner_ids_are_not_workflow_stage_ids(self):
+        manifest = (ROOT / "routing" / "manifest.md").read_text(encoding="utf-8")
+
+        self.assertIn("domain owner ids are not workflow stages", manifest)
+        self.assertIn("Workflow stages describe process state", manifest)
+        self.assertIn("domain owner ids describe responsibility areas", manifest)
+
+    def test_registry_route_log_and_release_notes_do_not_create_authority(self):
+        combined = "\n".join(
+            [
+                (ROOT / "routing" / "manifest.md").read_text(encoding="utf-8"),
+                (ROOT / "artifacts" / "registry.md").read_text(encoding="utf-8"),
+                (ROOT / "artifacts" / "log.md").read_text(encoding="utf-8"),
+            ]
+        )
+
+        self.assertIn("folder existence, registry rows, log rows, route rows, release notes, and release transaction entries are not authority", combined)
+        self.assertIn("release notes do not create release readiness", combined)
+        self.assertIn("registry rows do not grant approval", combined)
+        self.assertIn("log rows do not grant approval", combined)
+
+    def test_release_package_surfaces_are_not_part_of_layout_task(self):
+        combined = "\n".join(
+            [
+                (ROOT / "routing" / "manifest.md").read_text(encoding="utf-8"),
+                (ROOT / "safety" / "regression.md").read_text(encoding="utf-8"),
+                (ROOT / "safety" / "improvement.md").read_text(encoding="utf-8"),
+            ]
+        )
+
+        self.assertIn("release/package surfaces are not part of the layout task", combined)
+        self.assertIn("do not create release readiness, publish authority, tag authority, or version authority", combined)
 
     def test_cli_apply_alias_is_idempotent_without_force(self):
         with tempfile.TemporaryDirectory() as temp_root:

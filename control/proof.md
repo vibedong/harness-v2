@@ -6,7 +6,7 @@ This file separates proof obligation, artifact check, and proof result.
 
 ## Current Proof Obligation
 
-For the 0.1.7 npm/GitHub release slice, verify after authoring:
+For the 0.1.13 npm/GitHub release slice, verify after authoring:
 
 1. generated scaffold hardening remains documented and covered by tests;
 2. executable 8-stage workflow enforcement remains documented and covered by tests;
@@ -16,11 +16,11 @@ For the 0.1.7 npm/GitHub release slice, verify after authoring:
 6. `gate` combines current `status`, task `verify`, and optional `preflight` checks without executing side effects;
 7. README and README.ko describe status, verify, init/apply, preflight, gate, MCP, update behavior, and current non-automatic-enforcement limits;
 8. `doctor` reports the integrated local surfaces and keeps the repeat-release boundary closed;
-9. control and release surfaces agree on current approval, permission, proof, lifecycle, version, npm target, Git tag, GitHub release, MCP, hook-equivalent gate, and integration doctor boundaries;
+9. control and release surfaces agree on current approval, permission, proof, lifecycle, version, npm target, GitHub source push, MCP, hook-equivalent gate, and integration doctor boundaries;
 10. read-only subagent review findings are reflected or explicitly rejected before git push;
 11. the approved local verification commands pass or blocked commands are reported as blocked;
-12. npm publish output shows `harness-v2@0.1.7`;
-13. git status, push output, tag push output, and GitHub release output show the final intended product state is current on `vibedong/harness-v2`.
+12. npm publish output shows `harness-v2@0.1.13`;
+13. git status and push output show the final intended product state is current on `vibedong/harness-v2`.
 
 ## Verification Commands
 
@@ -54,10 +54,9 @@ Subagent reports and review findings can help find defects, but they are not pro
 Required release evidence for this slice:
 
 - version readback from `package.json`, `pyproject.toml`, and `harness_v2\__init__.py`;
-- `npm pack --dry-run` showing `harness-v2-0.1.7.tgz`;
-- `npm publish` showing `+ harness-v2@0.1.7`;
-- Git tag `v0.1.7` pushed to `vibedong/harness-v2`;
-- GitHub release `v0.1.7` created from `RELEASE_NOTES.md`.
+- `npm pack --dry-run` showing `harness-v2-0.1.13.tgz`;
+- `npm publish` showing `+ harness-v2@0.1.13`;
+- git push output showing `vibedong/harness-v2` was updated.
 
 ## Freshness
 

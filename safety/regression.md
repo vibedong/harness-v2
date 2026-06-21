@@ -27,6 +27,9 @@ This file maps HARNESS V2 boundary risks to regression guard candidates. It does
 | MCP stdio adapter mistaken for remote MCP hosting or shell-level blocking | require README/routing/control wording that this is local stdio only and not a hook, HTTP server, editor blocker, or shell blocker |
 | hook-equivalent gate mistaken for a real shell/editor blocker | require CLI/MCP tests plus README/routing/control wording that `gate` is explicit and does not automatically block external tools |
 | integration doctor mistaken for release readiness | require doctor output and release/control wording that release boundary remains closed |
+| domain owner id mistaken for workflow stage id | require routing wording that domain owner ids are not workflow stages |
+| compatibility path mistaken for obsolete path during layout analysis | require routing wording that compatibility paths remain public targets |
+| release/package surface mistaken for layout authority | require routing and safety wording that release/package surfaces are not part of the layout task and do not create release readiness, publish authority, tag authority, or version authority |
 
 ## Guard Evidence
 
@@ -39,3 +42,5 @@ Npm publish, Python package registry publish, dependency installation from the n
 ## Non-Authority Boundary
 
 This file does not create active regression tests, verification commands, proof, approval, permission, lifecycle transition, route permission, implementation completion, package readiness, or release readiness.
+
+release/package surfaces are not part of the layout task and do not create release readiness, publish authority, tag authority, or version authority.

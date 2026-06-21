@@ -8,16 +8,100 @@ Workflow rules specialize `RULES.md`. They cannot weaken root rules or create ap
 
 Task contracts use `workflow_stage` for stage-specific verifier rules. The allowed values are:
 
-- `planning`
-- `approval`
+- `spec`
+- `spec_review`
+- `plan`
+- `plan_review`
+- `plan_approval`
 - `development`
 - `development_review`
+- `improvement`
+
+Legacy compatibility values accepted with `legacy workflow_stage` warnings:
+
+- `planning`
+- `approval`
 - `artifact_observation`
 - `routing`
 - `safety_improvement`
 - `release_boundary`
 
 `workflow` remains the current program pointer from `CURRENT.md`; `workflow_stage` is the task-local rule stage.
+
+## Spec Workflow
+
+Spec work clarifies the user goal, source basis, domain terms, constraints, and completion criteria.
+
+Spec work may use Matt Pocock-style questioning inside the HARNESS boundary, but it does not create approval, permission, proof, lifecycle state, or development entry.
+
+## Spec Review Workflow
+
+Spec review checks whether the spec is source-grounded, scoped, and clear enough for planning.
+
+Spec review findings are not approval, permission, proof, lifecycle state, route permission, or development entry.
+
+## Plan Workflow
+
+Plan work turns an approved spec or PRD-equivalent into implementation tasks, files, order, tests, and verification.
+
+Plan work does not itself authorize product file edits.
+
+## Plan Review Workflow
+
+Plan review checks implementation feasibility, missing tests, boundary errors, and stale assumptions.
+
+Plan review pass is not ApprovalDecision, PermissionDecision, ProofReceipt, or LifecycleTransition.
+
+## Plan Approval Workflow
+
+Plan approval binds exact scope before development.
+
+Plan approval requires exact target paths, allowed commands, denied side effects, proof obligations, stale triggers, lifecycle current/target state, git scope, and release scope.
+
+## Codebase Purpose Classification
+
+When code or documents exist, classify their purpose before treating them as source:
+
+- pure research/reference;
+- source of truth;
+- possible modification target;
+- example/comparison.
+
+reference code is read-only unless the active task contract names exact write paths. Source of truth is not write permission. Exact paths, side effects, proof obligations, and lifecycle state still need approval and permission.
+
+## PRD And Planning Boundary
+
+`/to-prd` or HARNESS PRD-equivalent can close spec. PRD is not approval, permission, proof, lifecycle transition, route permission, release readiness, or development entry.
+
+`superpowers:writing-plans` runs after PRD/spec approval. superpowers:writing-plans is not Matt Pocock flow. plan-ceo-review and plan-eng-review are specialist review axes, not Matt Pocock flow.
+
+review pass is not approval. review pass is not permission. review pass is not proof. review pass is not lifecycle transition.
+
+## Prototype And Handoff Route
+
+unresolved logic/UI/interaction questions are spec open questions. They may close by direct user decision or by handoff -> prototype -> handoff.
+
+Prototype code is throwaway validation. handoff records are context-transfer records only. handoff is not approval, permission, proof, lifecycle transition, route permission, or product implementation authority.
+
+The durable result is the question, observation, answer, discarded material, adopted decision, and PRD/ADR/plan absorption. prototype side effects require approval, permission, and preflight. prototype result is not product implementation approval.
+
+If a prototype or review answer changes the basis during plan or development, mark downstream material stale and backtrack to spec or plan.
+
+## Project-Local Domain Docs
+
+project-root `CONTEXT.md` records reusable project-domain terms when useful. project-root `docs\adr\` records durable architecture/tradeoff decisions when useful. Neither surface is created by default.
+
+Domain docs may appear in `source.basis` only for project-domain terminology, invariants, and architecture decisions. Domain docs never grant approval, permission, proof, lifecycle, route, release readiness, workflow stage IDs, or HARNESS internal vocabulary/schema/CLI IDs.
+
+## Cross-Stage Improvement Intake
+
+Improvement feedback can arrive during spec, plan, development, review, or improvement. Intake classes are current-stage correction, current-scope improvement, new-scope request, discomfort/usability feedback, and blocker.
+
+These are intake routing classes. They do not replace improvement status classes. improvement intake does not create approval or permission.
+
+During SPEC, improvement can correct the spec only. During PLAN, it can adjust the plan only inside plan authority. During DEVELOPMENT, it can change product files only inside current approval, permission, proof obligation, and lifecycle scope.
+
+Out-of-scope improvement marks downstream material stale and backtracks to plan/approval. A blocker fails closed and marks downstream material stale.
 
 ## Planning Workflow
 

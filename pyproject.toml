@@ -5,7 +5,7 @@ backend-path = ["_build_backend"]
 
 [project]
 name = "harness-v2"
-version = "0.1.7"
+version = "0.1.13"
 description = "Local workflow harness for AI-assisted software work."
 readme = "README.md"
 requires-python = ">=3.11"

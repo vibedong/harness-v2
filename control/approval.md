@@ -21,7 +21,7 @@ remaining_completion_program
 Current active slice:
 
 ```text
-npm_release_v0.1.7 / release_closed
+npm_release_v0.1.13 / release_closed
 ```
 
 Remaining completion program base packet:
@@ -100,7 +100,7 @@ User approved Goal I after Goal H.
 Goal I is bound to integration hardening and release preparation under the remaining completion program.
 It may harden read-only integration reporting and synchronize docs/control surfaces, but it does not authorize npm publish, Python registry publish, GitHub release, release tag creation, dependency installation, secret access, Codex app configuration mutation, real hook installation, or destructive work outside generated verification artifacts.
 
-This Goal I boundary is superseded only by the later exact public release approval for `harness-v2@0.1.7`.
+This Goal I boundary is superseded only by the later exact public release approval for `harness-v2@0.1.13`.
 ```
 
 Current public release approval:
@@ -111,9 +111,9 @@ work only under F:\Folder\harness-v2.
 
 Purpose:
 publish the current Goal H/I GitHub source state as a new public npm release,
-including release readiness audit, version bump to 0.1.7,
-release notes/update docs/control/release transaction sync, Git commit, Git tag,
-GitHub release, and npm publish.
+including release readiness audit, version bump to 0.1.13,
+release notes/update docs/control/release transaction sync, Git commit, GitHub source push,
+and npm publish.
 
 Allow modifying only release/package/control/doc/test files needed for this release:
 package.json,
@@ -140,12 +140,9 @@ node bin\harness-v2.js doctor --root .
 npm pack --dry-run
 npm publish
 
-Allow git/GitHub release operations:
+Allow git/GitHub source operations:
 git add/commit
-git tag for v0.1.7
 git push
-git push --tags
-GitHub release creation for vibedong/harness-v2 v0.1.7.
 ```
 
 Current release amendment:
@@ -153,14 +150,14 @@ Current release amendment:
 ```text
 Approve release slice amendment:
 also allow modifying pyproject.toml under F:\Folder\harness-v2
-for version consistency with package.json and harness_v2\__init__.py during the 0.1.7 npm/GitHub release.
+for version consistency with package.json and harness_v2\__init__.py during the 0.1.13 npm/GitHub source push release.
 ```
 
 Current npm publish resumption:
 
 ```text
 User resumed npm publish after authenticating as donghyeonlee.
-The active transaction is `harness-v2@0.1.7` npm publish plus Git tag and GitHub release `v0.1.7`.
+The active transaction is `harness-v2@0.1.13` npm publish plus GitHub source push to `vibedong/harness-v2` `main`.
 ```
 
 ## Bound Local Verification Commands
@@ -190,8 +187,8 @@ Operation type:
 
 - local product implementation, documentation, control-plane, test, scaffold, and verification work under `F:\Folder\harness-v2`;
 - completed targets are generated scaffold hardening, executable 8-stage workflow engine enforcement, and side-effect preflight adapter work;
-- current target is the 0.1.7 npm/GitHub release transaction;
-- npm publish for `harness-v2@0.1.7`, Git tag `v0.1.7`, GitHub release creation, and git push are allowed only for this exact transaction;
+- current target is the 0.1.13 npm/GitHub source push transaction;
+- npm publish for `harness-v2@0.1.13` and git push are allowed only for this exact transaction;
 - no Python package registry publish, dependency install, secret access, or destructive operation outside generated temporary verification artifacts.
 
 Freshness anchors:
@@ -206,10 +203,10 @@ Denied by the current approval scope:
 
 - mutation outside `F:\Folder\harness-v2`;
 - files or new surfaces not directly required by the remaining completion program;
-- repeat npm publish after `harness-v2@0.1.7` is published;
+- repeat npm publish after `harness-v2@0.1.13` is published;
 - Python package registry publish;
-- additional GitHub release mutation after `v0.1.7` is created;
-- additional release tag mutation after `v0.1.7` is created;
+- GitHub release mutation without a separate exact transaction;
+- release tag mutation without a separate exact transaction;
 - dependency install from network;
 - secret access;
 - external network mutation outside allowed git push;
@@ -223,5 +220,11 @@ Denied by the current approval scope:
 An action is inside approval scope only when it matches the work unit, target surface, operation type, exclusions, freshness anchors, and proof obligation.
 
 If any part is wider, missing, or stale, approval does not fit and the workflow fails closed.
+
+## Planning And Review Non-Authority
+
+PRD, HARNESS PRD-equivalent, writing plan, review pass, handoff, prototype observation, domain doc, source basis, or improvement intake may inform a future approval packet, but none of them is ApprovalDecision by itself.
+
+Prototype side effects, domain doc writes, and handoff file writes require exact approved paths before execution.
 
 This file does not grant permission, produce proof, move lifecycle state, grant route permission, create regression pass, execute improvement, prepare release, or claim automatic enforcement completion.

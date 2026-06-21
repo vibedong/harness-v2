@@ -11,10 +11,16 @@
     "workflow_stage": {
       "type": "string",
       "enum": [
+        "spec",
+        "spec_review",
+        "plan",
+        "plan_review",
+        "plan_approval",
         "planning",
         "approval",
         "development",
         "development_review",
+        "improvement",
         "artifact_observation",
         "routing",
         "safety_improvement",

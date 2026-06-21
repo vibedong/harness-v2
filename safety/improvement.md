@@ -26,6 +26,22 @@ An improvement candidate must name:
 - stale or rollback trigger;
 - required approval and permission for any actual change.
 
+## Cross-Stage Intake Routing
+
+The following intake routing classes may be used during spec, plan, development, review, or improvement:
+
+| intake class | meaning | handling |
+| --- | --- | --- |
+| current-stage correction | current understanding is wrong | correct only the current stage record before moving on |
+| current-scope improvement | same approved scope | compare with current approval, permission, proof, and lifecycle scope |
+| new-scope request | outside current approval | backtrack to plan/approval or create a follow-up candidate |
+| discomfort/usability feedback | user reports friction | decide whether it blocks current flow |
+| blocker | continuing would be wrong or risky | fail closed and mark downstream material stale |
+
+These are intake routing classes, not replacements for the improvement status classes `observation`, `candidate`, `rejected`, `deferred`, and `unknown`.
+
+Improvement intake does not create approval or permission. Out-of-scope improvement marks downstream material stale and backtracks to plan/approval. A blocker fails closed and marks downstream material stale.
+
 ## Current Deferred Candidates
 
 | candidate | class | current handling |
@@ -37,6 +53,8 @@ An improvement candidate must name:
 ## Direct-Change Guard
 
 Improvement records do not directly edit `AGENTS.md`, `RULES.md`, workflow rules, control files, routing, artifacts, safety files, release files, code, tests, schemas, fixtures, runners, packages, dependencies, git, secrets, external systems, or destructive targets.
+
+Layout or owner feedback can become an improvement candidate, but release/package surfaces are not part of the layout task and do not create release readiness, publish authority, tag authority, or version authority.
 
 ## Non-Authority Boundary
 

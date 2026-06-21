@@ -2,7 +2,9 @@
   "task_id": "<task-id>",
   "title": "<task title>",
   "workflow": "<workflow>",
-  "workflow_stage": "<planning|approval|development|development_review|artifact_observation|routing|safety_improvement|release_boundary>",
+  "workflow_stage": "<spec|spec_review|plan|plan_review|plan_approval|development|development_review|improvement>",
+  "workflow_stage_legacy_compatibility": "<planning|approval|artifact_observation|routing|safety_improvement|release_boundary>",
+  "workflow_stage_note": "legacy compatibility values are accepted with warnings only",
   "source": {
     "basis": ["<source path>"],
     "current_pointer": "CURRENT.md"

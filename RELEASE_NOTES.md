@@ -1,10 +1,10 @@
-# HARNESS V2 0.1.7 Release Notes
+# HARNESS V2 0.1.13 Release Notes
 
-npm and GitHub release notes for the current Codex-app-focused HARNESS V2 source.
+npm release notes for the current Codex-app-focused HARNESS V2 source.
 
 ## Changed
 
-- Publishes the current source package metadata as `0.1.7`.
+- Publishes the current source package metadata as `0.1.13`.
 - Includes generated scaffold hardening for `AGENTS.md`, `RULES.md`, `CURRENT.md`, and `control\`.
 - Keeps `harness-v2 init --root .` and `harness-v2 apply --root .` focused on project-root files, not a nested `harness-v2` folder.
 - Includes executable 8-stage workflow checks, side-effect preflight checks, and the hook-equivalent `gate` command.
@@ -34,26 +34,26 @@ npm pack --dry-run
 npm publish
 ```
 
-`npm publish`, Git tag push, and GitHub release output close this release transaction.
+`npm publish` and GitHub source push output close this release transaction.
 
 ## Publish Scope
 
 Release target:
 
 ```text
-harness-v2@0.1.7
+harness-v2@0.1.13
 ```
 
 Release transaction state:
 
 ```text
-NPM_PUBLISHED / GITHUB_RELEASE_PUBLISHED / RELEASE_EXECUTION_CLOSED
+NPM_PUBLISHED / GITHUB_SOURCE_PUSHED / RELEASE_EXECUTION_CLOSED
 ```
 
-Git tag and GitHub release target:
+GitHub source target:
 
 ```text
-v0.1.7
+vibedong/harness-v2 main
 ```
 
 Repeat npm publish, release tag creation, or GitHub release mutation requires a later exact transaction after this release is closed.

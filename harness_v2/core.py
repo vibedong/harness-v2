@@ -46,18 +46,30 @@ REQUIRED_TASK_OBJECTS = (
     "proof",
     "lifecycle",
 )
-WORKFLOW_STAGES = frozenset(
+CANONICAL_WORKFLOW_STAGES = frozenset(
+    {
+        "spec",
+        "spec_review",
+        "plan",
+        "plan_review",
+        "plan_approval",
+        "development",
+        "development_review",
+        "improvement",
+    }
+)
+LEGACY_WORKFLOW_STAGES = frozenset(
     {
         "planning",
         "approval",
-        "development",
-        "development_review",
         "artifact_observation",
         "routing",
         "safety_improvement",
         "release_boundary",
     }
 )
+ACCEPTED_WORKFLOW_STAGES = CANONICAL_WORKFLOW_STAGES | LEGACY_WORKFLOW_STAGES
+WORKFLOW_STAGES = ACCEPTED_WORKFLOW_STAGES
 PLANNING_PATH_PREFIXES = ("stage-plans\\", "plans\\", "records\\", "docs\\planning\\")
 ARTIFACT_PATHS = {"artifacts\\registry.md", "artifacts\\log.md"}
 ROUTING_PATHS = {"routing\\manifest.md"}
@@ -144,6 +156,15 @@ class ValidationResult:
     ok: bool
     task_id: str | None
     errors: tuple[str, ...]
+    warnings: tuple[str, ...] = ()
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "ok": self.ok,
+            "task_id": self.task_id,
+            "errors": list(self.errors),
+            "warnings": list(self.warnings),
+        }
 
 
 @dataclass(frozen=True)
@@ -232,6 +253,7 @@ def initialize_project(root: str | Path, force: bool = False) -> InitResult:
 
 def validate_task(data: dict[str, Any], root: str | Path | None = None) -> ValidationResult:
     errors: list[str] = []
+    warnings: list[str] = []
     task_id = data.get("task_id")
     root_path = Path(root) if root is not None else None
 
@@ -278,12 +300,13 @@ def validate_task(data: dict[str, Any], root: str | Path | None = None) -> Valid
         errors.append("lifecycle.target_state must be a non-empty string")
 
     _validate_current_context(data, root_path, errors)
-    _validate_workflow_stage(data, errors)
+    _validate_workflow_stage(data, errors, warnings)
 
     return ValidationResult(
         ok=not errors,
         task_id=task_id if isinstance(task_id, str) else None,
         errors=tuple(errors),
+        warnings=tuple(warnings),
     )
 
 
@@ -402,13 +425,15 @@ def _validate_current_context(data: dict[str, Any], root: Path | None, errors: l
     errors.extend(_stale_status_errors(root))
 
 
-def _validate_workflow_stage(data: dict[str, Any], errors: list[str]) -> None:
+def _validate_workflow_stage(data: dict[str, Any], errors: list[str], warnings: list[str]) -> None:
     stage = data.get("workflow_stage")
     if not isinstance(stage, str) or not stage.strip():
         return
-    if stage not in WORKFLOW_STAGES:
+    if stage not in ACCEPTED_WORKFLOW_STAGES:
         errors.append(f"workflow_stage is not a known stage: {stage}")
         return
+    if stage in LEGACY_WORKFLOW_STAGES:
+        warnings.append(f"legacy workflow_stage accepted for v0.1.7 compatibility: {stage}")
 
     source = data.get("source") if isinstance(data.get("source"), dict) else {}
     approval = data.get("approval") if isinstance(data.get("approval"), dict) else {}
@@ -695,6 +720,69 @@ Routine current-task work may start from this file, `CURRENT.md`, and the active
 
 Read exact source, approval, permission, proof, and lifecycle control text before approval binding, permission-sensitive commands, proof/completion claims, lifecycle movement, stale/conflicting state, release work, external mutation, destructive action, or product implementation risk. Extra reading must improve the current decision evidence; it does not widen the active contract.
 
+## Codex-App Planning Flow
+
+Use this plain-language flow with users: understand -> clarify/spec -> plan -> approval -> implement -> verify -> improve.
+
+The user does not need to speak HARNESS stage names. Agents may use internal stages to preserve boundaries, but user-facing guidance should stay plain and specific.
+
+## Codebase Purpose Classification
+
+If code or docs exist, classify their purpose before using them:
+
+- pure research/reference: read for structure, patterns, terms, or prior method;
+- source of truth: current system basis, but source of truth is not write permission;
+- possible modification target: may be changed later only when exact paths are approved;
+- example/comparison: compare only, not authority unless the task says so.
+
+Codebase presence does not automatically make it a write target. reference code is read-only unless the active task contract names exact write paths.
+
+## Spec, PRD, And Planning Boundary
+
+Use `/to-prd` or a HARNESS PRD-equivalent to close spec when a durable spec artifact is needed.
+
+PRD is not approval, permission, proof, lifecycle transition, route permission, release readiness, or development entry.
+
+Use `superpowers:writing-plans` after PRD/spec approval. superpowers:writing-plans is not Matt Pocock flow. plan-ceo-review and plan-eng-review are specialist review axes, not Matt Pocock flow.
+
+review pass is not approval. review pass is not permission. review pass is not proof. review pass is not lifecycle transition.
+
+## Prototype And Handoff Route
+
+unresolved logic/UI/interaction questions are spec open questions. They may close by direct user decision or by handoff -> prototype -> handoff.
+
+Prototype code is throwaway validation. The durable result is the question, observation, answer, discarded material, adopted decision, and PRD/ADR/plan absorption.
+
+handoff records are context-transfer records only. handoff is not approval, permission, proof, lifecycle transition, route permission, or product implementation authority.
+
+prototype side effects require approval, permission, and preflight. prototype result is not product implementation approval.
+
+If a prototype or review answer changes the basis during plan or development, mark downstream material stale and backtrack to spec or plan.
+
+## Project-Local Domain Docs
+
+project-root `CONTEXT.md` may record reusable project-domain terms. project-root `docs\\adr\\` may record durable architecture/tradeoff decisions. They are not created by default.
+
+Domain docs may appear in source.basis only for project-domain terminology, invariants, and architecture decisions.
+
+Domain docs never grant approval, permission, proof, lifecycle, route, release readiness, workflow stage IDs, or HARNESS internal vocabulary/schema/CLI IDs.
+
+## Cross-Stage Improvement Intake
+
+Improvement feedback can arrive during spec, plan, development, review, or improvement. Classify it before acting:
+
+- current-stage correction;
+- current-scope improvement;
+- new-scope request;
+- discomfort/usability feedback;
+- blocker.
+
+These are intake routing classes. They do not replace improvement status classes. improvement intake does not create approval or permission.
+
+During SPEC, improvement can correct the spec only. During PLAN, it can adjust the plan only inside plan authority. During DEVELOPMENT, it can change product files only inside current approval, permission, proof obligation, and lifecycle scope.
+
+Out-of-scope improvement marks downstream material stale and backtracks to plan/approval. A blocker fails closed and marks downstream material stale.
+
 ## Authority Separation
 
 - `source` names what can be trusted.
@@ -897,7 +985,9 @@ def _task_template_json() -> str:
   "task_id": "<task-id>",
   "title": "<task title>",
   "workflow": "default",
-  "workflow_stage": "<planning|approval|development|development_review|artifact_observation|routing|safety_improvement|release_boundary>",
+  "workflow_stage": "<spec|spec_review|plan|plan_review|plan_approval|development|development_review|improvement>",
+  "workflow_stage_legacy_compatibility": "<planning|approval|artifact_observation|routing|safety_improvement|release_boundary>",
+  "workflow_stage_note": "legacy compatibility values are accepted with warnings only",
   "source": {
     "basis": ["CURRENT.md"],
     "current_pointer": "CURRENT.md"
